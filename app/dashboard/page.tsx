@@ -37,4 +37,23 @@ export default function Dash() {
           <p style={{ margin:0, fontSize:'12px' }}>{s ? `${s.name}: ${s.slots.used}/${s.slots.capacity}` : 'Montana Server Offline'}</p>
         </div>
 
-        <div style={{ background:'#131
+        <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', textAlign:'left', border:'1px solid #1e293b' }}>
+          <p style={{ margin:'0 0 10px 0', fontSize:'12px', color:'#22c55e', fontWeight:'bold' }}>RECENT ACTIVITY</p>
+          {tx.map(t => (
+            <div key={t.id} style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', padding:'5px 0', borderBottom:'1px solid #0b0f1a' }}>
+              <span>{t.description}</span><span style={{ color:t.type==='income'?'#22c55e':'#ef4444' }}>${t.amount.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display:'flex', justifyContent:'center', gap:'8px', marginTop:'20px', flexWrap:'wrap' }}>
+          <button onClick={()=>window.location.href='/bank'} style={{padding:'10px 15px', background:'#1e293b', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'12px'}}>Bank</button>
+          <button onClick={()=>window.location.href='/land'} style={{padding:'10px 15px', background:'#1e293b', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'12px'}}>Land</button>
+          <button onClick={()=>window.location.href='/contracts'} style={{padding:'10px 15px', background:'#1e293b', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'12px'}}>Jobs</button>
+          {p.rank==='Admin' && <button onClick={()=>window.location.href='/admin'} style={{padding:'10px 15px', background:'#475569', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'12px'}}>Staff</button>}
+          <button onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')} style={{padding:'10px 15px', background:'#ef4444', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'12px'}}>Logout</button>
+        </div>
+      </div>
+    </div>
+  );
+}

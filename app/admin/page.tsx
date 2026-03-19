@@ -8,36 +8,49 @@ const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux
 export default function Admin() {
   const [ps, setPs] = useState<any[]>([]);
   const [js, setJs] = useState<any[]>([]);
-  const [form, setForm] = useState({ t: '', p: '' });
-  const [status, setStatus] = useState("");
+  const [f, setF] = useState({ t: '', p: '' });
+  const [s, setS] = useState("");
 
-  const refresh = async () => {
+  const ref = async () => {
     const { data: p } = await sb.from('profiles').select('*').order('balance', { ascending: false });
     const { data: j } = await sb.from('contracts').select('*, profiles(username)').eq('status', 'pending');
     setPs(p || []); setJs(j || []);
   };
 
   useEffect(() => {
-    const check = async () => {
+    const c = async () => {
       const { data: { user } } = await sb.auth.getUser();
       const { data: r } = await sb.from('profiles').select('rank').eq('id', user?.id).single();
       if (r?.rank !== 'Admin') window.location.href = '/dashboard';
-      else refresh();
+      else ref();
     };
-    check();
+    c();
   }, []);
 
   const post = async (e: any) => {
     e.preventDefault();
-    setStatus("Posting...");
-    await sb.from('contracts').insert([{ title: form.t, payout: parseInt(form.p), status: 'available' }]);
-    fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `📢 **NEW JOB:** ${form.t} ($${form.p})` }) }).catch(()=>0);
-    setForm({ t: '', p: '' });
-    setStatus("✅ Job Posted to Board!");
-    refresh();
+    setS("Posting...");
+    await sb.from('contracts').insert([{ title: f.t, payout: parseInt(f.p), status: 'available' }]);
+    fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `📢 **NEW JOB:** ${f.t} ($${f.p})` }) }).catch(()=>0);
+    setF({ t: '', p: '' }); setS("✅ Posted!"); ref();
   };
 
   const pay = async (j: any) => {
-    setStatus("Processing Pay...");
+    setS("Paying...");
     const { data: u } = await sb.from('profiles').select('balance').eq('id', j.assigned_to).single();
-    await sb.from('profiles').update({ balance
+    await sb.from('profiles').update({ balance: u.balance + j.payout }).eq('id', j.assigned_to);
+    await sb.from('transactions').insert([{ user_id: j.assigned_to, amount: j.payout, type: 'income', description: `Job: ${j.title}` }]);
+    await sb.from('contracts').update({ status: 'completed' }).eq('id', j.id);
+    fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `✅ **PAID:** $${j.payout} to ${j.profiles?.username}` }) }).catch(()=>0);
+    setS("✅ Paid!"); ref();
+  };
+
+  return (
+    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'20px', fontFamily:'sans-serif' }}>
+      <div style={{ maxWidth:'500px', margin:'0 auto' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'20px' }}>
+          <h2 style={{margin:0}}>Staff Office</h2>
+          <button onClick={()=>window.location.href='/dashboard'} style={{background:'#1e293b',color:'#fff',border:'none',padding:'5px 15px',borderRadius:'5px',cursor:'pointer'}}>Back</button>
+        </div>
+        {s && <div style={{ background:'#22c55e22', color:'#22c55e', padding:'10px', borderRadius:'10px', marginBottom:'15px', textAlign:'center', border:'1px solid #22c55e' }}>{s}</div>}
+        <div style={{ background:'#131926', padding:'

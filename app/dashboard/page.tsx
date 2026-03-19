@@ -6,22 +6,33 @@ const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJ
 
 export default function Dash() {
   const [p, setP] = useState<any>(null);
-  const [err, setErr] = useState("");
 
   useEffect(() => {
-    const start = async () => {
-      try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) { window.location.href = '/'; return; }
-        
-        const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        if (error) setErr(error.message);
-        setP(data || { username: 'Farmer', balance: 0 });
-      } catch (e: any) {
-        setErr(e.message);
-      }
+    const load = async () => {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return window.location.href = '/';
+      const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+      setP(data || { username: 'Farmer', balance: 0 });
     };
-    start();
+    load();
   }, []);
 
-  if (err
+  if (!p) return <div style={{color:'white',padding:'20px',background:'#0b0f1a',height:'100vh'}}>Loading...</div>;
+
+  return (
+    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'white', padding:'20px', fontFamily:'sans-serif', textAlign:'center' }}>
+      <h1 style={{ color:'#22c55e' }}>CTFG PORTAL</h1>
+      <p>Welcome, <b>{p.username}</b></p>
+      <div style={{ background:'#166534', padding:'30px', borderRadius:'20px', margin:'20px auto', maxWidth:'300px' }}>
+        <p style={{ margin:0, fontSize:'12px' }}>BALANCE</p>
+        <h2 style={{ margin:0, fontSize:'36px' }}>${p.balance?.toLocaleString()}</h2>
+      </div>
+      <div style={{ display:'flex', justifyContent:'center', gap:'10px', flexWrap:'wrap' }}>
+        <button onClick={()=>window.location.href='/bank'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Bank</button>
+        <button onClick={()=>window.location.href='/land'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Land</button>
+        <button onClick={()=>window.location.href='/contracts'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Jobs</button>
+        <button onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')} style={{padding:'10px 20px',background:'#ef4444',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Logout</button>
+      </div>
+    </div>
+  );
+}

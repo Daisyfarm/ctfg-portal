@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Wallet, Tractor, RefreshCcw, Send, Map, ShieldCheck } from 'lucide-react';
+import { Wallet, Tractor, RefreshCcw, Send, Map, ShieldCheck, LogOut } from 'lucide-react';
 
 const supabase = createClient(
   'https://dlwhztcqntalrhfrefsk.supabase.co', 
@@ -16,7 +16,6 @@ export default function Dashboard() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = '/'; return; }
-    
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     if (data) setProfile(data);
     setLoading(false);
@@ -24,19 +23,18 @@ export default function Dashboard() {
 
   useEffect(() => { getProfile(); }, []);
 
-  if (loading) return (
-    <div style={{backgroundColor:'#0f172a', color:'white', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif'}}>
-      <div style={{textAlign:'center'}}>
-        <Tractor size={48} color="#22c55e" style={{marginBottom:'10px'}} />
-        <p>Loading CTFG Farm Data...</p>
-      </div>
-    </div>
-  );
+  if (loading) return <div style={{backgroundColor:'#0f172a', color:'white', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif'}}>Loading CTFG Data...</div>;
 
   return (
     <div style={{ backgroundColor: '#0b0f1a', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', padding: '20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
         
-        {/* BUTTON NAVIGATION BAR */}
+        {/* NAV BUTTONS */}
         <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
-           <button onClick={getP
+           <button onClick={getProfile} style={{ background: '#1e293b', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '10px', cursor: 'pointer' }}><RefreshCcw size={16} /></button>
+           <button onClick={() => window.location.href = '/bank'} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Send Money</button>
+           <button onClick={() => window.location.href = '/land'} style={{ backgroundColor: '#f97316', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Buy Land</button>
+           {profile?.rank === 'Admin' && (
+             <button onClick={() => window.location.href = '/admin'} style={{ backgroundColor: '#475569', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Admin</button>
+           )}
+           <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} style={{ background: '#ef4444', color: 'white', border: 'no

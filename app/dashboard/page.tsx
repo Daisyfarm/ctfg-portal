@@ -8,21 +8,29 @@ export default function Dash() {
   const [p, setP] = useState<any>(null);
   const [s, setS] = useState<any>(null);
   const [tx, setTx] = useState<any[]>([]);
+  const [m, setM] = useState(false);
 
   useEffect(() => {
+    setM(true);
     const load = async () => {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return window.location.href = '/';
       const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      const { data: history } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
-      setP(prof); setTx(history || []);
-      // Safe Background Fetch for Server
-      fetch('/api/server').then(r=>r.json()).then(d=>{if(d?.server) setS(d.server)}).catch(()=>null);
+      const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
+      setP(prof); setTx(t || []);
+      
+      // We wait 1 second before checking the Montana server to prevent crashing
+      setTimeout(() => {
+        fetch('/api/server').then(res => res.json()).then(data => {
+          if (data?.server) setS(data.server);
+        }).catch(() => null);
+      }, 1000);
     };
     load();
   }, []);
 
-  if (!p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',padding:'20px'}}>Syncing...</div>;
+  // This stops the "Page couldn't load" crash
+  if (!m || !p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',padding:'20px'}}>Syncing CTFG Portal...</div>;
 
   const btn = { padding:'10px 12px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'11px', fontWeight:'bold' };
 
@@ -32,7 +40,7 @@ export default function Dash() {
       
       <div style={{ background:'#131926', padding:'8px', borderRadius:'12px', display:'inline-flex', alignItems:'center', gap:'8px', margin:'10px 0', border:'1px solid #1e293b' }}>
         <div style={{ width:'8px', height:'8px', borderRadius:'50%', background: s?'#22c55e':'#ef4444' }}></div>
-        <p style={{ margin:0, fontSize:'11px' }}>{s ? `${s.name}: ${s.slots.used}/${s.slots.capacity}` : 'Montana Server Offline'}</p>
+        <p style={{ margin:0, fontSize:'11px' }}>{s ? `${s.name}: ${s.slots.used}/${s.slots.capacity} Online` : 'Montana Server Offline'}</p>
       </div>
 
       <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)', padding:'25px', borderRadius:'20px', margin:'0 auto 15px', maxWidth:'400px' }}>
@@ -53,7 +61,7 @@ export default function Dash() {
         <p style={{ margin:'0 0 8px 0', fontSize:'11px', color:'#22c55e', fontWeight:'bold' }}>RECENT ACTIVITY</p>
         {tx.map(t => (
           <div key={t.id} style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', borderBottom:'1px solid #0b0f1a', padding:'5px 0' }}>
-            <span>{t.description}</span><span style={{color:t.type==='income'?'#22c55e':'#ef4444'}}>${t.amount}</span>
+            <span>{t.description}</span><span>${t.amount?.toLocaleString()}</span>
           </div>
         ))}
       </div>

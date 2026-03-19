@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Wallet, Tractor, RefreshCcw, LogOut, Clock, Send, Map } from 'lucide-react';
+import { Wallet, Tractor, RefreshCcw, LogOut, Clock } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 
@@ -13,11 +13,9 @@ export default function Dash() {
   const load = async () => {
     try {
       const { data: { user } } = await sb.auth.getUser();
-      if (!user) { window.location.href = '/'; return; }
-
+      if (!user) return window.location.href = '/';
       const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
       const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
-      
       setP(prof || { username: 'Farmer', balance: 0, rank: 'Member' });
       setTx(t || []);
     } catch (e) { console.error(e); }
@@ -26,7 +24,7 @@ export default function Dash() {
 
   useEffect(() => { load(); }, []);
 
-  if (ld) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading CTFG...</div>;
+  if (ld) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading...</div>;
 
   return (
     <div style={{ background:'#0b0f1a',minHeight:'100vh',color:'white',fontFamily:'sans-serif',padding:'20px' }}>
@@ -39,4 +37,17 @@ export default function Dash() {
         </div>
         <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)',padding:'40px',borderRadius:'30px',textAlign:'center',marginBottom:'20px' }}>
           <p style={{fontSize:'12px',fontWeight:'bold'}}>{p?.username} • {p?.rank}</p>
-          <h2 style={{fontSize:'48
+          <h2 style={{fontSize:'48px',margin:'10px 0'}}>${p?.balance?.toLocaleString() || '0'}</h2>
+        </div>
+        <div style={{ background:'#131926',padding:'20px',borderRadius:'20px',border:'1px solid #1e293b' }}>
+          <h3 style={{margin:'0 0 10px 0',fontSize:'14px'}}><Clock size={16}/> Activity</h3>
+          {tx.map(t => (
+            <div key={t.id} style={{display:'flex',justifyContent:'space-between',fontSize:'13px',padding:'8px 0',borderBottom:'1px solid #1e293b'}}>
+              <span>{t.description}</span><span>${t.amount.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

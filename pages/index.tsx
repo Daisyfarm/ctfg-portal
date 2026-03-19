@@ -1,57 +1,54 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Tractor, Mail, Lock, User } from 'lucide-react';
+import { Tractor, ShieldCheck } from 'lucide-react';
 
-// Connect to your database
+// Database connection
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 );
 
-export default function AuthPage() {
-  const [isRegister, setIsRegister] = useState(false);
+export default function CTFGPortal() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleAuth = async (e: any) => {
     e.preventDefault();
     if (isRegister) {
       const { error } = await supabase.auth.signUp({
         email, password, options: { data: { username } }
       });
       if (error) alert(error.message);
-      else alert("Registration successful! You can now log in.");
+      else alert("Check your email or try logging in!");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) alert(error.message);
-      else window.location.href = '/dashboard';
+      else alert("Login Successful! (Dashboard coming soon)");
     }
   };
 
   return (
-    <div style={{ backgroundColor: '#0b0f1a', minHeight: '100vh', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>
-      <div style={{ backgroundColor: '#131926', padding: '40px', borderRadius: '24px', width: '100%', maxWidth: '400px', border: '1px solid #334155' }}>
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <Tractor size={48} color="#22c55e" style={{ marginBottom: '10px' }} />
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold' }}>CTFG <span style={{ color: '#22c55e' }}>PORTAL</span></h1>
-          <p style={{ color: '#94a3b8' }}>{isRegister ? 'Create your farmer account' : 'Welcome back, Farmer'}</p>
-        </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    <div style={{ backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>
+      <div style={{ backgroundColor: '#1e293b', padding: '40px', borderRadius: '20px', width: '100%', maxWidth: '400px', textAlign: 'center', border: '1px solid #334155' }}>
+        <Tractor size={60} color="#22c55e" style={{ marginBottom: '20px' }} />
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 10px 0' }}>CTFG <span style={{ color: '#22c55e' }}>PORTAL</span></h1>
+        <p style={{ color: '#94a3b8', marginBottom: '30px' }}>{isRegister ? 'Create your account' : 'Farmer Login'}</p>
+        
+        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {isRegister && (
-            <input type="text" placeholder="In-Game Username" required style={{ padding: '12px', borderRadius: '12px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} onChange={(e) => setUsername(e.target.value)} />
+            <input type="text" placeholder="In-Game Name" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }} onChange={(e) => setUsername(e.target.value)} />
           )}
-          <input type="email" placeholder="Email Address" required style={{ padding: '12px', borderRadius: '12px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" required style={{ padding: '12px', borderRadius: '12px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} onChange={(e) => setPassword(e.target.value)} />
-          <button type="submit" style={{ padding: '15px', borderRadius: '12px', border: 'none', backgroundColor: '#22c55e', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
-            {isRegister ? 'Register Account' : 'Login to Farm'}
+          <input type="email" placeholder="Email" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }} onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }} onChange={(e) => setPassword(e.target.value)} />
+          <button type="submit" style={{ padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#22c55e', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
+            {isRegister ? 'Register' : 'Login'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: '20px', color: '#94a3b8', fontSize: '14px' }}>
-          {isRegister ? 'Already have an account?' : 'Need an account?'} 
-          <span onClick={() => setIsRegister(!isRegister)} style={{ color: 'white', cursor: 'pointer', marginLeft: '5px', fontWeight: 'bold' }}>
-            {isRegister ? 'Log In' : 'Register Now'}
-          </span>
+
+        <p onClick={() => setIsRegister(!isRegister)} style={{ marginTop: '20px', cursor: 'pointer', color: '#94a3b8', fontSize: '0.9rem' }}>
+          {isRegister ? 'Already a member? Login' : 'New here? Register'}
         </p>
       </div>
     </div>

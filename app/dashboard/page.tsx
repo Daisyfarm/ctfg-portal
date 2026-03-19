@@ -49,6 +49,7 @@ export default function Dash() {
         <button style={btn} onClick={()=>window.location.href='/land'}>Land</button>
         <button style={btn} onClick={()=>window.location.href='/contracts'}>Jobs</button>
         {p?.rank==='Admin'&&<button style={{...btn,background:'#dc2626'}} onClick={()=>window.location.href='/admin'}>Staff</button>}
+        <button onClick={()=>window.location.href='/marketplace'} style={btn}>Market</button>
         <button style={{...btn,background:'#444'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}>Logout</button>
       </div>
 

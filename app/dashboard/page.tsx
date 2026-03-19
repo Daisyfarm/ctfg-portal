@@ -43,7 +43,13 @@ export default function Dashboard() {
            <button onClick={() => window.location.reload()} style={{ background: '#1e293b', color: 'white', border: 'none', padding: '10px', borderRadius: '10px', cursor: 'pointer' }}><RefreshCcw size={18}/></button>
            <button onClick={() => window.location.href = '/bank'} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Bank</button>
            <button onClick={() => window.location.href = '/land'} style={{ backgroundColor: '#f97316', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Land</button>
-           <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px', borderRadius: '10px' }}><LogOut size={18}/></button>
+           <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px', borderRadius: '10px' }}><LogOut size={18}/>
+           <button 
+  onClick={() => window.location.href = '/contracts'} 
+  style={{ backgroundColor: '#6366f1', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+>
+  View Jobs
+</button></button>
         </div>
 
         <div style={{ background: 'linear-gradient(135deg, #166534 0%, #064e3b 100%)', padding: '40px', borderRadius: '30px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>

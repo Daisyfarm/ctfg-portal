@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Tractor } from 'lucide-react';
 
-// CONNECT TO YOUR NEW PROJECT
+// CONNECTING TO YOUR NEW CTFG DATABASE
 const supabase = createClient(
   'https://dlwhztcqntalrhfrefsk.supabase.co', 
-  'PASTE_YOUR_LONG_EYJ_ANON_KEY_HERE' 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY'
 );
 
 export default function LoginPage() {
@@ -22,9 +22,7 @@ export default function LoginPage() {
 
     if (isRegister) {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { username: username } }
+        email, password, options: { data: { username: username } }
       });
       if (error) alert("Error: " + error.message);
       else alert("Registration successful! You can now log in.");

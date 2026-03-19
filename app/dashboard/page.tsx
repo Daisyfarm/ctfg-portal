@@ -6,6 +6,7 @@ const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJ
 
 export default function Dash() {
   const [p, setP] = useState<any>(null);
+  const [s, setS] = useState<any>(null);
   const [tx, setTx] = useState<any[]>([]);
 
   useEffect(() => {
@@ -15,20 +16,27 @@ export default function Dash() {
       const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
       const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
       setP(prof); setTx(t || []);
+      // Safe fetch for server status
+      fetch('/api/server').then(res => res.json()).then(data => setS(data.server)).catch(() => null);
     };
     load();
   }, []);
 
-  if (!p) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading CTFG...</div>;
+  if (!p) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading...</div>;
 
   return (
     <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'white', padding:'15px', fontFamily:'sans-serif', textAlign:'center' }}>
       <h1 style={{ color:'#22c55e', margin:0 }}>CTFG PORTAL</h1>
       <p style={{ fontSize:'12px', color:'#94a3b8' }}>{p.username} • {p.rank}</p>
 
-      <div style={{ background:'#166534', padding:'30px', borderRadius:'20px', margin:'20px auto', maxWidth:'400px' }}>
+      <div style={{ background:'#166534', padding:'30px', borderRadius:'20px', margin:'15px auto', maxWidth:'400px' }}>
         <p style={{ margin:0, fontSize:'10px', opacity:0.8 }}>TOTAL BALANCE</p>
         <h2 style={{ margin:0, fontSize:'42px' }}>${p.balance?.toLocaleString()}</h2>
+      </div>
+
+      <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', maxWidth:'400px', margin:'0 auto 15px', display:'flex', alignItems:'center', gap:'10px', border:'1px solid #1e293b' }}>
+        <div style={{ width:'10px', height:'10px', borderRadius:'50%', background: s?.slots?.capacity > 0 ? '#22c55e' : '#ef4444' }}></div>
+        <p style={{ margin:0, fontSize:'13px' }}>{s?.slots?.capacity > 0 ? `Montana Server: ${s.slots.used}/${s.slots.capacity} Online` : 'Server Offline'}</p>
       </div>
 
       <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', maxWidth:'400px', margin:'0 auto', textAlign:'left', border:'1px solid #1e293b' }}>

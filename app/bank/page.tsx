@@ -3,60 +3,51 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Send, ArrowLeft } from 'lucide-react';
 
-const supabase = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function BankPage() {
-  const [balance, setBalance] = useState(0);
-  const [username, setUsername] = useState('');
-  const [targetUsername, setTargetUsername] = useState('');
-  const [amount, setAmount] = useState('');
+export default function Bank() {
+  const [bal, setBal] = useState(0);
+  const [un, setUn] = useState('');
+  const [target, setTarget] = useState('');
+  const [amt, setAmt] = useState('');
   const [note, setNote] = useState('');
-  const [msg, setMsg] = useState({ type: '', text: '' });
 
-  useEffect(() => { 
-    async function getBalance() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data } = await supabase.from('profiles').select('*').eq('id', user?.id).single();
-      if (data) { setBalance(data.balance); setUsername(data.username); }
-    }
-    getBalance();
+  useEffect(() => {
+    const getB = async () => {
+      const { data: { user } } = await sb.auth.getUser();
+      const { data } = await sb.from('profiles').select('*').eq('id', user?.id).single();
+      if (data) { setBal(data.balance); setUn(data.username); }
+    };
+    getB();
   }, []);
 
-  const handleTransfer = async (e: any) => {
+  const send = async (e: any) => {
     e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.rpc('transfer_money', { sender_id: user?.id, target_username: targetUsername, amount_to_send: parseInt(amount), transfer_note: note });
-
-    if (error) {
-      setMsg({ type: 'error', text: error.message });
-    } else {
-      setMsg({ type: 'success', text: 'Money Sent Successfully!' });
-      
-      // DISCORD TRANSFER ALERT
-      await fetch(DISCORD_WEBHOOK, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-              content: `💰 **BANK WIRE**\n**${username}** sent **$${parseInt(amount).toLocaleString()}** to **${targetUsername}**\n📝 *Note: ${note || "None"}*`
-          })
-      });
-
-      setTimeout(() => window.location.href = '/dashboard', 2000);
+    const { data: { user } } = await sb.auth.getUser();
+    const { error } = await sb.rpc('transfer_money', { sender_id: user?.id, target_username: target, amount_to_send: parseInt(amt), transfer_note: note });
+    if (error) alert(error.message);
+    else {
+      await fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💰 **TRANSFER:** **${un}** sent **$${amt}** to **${target}**` }) });
+      alert("Sent!"); window.location.href = '/dashboard';
     }
   };
 
   return (
-    <div style={{ backgroundColor: '#0b0f1a', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', padding: '40px' }}>
-      <div style={{ maxWidth: '450px', margin: '0 auto' }}>
-        <button onClick={() => window.location.href = '/dashboard'} style={{ background: 'none', border: 'none', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '20px' }}><ArrowLeft size={18} /> Dashboard</button>
-        
-        <div style={{ background: 'linear-gradient(135deg, #166534 0%, #064e3b 100%)', padding: '30px', borderRadius: '24px', marginBottom: '30px', textAlign: 'center' }}>
-          <p style={{ opacity: 0.7, fontSize: '11px', fontWeight: 'bold', margin: 0 }}>AVAILABLE CAPITAL</p>
-          <h2 style={{ fontSize: '32px', margin: 0 }}>${balance.toLocaleString()}</h2>
+    <div style={{ background:'#0b0f1a',minHeight:'100vh',color:'white',fontFamily:'sans-serif',padding:'40px' }}>
+      <div style={{ maxWidth:'400px',margin:'0 auto' }}>
+        <button onClick={()=>window.location.href='/dashboard'} style={{background:'none',color:'#94a3b8',border:'none',cursor:'pointer',marginBottom:'20px'}}><ArrowLeft/> Back</button>
+        <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)',padding:'20px',borderRadius:'20px',textAlign:'center',marginBottom:'20px' }}>
+          <p style={{fontSize:'12px'}}>BALANCE</p>
+          <h2>${bal.toLocaleString()}</h2>
         </div>
-
-        <div style={{ backgroundColor: '#131926', padding: '25px', borderRadius: '24px', border: '1px solid #1e293b' }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#22c55e', fontSize: '18px' }}><Send size={18} /> New Wire Transfer</h3>
-          <form onSubmit={handleTransfer} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <input type="text" placeholder="Recipient Username" required style={{ padding: '12px'
+        <form onSubmit={send} style={{ background:'#131926',padding:'20px',borderRadius:'20px',display:'flex',flexDirection:'column',gap:'10px' }}>
+          <input placeholder="Recipient Username" required style={{padding:'10px',borderRadius:'8px',background:'#0b0f1a',color:'white',border:'1px solid #334155'}} onChange={e=>setTarget(e.target.value)} />
+          <input placeholder="Amount" type="number" required style={{padding:'10px',borderRadius:'8px',background:'#0b0f1a',color:'white',border:'1px solid #334155'}} onChange={e=>setAmt(e.target.value)} />
+          <input placeholder="Note" style={{padding:'10px',borderRadius:'8px',background:'#0b0f1a',color:'white',border:'1px solid #334155'}} onChange={e=>setNote(e.target.value)} />
+          <button type="submit" style={{background:'#22c55e',color:'white',border:'none',padding:'15px',borderRadius:'10px',fontWeight:'bold'}}>Send Money</button>
+        </form>
+      </div>
+    </div>
+  );
+}

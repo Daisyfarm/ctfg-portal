@@ -27,4 +27,16 @@ export default function Dashboard() {
   if (loading) return (
     <div style={{backgroundColor:'#0f172a', color:'white', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif'}}>
       <div style={{textAlign:'center'}}>
-        <Tractor size={48} color="#22c55e" style={{marginBottom:'10px'}
+        <Tractor size={48} color="#22c55e" style={{marginBottom:'10px'}} />
+        <p>Loading CTFG Farm Data...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ backgroundColor: '#0b0f1a', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', padding: '20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+        
+        {/* BUTTON NAVIGATION BAR */}
+        <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+           <button onClick={getP

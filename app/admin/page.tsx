@@ -83,6 +83,12 @@ export default function AdminPanel() {
               ))}
             </tbody>
           </table>
+          {/* PENDING JOBS TO PAY */}
+<div style={{ marginTop: '40px' }}>
+  <h2 style={{ fontSize: '20px', marginBottom: '15px' }}>Job Payouts Needed</h2>
+  {/* We will fetch and map through jobs here in the next step */}
+  <p style={{color: '#475569', fontSize: '14px'}}>Check the contracts table for players waiting for payment.</p>
+</div>
         </div>
       </div>
     </div>

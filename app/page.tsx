@@ -5,8 +5,8 @@ import { Tractor } from 'lucide-react';
 
 // YOUR ACTUAL DATABASE CONNECTION
 const supabase = createClient(
-  'https://yioyfxvabhzvkwuljcki.supabase.co', 
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpb3lmeHZhYmh6dmt3dWxqY2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzYyNjgsImV4cCI6MjA4OTQ1MjI2OH0.Ov36x2V6QfDYQhHdA57Bg8fzYkefjJFvG3JJakYMLPU'
+  'https://dlwhztcqntalrhfrefsk.supabase.co, 
+  'sb_publishable_JtnzF6YKCXc5u2XC_LE_Iw_fCU4rK8h'
 );
 
 export default function LoginPage() {

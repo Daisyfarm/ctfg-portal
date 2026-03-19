@@ -40,7 +40,7 @@ export default function LiveMap() {
       <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1000, top:10, left:10, padding:'10px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer'}}>Back</button>
       
       <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%' }}>
-        <ImageOverlay url="https://i.imgur.com/8K5QZ6u.png" bounds={[[0,0],[100,100]]} />
+        <ImageOverlay url="https://i.postimg.cc/qR086X8m/montana-pda.png"" bounds={[[0,0],[100,100]]} />
         
         {fields.map(f => (
           <Marker key={f.id} position={[100 - convert(f.z), convert(f.x)]}>

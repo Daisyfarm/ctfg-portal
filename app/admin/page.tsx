@@ -35,12 +35,11 @@ export default function AdminPanel() {
     const payoutNum = parseInt(newJob.payout);
     await supabase.from('contracts').insert([{ title: newJob.title, payout: payoutNum, status: 'available' }]);
     
-    // DISCORD ALERT FOR NEW JOB
     await fetch(DISCORD_WEBHOOK, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            content: `📢 **NEW CONTRACT POSTED**\nA new job is available on the CTFG Board: **${newJob.title}**\n💰 Payout: **$${payoutNum.toLocaleString()}**\nGo to the portal to claim it!`
+            content: `📢 **NEW CONTRACT POSTED**\nA new job is available on the CTFG Board: **${newJob.title}**\n💰 Payout: **$${payoutNum.toLocaleString()}**\nClaim it now at: https://ctfg-portal.vercel.app/contracts`
         })
     });
 
@@ -58,7 +57,7 @@ export default function AdminPanel() {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            content: `✅ **CTFG PAYROLL**\nSamuel_Founder approved a payout of **$${job.payout.toLocaleString()}** to **${job.profiles?.username}** for *${job.title}*!`
+            content: `✅ **CTFG PAYROLL**\nStaff approved a payout of **$${job.payout.toLocaleString()}** to **${job.profiles?.username}** for *${job.title}*!`
         })
     });
 
@@ -76,7 +75,7 @@ export default function AdminPanel() {
         </div>
 
         <div style={{ backgroundColor: '#131926', padding: '20px', borderRadius: '20px', border: '1px solid #1e293b', marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '16px', margin: '0 0 15px 0' }}><Plus size={16}/> Post a New Contract</h2>
+          <h2 style={{ fontSize: '16px', margin: '0 0 15px 0', color:'#22c55e' }}><Plus size={16}/> Post a New Contract</h2>
           <form onSubmit={createJob} style={{ display: 'flex', gap: '10px' }}>
             <input type="text" placeholder="Job Title" required style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})} />
             <input type="number" placeholder="Payout" required style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} value={newJob.payout} onChange={e => setNewJob({...newJob, payout: e.target.value})} />
@@ -90,7 +89,7 @@ export default function AdminPanel() {
           {pendingJobs.map(job => (
             <div key={job.id} style={{ backgroundColor: '#131926', padding: '15px', borderRadius: '15px', border: '1px solid #22c55e44', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{fontSize:'14px'}}><b>{job.profiles?.username}</b>: {job.title}</span>
-              <button onClick={() => approveJob(job)} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Pay ${job.payout.toLocaleString()}</button>
+              <button onClick={() => approveJob(job)} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Pay ${job.payout.toLocaleString()}</button>
             </div>
           ))}
         </div>

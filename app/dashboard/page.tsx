@@ -6,33 +6,35 @@ const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJ
 
 export default function Dash() {
   const [p, setP] = useState<any>(null);
+  const [s, setS] = useState<any>(null);
+  const [tx, setTx] = useState<any[]>([]);
 
-  useEffect(() => {
-    const load = async () => {
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) return window.location.href = '/';
-      const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      setP(data || { username: 'Farmer', balance: 0 });
-    };
-    load();
-  }, []);
+  const load = async () => {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return window.location.href = '/';
+    const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
+    setP(prof); setTx(t || []);
+    fetch('/api/server').then(r=>r.json()).then(d=>setS(d.server)).catch(()=>null);
+  };
+  useEffect(() => { load(); }, []);
 
-  if (!p) return <div style={{color:'white',padding:'20px',background:'#0b0f1a',height:'100vh'}}>Loading...</div>;
+  if (!p) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',padding:'20px'}}>Loading...</div>;
 
   return (
-    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'white', padding:'20px', fontFamily:'sans-serif', textAlign:'center' }}>
-      <h1 style={{ color:'#22c55e' }}>CTFG PORTAL</h1>
-      <p>Welcome, <b>{p.username}</b></p>
-      <div style={{ background:'#166534', padding:'30px', borderRadius:'20px', margin:'20px auto', maxWidth:'300px' }}>
-        <p style={{ margin:0, fontSize:'12px' }}>BALANCE</p>
-        <h2 style={{ margin:0, fontSize:'36px' }}>${p.balance?.toLocaleString()}</h2>
-      </div>
-      <div style={{ display:'flex', justifyContent:'center', gap:'10px', flexWrap:'wrap' }}>
-        <button onClick={()=>window.location.href='/bank'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Bank</button>
-        <button onClick={()=>window.location.href='/land'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Land</button>
-        <button onClick={()=>window.location.href='/contracts'} style={{padding:'10px 20px',background:'#1e293b',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Jobs</button>
-        <button onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')} style={{padding:'10px 20px',background:'#ef4444',color:'white',border:'none',borderRadius:'8px',cursor:'pointer'}}>Logout</button>
-      </div>
-    </div>
-  );
-}
+    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'white', padding:'15px', fontFamily:'sans-serif' }}>
+      <div style={{ maxWidth:'500px', margin:'0 auto', textAlign:'center' }}>
+        <h1 style={{ color:'#22c55e', margin:0 }}>CTFG PORTAL</h1>
+        <p style={{ fontSize:'12px', color:'#94a3b8' }}>{p.username} • {p.rank}</p>
+
+        <div style={{ background:'#166534', padding:'30px', borderRadius:'20px', margin:'15px 0' }}>
+          <p style={{ margin:0, fontSize:'10px', opacity:0.8 }}>BANK BALANCE</p>
+          <h2 style={{ margin:0, fontSize:'42px' }}>${p.balance?.toLocaleString()}</h2>
+        </div>
+
+        <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', marginBottom:'15px', display:'flex', alignItems:'center', gap:'10px', border:'1px solid #1e293b' }}>
+          <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:s?'#22c55e':'#ef4444' }}></div>
+          <p style={{ margin:0, fontSize:'12px' }}>{s ? `${s.name}: ${s.slots.used}/${s.slots.capacity}` : 'Montana Server Offline'}</p>
+        </div>
+
+        <div style={{ background:'#131

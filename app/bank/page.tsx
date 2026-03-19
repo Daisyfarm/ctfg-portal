@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Send, ArrowLeft } from 'lucide-react';
 
 const supabase = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1484178814585012254/TTQsOSg49P0cN2_95jFdZTyHz1UHMT8cafS70NSmPZ36Cp5rRyaga0er3W-B8u8Ei-j7";
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1484183365048602776/vlKwPtv3GkJ2DSn6vE1coJZf71ETVeJVMNXP_Su47bVevQZv5dmI3Z3bB-JSwIRPTtQ-";
 
 export default function BankPage() {
   const [balance, setBalance] = useState(0);
@@ -33,7 +33,6 @@ export default function BankPage() {
     } else {
       setMsg({ type: 'success', text: 'Transfer Successful!' });
       
-      // SEND TO DISCORD
       await fetch(DISCORD_WEBHOOK, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -42,7 +41,7 @@ export default function BankPage() {
           })
       });
 
-      window.location.reload();
+      window.location.href = '/dashboard';
     }
   };
 

@@ -34,7 +34,12 @@ export default function Dashboard() {
              <RefreshCcw size={20} /> Refresh Balance
            </button>
            <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px', borderRadius: '10px', cursor: 'pointer' }}>Logout</button>
-        </div>
+<button 
+  onClick={() => window.location.href = '/bank'} 
+  style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', marginRight: '10px' }}
+>
+  Send Money
+</button>        </div>
 
         <h1 style={{ fontSize: '24px' }}>Welcome, <span style={{ color: '#22c55e' }}>{profile?.username || "ID NOT FOUND"}</span></h1>
         

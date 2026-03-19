@@ -15,39 +15,29 @@ export default function Dash() {
     try {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return window.location.href = '/';
-
-      const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      const { data: pr } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
       const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
-      
-      setP(prof || { username: 'Farmer', balance: 0, rank: 'Farmer' });
+      setP(pr || { username: 'Farmer', balance: 0, rank: 'Farmer' });
       setTx(t || []);
-
       const r = await fetch('/api/server').then(res => res.json()).catch(() => null);
       if (r?.server) setS(r.server);
     } catch (e) { console.log(e); }
     setLd(false);
   };
-
   useEffect(() => { load(); }, []);
 
-  if (ld) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Syncing CTFG...</div>;
+  if (ld) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Syncing CTFG Portal...</div>;
 
   return (
     <div style={{ background:'#0b0f1a',minHeight:'100vh',color:'white',fontFamily:'sans-serif',padding:'15px' }}>
-      <div style={{ maxWidth:'600px',margin:'0 auto' }}>
-        
-        {/* NAV BUTTONS */}
+      <div style={{ maxWidth:'500px',margin:'0 auto' }}>
         <div style={{ display:'flex',gap:'8px',marginBottom:'15px',justifyContent:'center',flexWrap:'wrap' }}>
-          <button onClick={() => window.location.reload()} style={{background:'#1e293b',color:'white',border:'none',padding:'10px',borderRadius:'10px',cursor:'pointer'}}><RefreshCcw size={16}/></button>
-          <button onClick={()=>window.location.href='/contracts'} style={{background:'#6366f1',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Jobs</button>
-          <button onClick={()=>window.location.href='/bank'} style={{background:'#22c55e',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Bank</button>
-          <button onClick={()=>window.location.href='/land'} style={{background:'#f97316',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Land</button>
-          
-          {/* HUB OR APPLY GATE */}
-          {(p?.rank === 'Admin' || p?.rank === 'Member') ? (
-            <button onClick={()=>window.location.href='/community'} style={{background:'#475569',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Hub</button>
-          ) : (
-            <button onClick={()=>window.location.href='/apply'} style={{background:'#f59e0b',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Apply</button>
-          )}
-
-          {p?.rank === 'Admin' && <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold',cursor:'pointer'}}>Staff</butto
+          <button onClick={() => window.location.reload()} style={{background:'#1e293b',color:'white',border:'none',padding:'10px',borderRadius:'10px'}}><RefreshCcw size={16}/></button>
+          <button onClick={()=>window.location.href='/contracts'} style={{background:'#6366f1',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold'}}>Jobs</button>
+          <button onClick={()=>window.location.href='/bank'} style={{background:'#22c55e',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold'}}>Bank</button>
+          <button onClick={()=>window.location.href='/land'} style={{background:'#f97316',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold'}}>Land</button>
+          {(p?.rank==='Admin'||p?.rank==='Member') ? 
+            <button onClick={()=>window.location.href='/community'} style={{background:'#475569',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold'}}>Hub</button> :
+            <button onClick={()=>window.location.href='/apply'} style={{background:'#f59e0b',color:'white',border:'none',padding:'10px 15px',borderRadius:'10px',fontWeight:'bold'}}>Apply</button>
+          }
+          {p?.rank==='Admin' && <button onClick={()=>window.location.href='/admin'} style={{background:'#d

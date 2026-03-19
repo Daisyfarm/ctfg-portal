@@ -33,3 +33,42 @@ export default function Dash() {
   return (
     <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'15px', fontFamily:'sans-serif', textAlign:'center' }}>
       <div style={{ maxWidth:'500px', margin:'0 auto' }}>
+        <h1 style={{ color:'#22c55e', fontStyle:'italic', margin:'0 0 15px 0', fontSize:'22px' }}>CTFG PORTAL</h1>
+
+        <div style={{ display:'flex', justifyContent:'center', gap:'5px', flexWrap:'wrap', marginBottom:'15px' }}>
+          <button onClick={() => window.location.reload()} style={btn}><RefreshCcw size={14}/></button>
+          <button onClick={()=>window.location.href='/contracts'} style={btn}><Briefcase size={14}/> Jobs</button>
+          <button onClick={()=>window.location.href='/bank'} style={btn}><Send size={14}/> Bank</button>
+          <button onClick={()=>window.location.href='/land'} style={btn}><Map size={14}/> Land</button>
+          <button onClick={()=>window.location.href='/map'} style={{...btn, background:'#6366f1'}}><Map size={14}/> Live Map</button>
+          {p.rank === 'Farmer' ? 
+            <button onClick={()=>window.location.href='/apply'} style={{...btn, background:'#f59e0b'}}><FileText size={14}/> Apply</button> :
+            <button onClick={()=>window.location.href='/community'} style={{...btn, background:'#475569'}}><Tractor size={14}/> Hub</button>
+          }
+          {p.rank === 'Admin' && <button onClick={()=>window.location.href='/admin'} style={{...btn, background:'#dc2626'}}><ShieldCheck size={14}/> Staff</button>}
+          <button onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')} style={{...btn, background:'#444'}}><LogOut size={14}/></button>
+        </div>
+
+        <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)', padding:'30px', borderRadius:'25px', marginBottom:'15px', boxShadow:'0 10px 20px rgba(0,0,0,0.4)' }}>
+          <p style={{ margin:0, fontSize:'11px', fontWeight:'bold' }}>{p.username} • {p.rank}</p>
+          <h2 style={{ margin:'5px 0 0 0', fontSize:'45px' }}>${p.balance?.toLocaleString()}</h2>
+        </div>
+
+        <div style={{ background:'#131926', padding:'12px', borderRadius:'15px', marginBottom:'15px', display:'flex', alignItems:'center', gap:'10px', border:'1px solid #1e293b' }}>
+          <div style={{ width:'10px', height:'10px', borderRadius:'50%', background: s?'#22c55e':'#ef4444', boxShadow: s?'0 0 10px #22c55e':'none' }}></div>
+          <p style={{ margin:0, fontSize:'12px' }}>{s ? `${s.name}: ${s.slots.used}/${s.slots.capacity} Online` : 'Montana Server Offline'}</p>
+        </div>
+
+        <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', textAlign:'left', border:'1px solid #1e293b' }}>
+          <p style={{ margin:'0 0 10px 0', fontSize:'11px', color:'#22c55e', fontWeight:'bold', display:'flex', alignItems:'center', gap:'5px' }}><Clock size={14}/> RECENT ACTIVITY</p>
+          {tx.length === 0 ? <p style={{fontSize:'10px', color:'#475569'}}>No history found.</p> : tx.map(t => (
+            <div key={t.id} style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', borderBottom:'1px solid #0b0f1a', padding:'6px 0' }}>
+              <span style={{color:'#94a3b8'}}>{t.description}</span>
+              <span style={{color: t.type==='income'?'#22c55e':'#ef4444', fontWeight:'bold'}}>${t.amount?.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

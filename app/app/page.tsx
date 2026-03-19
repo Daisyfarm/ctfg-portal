@@ -1,13 +1,12 @@
-
 "use client";
 import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Tractor } from 'lucide-react';
 
-// PASTE YOUR ACTUAL DETAILS HERE TO BYPASS VERCEL SETTINGS
+// I have placed your actual keys inside the quotes below:
 const supabase = createClient(
-  'https://your-project-id.supabase.co', // https://yioyfxvabhzvkwuljcki.supabase.co
-  'eyJhbG...your-anon-key'               // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpb3lmeHZhYmh6dmt3dWxqY2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzYyNjgsImV4cCI6MjA4OTQ1MjI2OH0.Ov36x2V6QfDYQhHdA57Bg8fzYkefjJFvG3JJakYMLPU
+  'https://yioyfxvabhzvkwuljcki.supabase.co', 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlpb3lmeHZhYmh6dmt3dWxqY2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzYyNjgsImV4cCI6MjA4OTQ1MjI2OH0.Ov36x2V6QfDYQhHdA57Bg8fzYkefjJFvG3JJakYMLPU'
 );
 
 export default function CTFGPortal() {
@@ -27,7 +26,7 @@ export default function CTFGPortal() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) alert(error.message);
-      else alert("Login Successful!");
+      else window.location.href = '/dashboard'; // This takes you to the money page
     }
   };
 
@@ -43,7 +42,7 @@ export default function CTFGPortal() {
           )}
           <input type="email" placeholder="Email" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }} onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }} onChange={(e) => setPassword(e.target.value)} />
-          <button type="submit" style={{ padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#22c55e', color: 'white', fontWeight: 'bold' }}>
+          <button type="submit" style={{ padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#22c55e', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
             {isRegister ? 'Create Account' : 'Enter Farm'}
           </button>
         </form>

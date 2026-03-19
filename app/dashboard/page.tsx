@@ -6,7 +6,7 @@ import { Tractor, Wallet, ShieldCheck, LogOut } from 'lucide-react';
 // CONNECT TO YOUR DATABASE
 const supabase = createClient(
   'https://dlwhztcqntalrhfrefsk.supabase.co', 
-  'PASTE_YOUR_LONG_EYJ_ANON_KEY_HERE' 
+  'sb_publishable_JtnzF6YKCXc5u2XC_LE_Iw_fCU4rK8h' 
 );
 
 export default function Dashboard() {

@@ -32,7 +32,18 @@ export default function AdminPanel() {
 
   const createJob = async (e: any) => {
     e.preventDefault();
-    await supabase.from('contracts').insert([{ title: newJob.title, payout: parseInt(newJob.payout), status: 'available' }]);
+    const payoutNum = parseInt(newJob.payout);
+    await supabase.from('contracts').insert([{ title: newJob.title, payout: payoutNum, status: 'available' }]);
+    
+    // DISCORD ALERT FOR NEW JOB
+    await fetch(DISCORD_WEBHOOK, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            content: `📢 **NEW CONTRACT POSTED**\nA new job is available on the CTFG Board: **${newJob.title}**\n💰 Payout: **$${payoutNum.toLocaleString()}**\nGo to the portal to claim it!`
+        })
+    });
+
     setNewJob({ title: '', payout: '' });
     fetchData();
   };
@@ -43,7 +54,6 @@ export default function AdminPanel() {
     await supabase.from('transactions').insert([{ user_id: job.assigned_to, amount: job.payout, type: 'income', description: `Job: ${job.title}` }]);
     await supabase.from('contracts').update({ status: 'completed' }).eq('id', job.id);
     
-    // SEND TO DISCORD
     await fetch(DISCORD_WEBHOOK, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -66,20 +76,21 @@ export default function AdminPanel() {
         </div>
 
         <div style={{ backgroundColor: '#131926', padding: '20px', borderRadius: '20px', border: '1px solid #1e293b', marginBottom: '30px' }}>
-          <h2 style={{ fontSize: '16px', margin: '0 0 15px 0' }}><Plus size={16}/> New Job</h2>
+          <h2 style={{ fontSize: '16px', margin: '0 0 15px 0' }}><Plus size={16}/> Post a New Contract</h2>
           <form onSubmit={createJob} style={{ display: 'flex', gap: '10px' }}>
             <input type="text" placeholder="Job Title" required style={{ flex: 2, padding: '10px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})} />
             <input type="number" placeholder="Payout" required style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#0b0f1a', color: 'white' }} value={newJob.payout} onChange={e => setNewJob({...newJob, payout: e.target.value})} />
-            <button type="submit" style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Post</button>
+            <button type="submit" style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Post Job</button>
           </form>
         </div>
 
         <div style={{ marginBottom: '30px' }}>
           <h2 style={{ fontSize: '16px', marginBottom: '10px' }}>Pending Payouts</h2>
+          {pendingJobs.length === 0 && <p style={{color:'#475569', fontSize:'14px'}}>No one is waiting for pay.</p>}
           {pendingJobs.map(job => (
             <div key={job.id} style={{ backgroundColor: '#131926', padding: '15px', borderRadius: '15px', border: '1px solid #22c55e44', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{fontSize:'14px'}}><b>{job.profiles?.username}</b>: {job.title}</span>
-              <button onClick={() => approveJob(job)} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>Pay ${job.payout.toLocaleString()}</button>
+              <button onClick={() => approveJob(job)} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', fontWeight: 'bold' }}>Pay ${job.payout.toLocaleString()}</button>
             </div>
           ))}
         </div>
@@ -89,4 +100,11 @@ export default function AdminPanel() {
           {players.map(p => (
             <div key={p.id} style={{ padding: '12px 20px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span>{p.username} ({p.rank})</span>
-              <span style={{ color: '#22c55e', fontWeight: 'bold' }}>${p.balance.toLocaleStri
+              <span style={{ color: '#22c55e', fontWeight: 'bold' }}>${p.balance.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

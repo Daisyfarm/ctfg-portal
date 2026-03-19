@@ -38,7 +38,12 @@ export default function Dashboard() {
   onClick={() => window.location.href = '/bank'} 
   style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', marginRight: '10px' }}
 >
-  Send Money
+  Send Money  <button 
+  onClick={() => window.location.href = '/land'} 
+  style={{ backgroundColor: '#f97316', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}
+>
+  Buy Land
+</button>
 </button>        </div>
 
         <h1 style={{ fontSize: '24px' }}>Welcome, <span style={{ color: '#22c55e' }}>{profile?.username || "ID NOT FOUND"}</span></h1>

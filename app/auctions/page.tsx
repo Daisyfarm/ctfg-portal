@@ -6,7 +6,7 @@ import { Gavel, ArrowLeft, Landmark } from 'lucide-react';
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function AuctionHouse() {
+export default function AuctionFloor() {
   const [aucs, setAucs] = useState<any[]>([]);
   const [bid, setBid] = useState("");
   const [ld, setLd] = useState(true);
@@ -19,9 +19,9 @@ export default function AuctionHouse() {
 
   const placeBid = async (a: any) => {
     const amt = parseInt(bid);
-    if (amt <= a.highest_bid) return alert("Bid higher!");
+    if (amt <= a.highest_bid) return alert("Bid must be higher!");
     const { data: { user } } = await sb.auth.getUser();
-    const { data: p } = await sb.from('profiles').select('*').eq('id', user?.id).single();
+    const { data: p } = await sb.from('profiles').select('balance, username').eq('id', user?.id).single();
     if (p.balance < amt) return alert("Insufficient funds!");
 
     await sb.from('auctions').update({ highest_bid: amt, highest_bidder_id: user?.id }).eq('id', a.id);
@@ -29,14 +29,16 @@ export default function AuctionHouse() {
     setBid(""); alert("Bid Placed!"); load();
   };
 
-  if (ld) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',padding:'20px'}}>Opening Auction Floor...</div>;
+  if (ld) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',padding:'20px'}}>Entering Auction House...</div>;
 
   return (
     <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'20px', fontFamily:'sans-serif' }}>
       <div style={{ maxWidth:'500px', margin:'0 auto' }}>
         <button onClick={()=>window.location.href='/dashboard'} style={{background:'none',color:'#94a3b8',border:'none',cursor:'pointer',marginBottom:'20px'}}>← Back</button>
-        <h2 style={{color:'#facc15'}}><Gavel style={{verticalAlign:'middle'}}/> CTFG Land Auctions</h2>
-        {aucs.length === 0 && <p style={{color:'#475569'}}>No active auctions.</p>}
+        <h2 style={{color:'#facc15', textAlign:'center'}}><Gavel style={{verticalAlign:'middle'}}/> CTFG AUCTION FLOOR</h2>
+        
+        {aucs.length === 0 && <p style={{textAlign:'center', color:'#475569'}}>The gavel is silent. No active auctions.</p>}
+
         {aucs.map(a => (
           <div key={a.id} style={{ background:'#131926', padding:'20px', borderRadius:'20px', border:'1px solid #facc15', marginBottom:'15px' }}>
             <h3 style={{margin:0}}>Field {a.field_number}</h3>

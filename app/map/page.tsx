@@ -25,16 +25,27 @@ export default function LiveMap() {
 
   if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Loading Judith Plains...</div>;
 
-  // Conversion: Montana 4x is 4096 units (-2048 to 2048).
+  // Montana 4x Coordinate Conversion
   const convert = (val: number) => ((val + 2048) / 4096) * 100;
 
   return (
     <div style={{ background:'#000', minHeight:'100vh' }}>
-      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1000, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', fontSize:'14px', boxShadow:'0 4px 15px rgba(0,0,0,0.5)'}}>← Dashboard</button>
+      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', fontSize:'14px', boxShadow:'0 4px 15px rgba(0,0,0,0.5)'}}>← Dashboard</button>
       
-      <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%', background: '#111' }}>
-        {/* THIS MUST MATCH THE FILENAME map.PNG EXACTLY */}
-        <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} opacity={1} zIndex={1} />
+      <MapContainer 
+        crs={L.CRS.Simple} 
+        bounds={[[0,0],[100,100]]} 
+        style={{ height: '100vh', width: '100%', background: '#0b0f1a' }}
+        zoom={3}
+        center={[50, 50]}
+      >
+        {/* We use the ABSOLUTE URL here to force it to load */}
+        <ImageOverlay 
+          url="https://ctfg-portal.vercel.app/map.PNG" 
+          bounds={[[0,0],[100,100]]} 
+          zIndex={1}
+          opacity={1}
+        />
         
         {/* FIELD DOTS */}
         {data?.fields?.map((f:any) => (
@@ -51,7 +62,7 @@ export default function LiveMap() {
         {/* LIVE VEHICLES WITH PLAYER NAMES */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => {
           const player = data?.slots?.players?.find((p:any) => 
-            p.isUsed && Math.abs(p.x - v.x) < 12 && Math.abs(p.z - v.z) < 12
+            p.isUsed && Math.abs(p.x - v.x) < 15 && Math.abs(p.z - v.z) < 15
           );
 
           return (
@@ -61,7 +72,7 @@ export default function LiveMap() {
               icon={L.divIcon({
                 html: `
                   <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-                    ${player ? `<div style="background:rgba(34,197,94,0.9); color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-bottom:4px; border:1px solid #fff; white-space:nowrap; box-shadow:0 2px 4px #000;">${player.name}</div>` : ''}
+                    ${player ? `<div style="background:#22c55e; color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-bottom:4px; border:1px solid #fff; white-space:nowrap; box-shadow:0 2px 4px #000;">${player.name}</div>` : ''}
                     <div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 10px #000;">🚜</div>
                   </div>`,
                 className: '',

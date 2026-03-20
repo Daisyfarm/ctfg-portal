@@ -14,21 +14,18 @@ export default function LiveMap() {
   const [L, setL] = useState<any>(null);
 
   useEffect(() => {
-    import('leaflet').then((leaflet) => {
-      setL(leaflet);
-    });
-
+    import('leaflet').then((leaflet) => { setL(leaflet); });
     const fetchStatus = () => {
       fetch('/api/server').then(r => r.json()).then(d => setData(d)).catch(() => null);
     };
-
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000); 
     return () => clearInterval(interval);
   }, []);
 
-  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading Montana Map...</div>;
+  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Loading Judith Plains...</div>;
 
+  // Conversion: Montana 4x is 4096 units.
   const convert = (val: number) => ((val + 2048) / 4096) * 100;
 
   return (
@@ -36,23 +33,18 @@ export default function LiveMap() {
       <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1000, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold'}}>← Back</button>
       
       <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%' }}>
-        {/* We use your own website to host the image now */}
-        <ImageOverlay url="/map.png" bounds={[[0,0],[100,100]]} />
+        {/* MATCHES YOUR FILE NAME map.PNG */}
+        <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
         
-        {/* FIELDS AS SMALL DOTS */}
+        {/* FIELD DOTS */}
         {data?.fields?.map((f:any) => (
           <CircleMarker 
             key={`f-${f.id}`} 
             center={[100 - convert(f.z), convert(f.x)]}
-            radius={4}
-            pathOptions={{ color: f.isOwned ? '#3b82f6' : '#22c55e', fillColor: f.isOwned ? '#3b82f6' : '#22c55e', fillOpacity: 0.8 }}
+            radius={3}
+            pathOptions={{ color: f.isOwned ? '#3b82f6' : '#22c55e', fillColor: f.isOwned ? '#3b82f6' : '#22c55e', fillOpacity: 0.6 }}
           >
-            <Popup>
-              <div style={{textAlign:'center', color:'#000'}}>
-                <strong>Field {f.id}</strong><br/>
-                {f.isOwned ? "✅ Owned" : "💰 Available"}
-              </div>
-            </Popup>
+            <Popup><div style={{color:'#000'}}><strong>Field {f.id}</strong><br/>{f.isOwned ? "Owned" : "Available"}</div></Popup>
           </CircleMarker>
         ))}
 
@@ -62,9 +54,9 @@ export default function LiveMap() {
             key={`v-${i}`} 
             position={[100 - convert(v.z), convert(v.x)]}
             icon={L.divIcon({
-              html: `<div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 0 12px #000;">🚜</div>`,
+              html: `<div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:14px; box-shadow:0 0 10px #000;">🚜</div>`,
               className: '',
-              iconSize: [28, 28]
+              iconSize: [24, 24]
             })}
           >
             <Popup>

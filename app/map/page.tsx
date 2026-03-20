@@ -33,8 +33,8 @@ export default function LiveMap() {
       <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1000, top:10, left:10, padding:'8px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', fontSize:'12px'}}>← Back</button>
       
       <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%', background: '#111' }}>
-        {/* We add a ?v=1 to the end to force the browser to see the new image */}
-        <ImageOverlay url="/map.PNG?v=1" bounds={[[0,0],[100,100]]} />
+        {/* We use map.PNG to match your exact file name */}
+        <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
         
         {/* FIELD DOTS */}
         {data?.fields?.map((f:any) => (
@@ -50,9 +50,9 @@ export default function LiveMap() {
 
         {/* LIVE VEHICLES WITH PLAYER NAMES */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => {
-          // Check if a player is inside this vehicle
+          // Detect if a player is in this vehicle by coordinate proximity
           const playerInVeh = data?.slots?.players?.find((p:any) => 
-            Math.abs(p.x - v.x) < 5 && Math.abs(p.z - v.z) < 5
+            p.isUsed && Math.abs(p.x - v.x) < 10 && Math.abs(p.z - v.z) < 10
           );
 
           return (
@@ -61,9 +61,9 @@ export default function LiveMap() {
               position={[100 - convert(v.z), convert(v.x)]}
               icon={L.divIcon({
                 html: `
-                  <div style="position:relative;">
+                  <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+                    ${playerInVeh ? `<div style="background:rgba(34,197,94,0.9); color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; white-space:nowrap; font-weight:bold; margin-bottom:4px; border:1px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.5);">${playerInVeh.name}</div>` : ''}
                     <div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 10px #000;">🚜</div>
-                    ${playerInVeh ? `<div style="position:absolute; top:-20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; padding:2px 6px; border-radius:4px; font-size:10px; white-space:nowrap; font-weight:bold; border:1px solid #22c55e;">${playerInVeh.name}</div>` : ''}
                   </div>`,
                 className: '',
                 iconSize: [20, 20]
@@ -72,7 +72,7 @@ export default function LiveMap() {
               <Popup>
                 <div style={{textAlign:'center', color:'#000'}}>
                   <strong>{v.name}</strong><br/>
-                  {playerInVeh ? <span style={{color:'#22c55e'}}>Driven by: {playerInVeh.name}</span> : <span style={{color:'#666'}}>Stationary</span>}
+                  {playerInVeh ? <span style={{color:'#22c55e'}}>Status: Active</span> : <span style={{color:'#666'}}>Status: Parked</span>}
                 </div>
               </Popup>
             </Marker>

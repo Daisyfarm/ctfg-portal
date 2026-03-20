@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Clock, Cloud, Megaphone, TrendingUp, Send, Map, BookOpen, LogOut, ShieldCheck, Briefcase, Landmark } from 'lucide-react';
+import { Clock, Cloud, Megaphone, TrendingUp, Send, Map, BookOpen, LogOut, ShieldCheck, Briefcase, Landmark, Tractor } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 
@@ -12,7 +12,6 @@ export default function Dash() {
   const [w, setW] = useState("");
   const [news, setNews] = useState("");
   const [mkt, setMkt] = useState<any[]>([]);
-  const [debt, setDebt] = useState(0);
 
   const load = async () => {
     const { data: { user } } = await sb.auth.getUser();
@@ -21,19 +20,14 @@ export default function Dash() {
     const { data: t } = await sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3);
     const { data: n } = await sb.from('news').select('message').order('created_at', { ascending: false }).limit(1);
     const { data: m } = await sb.from('market_prices').select('*').order('crop_name');
-    const { data: ln } = await sb.from('loans').select('amount_remaining').eq('user_id', user.id).eq('status', 'active');
-    
     setP(pr); setTx(t || []); setNews(n?.[0]?.message || "Welcome to CTFG!"); setMkt(m || []);
-    setDebt(ln?.reduce((a, c) => a + c.amount_remaining, 0) || 0);
-    
     fetch('/api/server').then(r=>r.json()).then(d=>setS(d)).catch(()=>0);
     fetch('https://api.open-meteo.com/v1/forecast?latitude=47.15&longitude=-110.22&current=temperature_2m&temperature_unit=fahrenheit').then(r=>r.json()).then(d=>setW(Math.round(d.current.temperature_2m) + "°F")).catch(()=>0);
   };
-
   useEffect(() => { load(); }, []);
 
-  if (!p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing Portal...</div>;
-  const btn = { padding:'10px 12px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'11px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'5px' };
+  if (!p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing CTFG...</div>;
+  const btn = { padding:'10px 12px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'11px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'5px' };
 
   return (
     <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'20px', fontFamily:'sans-serif', textAlign:'center' }}>
@@ -58,11 +52,10 @@ export default function Dash() {
         <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)', padding:'30px', borderRadius:'25px', marginBottom:'15px', boxShadow:'0 10px 20px rgba(0,0,0,0.4)' }}>
           <p style={{ margin:0, fontSize:'11px' }}>{p.username} • {p.rank}</p>
           <h2 style={{ margin:0, fontSize:'48px' }}>${p.balance?.toLocaleString()}</h2>
-          {debt > 0 && <p style={{ margin:'10px 0 0 0', color:'#fca5a5', fontSize:'12px', fontWeight:'bold' }}>⚠️ Debt: ${debt.toLocaleString()}</p>}
         </div>
 
         <div style={{ background:'#131926', padding:'15px', borderRadius:'20px', marginBottom:'15px', border:'1px solid #1e293b', textAlign:'left' }}>
-          <p style={{ margin:'0 0 10px 0', fontSize:'12px', color:'#22c55e', fontWeight:'bold' }}><TrendingUp size={14} style={{verticalAlign:'middle'}}/> CROP MARKET</p>
+          <p style={{ margin:'0 0 10px 0', fontSize:'12px', color:'#22c55e', fontWeight:'bold' }}><TrendingUp size={14} style={{verticalAlign:'middle'}}/> MONTANA CROP MARKET</p>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
             {mkt.map(m => (
               <div key={m.id} style={{ fontSize:'11px', display:'flex', justifyContent:'space-between', borderBottom:'1px solid #0b0f1a', padding:'3px 0' }}>
@@ -77,10 +70,11 @@ export default function Dash() {
           <button style={btn} onClick={()=>window.location.href='/land'}><Map size={12}/> Land</button>
           <button style={{...btn, background:'#6366f1'}} onClick={()=>window.location.href='/map'}><Map size={12}/> Map</button>
           <button style={btn} onClick={()=>window.location.href='/contracts'}><Briefcase size={12}/> Jobs</button>
+          <button style={btn} onClick={()=>window.location.href='/fleet'}><Tractor size={12}/> Fleet</button>
           <button style={{...btn, background:'#7c3aed'}} onClick={()=>window.location.href='/loans'}><Landmark size={12}/> Loan</button>
           <button style={btn} onClick={()=>window.location.href='/rules'}><BookOpen size={12}/> Rules</button>
           {p.rank==='Admin' && <button style={{...btn,background:'#dc2626'}} onClick={()=>window.location.href='/admin'}><ShieldCheck size={12}/> Staff</button>}
-          <button style={{...btn, background:'#444'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={12}/></button>
+          <button style={{...btn, background:'#444'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={12}/> Logout</button>
         </div>
 
         <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', textAlign:'left', border:'1px solid #1e293b' }}>

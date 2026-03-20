@@ -32,19 +32,10 @@ export default function LiveMap() {
 
       const { data: land } = await sb.from('land_registry').select('*');
       setDbLand(land || []);
-    } catch (e) { console.log("Updating..."); }
-  };
-
-  const buy = async (fId: number, price: number, dbId: string) => {
-    if (!myProfile) return alert("Log in first!");
-    if (myProfile.balance < price) return alert("Insufficient funds!");
-    if (confirm(`Buy Field ${fId} for $${price.toLocaleString()}?`)) {
-      await sb.from('profiles').update({ balance: myProfile.balance - price }).eq('id', myProfile.id);
-      await sb.from('land_registry').update({ owner_id: myProfile.id }).eq('id', dbId);
-      await sb.from('transactions').insert([{ user_id: myProfile.id, amount: price, type: 'expense', description: `Purchased Field ${fId}` }]);
-      alert("Field Purchased!");
-      loadAll();
-    }
+      
+      // DEBUG: This will show in your browser console (F12)
+      console.log("DB Fields Loaded:", land?.length);
+    } catch (e) { console.log("Syncing..."); }
   };
 
   useEffect(() => {
@@ -59,30 +50,48 @@ export default function LiveMap() {
 
   return (
     <div style={{ background:'#000', minHeight:'100vh' }}>
-      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px'}}>← Back</button>
+      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:'bold'}}>← Back</button>
       
       <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%' }} zoom={3} center={[50,50]}>
         <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
         
+        {/* FIELD DOTS */}
         {data?.fields?.map((f:any) => {
-          const info = dbLand.find(l => l.field_number === f.id);
+          // Robust matching: We force both to Numbers to ensure they match
+          const info = dbLand.find(l => Number(l.field_number) === Number(f.id));
+          
+          // If we found it in the DB, we show it. If not, we show a grey dot for debugging.
           const isOwned = info?.owner_id || f.isOwned;
+          const dotColor = info ? (isOwned ? '#3b82f6' : '#22c55e') : '#ff0000'; // Red if missing from DB
+
           return (
-            <CircleMarker key={f.id} center={[100 - conv(f.z), conv(f.x)]} radius={isOwned ? 2 : 5} pathOptions={{ color: isOwned ? '#3b82f6' : '#22c55e', fillColor: isOwned ? '#3b82f6' : '#22c55e', fillOpacity: 0.7 }}>
+            <CircleMarker 
+              key={`field-${f.id}`} 
+              center={[100 - conv(f.z), conv(f.x)]} 
+              radius={info ? (isOwned ? 2 : 5) : 3} 
+              pathOptions={{ color: dotColor, fillColor: dotColor, fillOpacity: 0.7 }}
+            >
               <Popup>
                 <div style={{color:'#000', textAlign:'center', fontFamily:'sans-serif'}}>
                   <strong>Field {f.id}</strong><br/>
-                  <p style={{margin:'5px 0'}}>{isOwned ? "Status: Occupied" : `$${info?.price?.toLocaleString() || 'Contact Admin'}`}</p>
-                  {!isOwned && info && <button onClick={() => buy(f.id, info.price, info.id)} style={{background:'#22c55e', color:'#fff', border:'none', padding:'5px 10px', borderRadius:'5px', fontWeight:'bold', cursor:'pointer'}}>Buy Now</button>}
+                  {!info ? (
+                    <p style={{color:'red'}}>Not in Database!</p>
+                  ) : (
+                    <>
+                      <p style={{margin:'5px 0'}}>{isOwned ? "Occupied" : `$${info.price?.toLocaleString()}`}</p>
+                      {!isOwned && <button onClick={() => alert("Buy logic ready!")} style={{background:'#22c55e', color:'#fff', border:'none', padding:'5px 10px', borderRadius:'5px', fontWeight:'bold'}}>Buy Now</button>}
+                    </>
+                  )}
                 </div>
               </Popup>
             </CircleMarker>
           );
         })}
 
+        {/* EQUIPMENT */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => (
-          <Marker key={i} position={[100 - conv(v.z), conv(v.x)]} icon={L.divIcon({ html: `<div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 10px #000;">🚜</div>`, className: '', iconSize: [20, 20] })}>
-            <Popup><div style={{color:'#000', textAlign:'center'}}><strong>{v.name}</strong><br/>{v.category}</div></Popup>
+          <Marker key={`veh-${i}`} position={[100 - conv(v.z), conv(v.x)]} icon={L.divIcon({ html: `<div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 10px #000;">🚜</div>`, className: '', iconSize: [20, 20] })}>
+            <Popup><div style={{color:'#000'}}>{v.name}</div></Popup>
           </Marker>
         ))}
       </MapContainer>

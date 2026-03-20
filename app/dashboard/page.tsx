@@ -29,10 +29,11 @@ export default function Dash() {
     fetch('/api/server').then(r=>r.json()).then(d=>setS(d)).catch(()=>0);
     fetch('https://api.open-meteo.com/v1/forecast?latitude=47.15&longitude=-110.22&current=temperature_2m&temperature_unit=fahrenheit').then(r=>r.json()).then(d=>setW(Math.round(d.current.temperature_2m) + "°F")).catch(()=>0);
   };
+
   useEffect(() => { load(); }, []);
 
-  if (!p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing CTFG...</div>;
-  const btn = { padding:'10px 12px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'11px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'5px' };
+  if (!p) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing Portal...</div>;
+  const btn = { padding:'10px 12px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'11px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'5px' };
 
   return (
     <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'20px', fontFamily:'sans-serif', textAlign:'center' }}>
@@ -45,13 +46,13 @@ export default function Dash() {
             <span>CTFG: {s?.slots?.used || 0}/{s?.slots?.capacity || 0}</span>
           </div>
           <div style={{ background:'#131926', padding:'8px 12px', borderRadius:'12px', border:'1px solid #1e293b', display:'flex', alignItems:'center', gap:'8px', fontSize:'11px' }}>
-            <Cloud size={14} color="#3b82f6" /> <span>{w || '--°F'} Montana</span>
+            <Cloud size={14} color="#3b82f6" /> <span>{w || '--°F'}</span>
           </div>
         </div>
 
         <div style={{ background:'rgba(34,197,94,0.1)', border:'1px solid #22c55e', padding:'12px', borderRadius:'15px', marginBottom:'15px', display:'flex', alignItems:'center', gap:'10px' }}>
           <Megaphone size={18} color="#22c55e" />
-          <p style={{ margin:0, fontSize:'12px', textAlign:'left' }}>{news}</p>
+          <p style={{ margin:0, fontSize:'12px', textAlign:'left', lineHeight:'1.4' }}>{news}</p>
         </div>
 
         <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)', padding:'30px', borderRadius:'25px', marginBottom:'15px', boxShadow:'0 10px 20px rgba(0,0,0,0.4)' }}>

@@ -11,43 +11,65 @@ const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr:
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
 export default function LiveMap() {
   const [data, setData] = useState<any>(null);
   const [dbLand, setDbLand] = useState<any[]>([]);
   const [myProfile, setMyProfile] = useState<any>(null);
   const [L, setL] = useState<any>(null);
+  const [isBuying, setIsBuying] = useState(false);
 
   const loadAll = async () => {
-    const res = await fetch('/api/server');
-    const sData = await res.json();
-    setData(sData);
+    try {
+      const res = await fetch('/api/server');
+      const sData = await res.json();
+      setData(sData);
 
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      setMyProfile(prof);
-    }
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+        setMyProfile(prof);
+      }
 
-    const { data: land } = await sb.from('land_registry').select('*, profiles(username)');
-    setDbLand(land || []);
+      const { data: land } = await sb.from('land_registry').select('*, profiles(username)');
+      setDbLand(land || []);
+    } catch (e) { console.error("Map sync error", e); }
   };
 
   const handleBuy = async (field: any, dbInfo: any) => {
+    if (isBuying) return;
     if (!myProfile) return alert("Please log in first.");
     if (!dbInfo) return alert("Land info not found in database.");
     if (myProfile.balance < dbInfo.price) return alert("Insufficient funds!");
 
     if (confirm(`Purchase Field ${field.id} for $${dbInfo.price.toLocaleString()}?`)) {
-      // 1. Deduct Money
-      await sb.from('profiles').update({ balance: myProfile.balance - dbInfo.price }).eq('id', myProfile.id);
-      // 2. Set Owner
-      await sb.from('land_registry').update({ owner_id: myProfile.id }).eq('id', dbInfo.id);
-      // 3. Log Activity
-      await sb.from('transactions').insert([{ user_id: myProfile.id, amount: dbInfo.price, type: 'expense', description: `Purchased Field ${field.id}` }]);
+      setIsBuying(true);
       
-      alert("Purchase successful!");
-      loadAll(); // Refresh map
+      // 1. Deduct Money & Set Owner
+      await sb.from('profiles').update({ balance: myProfile.balance - dbInfo.price }).eq('id', myProfile.id);
+      await sb.from('land_registry').update({ owner_id: myProfile.id }).eq('id', dbInfo.id);
+      
+      // 2. Log Activity Ledger
+      await sb.from('transactions').insert([{ 
+        user_id: myProfile.id, 
+        amount: dbInfo.price, 
+        type: 'expense', 
+        description: `Purchased Field ${field.id}` 
+      }]);
+
+      // 3. ALERT DISCORD
+      await fetch(HK, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          content: `🏡 **NEW LAND OWNER**\n**${myProfile.username}** has just purchased **Field ${field.id}** for **$${dbInfo.price.toLocaleString()}**! Congratulations on expanding the farm!`
+        })
+      });
+      
+      alert("Purchase successful! Discord notified.");
+      setIsBuying(false);
+      loadAll(); 
     }
   };
 
@@ -58,7 +80,7 @@ export default function LiveMap() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing Montana Map...</div>;
+  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Syncing Montana Map...</div>;
 
   const convert = (val: number) => ((val + 2048) / 4096) * 100;
 
@@ -85,16 +107,23 @@ export default function LiveMap() {
                   <strong style={{fontSize:'16px'}}>Field {f.id}</strong><br/>
                   <span style={{fontSize:'12px', color:'#666'}}>{info?.acres || '??'} Acres</span>
                   <div style={{margin:'8px 0', fontWeight:'bold', color: isOwned ? '#3b82f6' : '#166534'}}>
-                    {isOwned ? `Owner: ${info?.profiles?.username || 'In-Game'}` : `$${info?.price?.toLocaleString() || 'N/A'}`}
+                    {isOwned ? `Owner: ${info?.profiles?.username || 'In-Game System'}` : `$${info?.price?.toLocaleString() || 'N/A'}`}
                   </div>
-                  {!isOwned && <button onClick={() => handleBuy(f, info)} style={{background:'#22c55e', color:'#fff', border:'none', padding:'8px 12px', borderRadius:'8px', cursor:'pointer', fontWeight:'bold'}}>Buy This Field</button>}
+                  {!isOwned && (
+                    <button 
+                      onClick={() => handleBuy(f, info)} 
+                      disabled={isBuying}
+                      style={{background:'#22c55e', color:'#fff', border:'none', padding:'8px 12px', borderRadius:'8px', cursor:'pointer', fontWeight:'bold'}}
+                    >
+                      {isBuying ? 'Processing...' : 'Buy This Field'}
+                    </button>
+                  )}
                 </div>
               </Popup>
             </CircleMarker>
           );
         })}
 
-        {/* LIVE VEHICLES */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => {
           const player = data?.slots?.players?.find((p:any) => p.isUsed && Math.abs(p.x - v.x) < 15 && Math.abs(p.z - v.z) < 15);
           return (

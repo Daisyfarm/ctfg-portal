@@ -25,7 +25,7 @@ export default function LiveMap() {
 
   if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Loading Judith Plains...</div>;
 
-  // Conversion logic for Judith Plains 4x (4096 units)
+  // Conversion: Montana 4x is 4096 units (-2048 to 2048).
   const convert = (val: number) => ((val + 2048) / 4096) * 100;
 
   return (
@@ -33,8 +33,8 @@ export default function LiveMap() {
       <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1000, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', fontSize:'14px', boxShadow:'0 4px 15px rgba(0,0,0,0.5)'}}>← Dashboard</button>
       
       <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%', background: '#111' }}>
-        {/* We use map.PNG which you confirmed is in your public folder */}
-        <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
+        {/* THIS MUST MATCH THE FILENAME map.PNG EXACTLY */}
+        <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} opacity={1} zIndex={1} />
         
         {/* FIELD DOTS */}
         {data?.fields?.map((f:any) => (
@@ -50,7 +50,6 @@ export default function LiveMap() {
 
         {/* LIVE VEHICLES WITH PLAYER NAMES */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => {
-          // Detect if a player is in this tractor
           const player = data?.slots?.players?.find((p:any) => 
             p.isUsed && Math.abs(p.x - v.x) < 12 && Math.abs(p.z - v.z) < 12
           );

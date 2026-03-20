@@ -15,17 +15,40 @@ const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJ
 export default function LiveMap() {
   const [data, setData] = useState<any>(null);
   const [dbLand, setDbLand] = useState<any[]>([]);
+  const [myProfile, setMyProfile] = useState<any>(null);
   const [L, setL] = useState<any>(null);
 
   const loadAll = async () => {
-    // Fetch Server Data
     const res = await fetch('/api/server');
     const sData = await res.json();
     setData(sData);
 
-    // Fetch Database Land Info
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+      setMyProfile(prof);
+    }
+
     const { data: land } = await sb.from('land_registry').select('*, profiles(username)');
     setDbLand(land || []);
+  };
+
+  const handleBuy = async (field: any, dbInfo: any) => {
+    if (!myProfile) return alert("Please log in first.");
+    if (!dbInfo) return alert("Land info not found in database.");
+    if (myProfile.balance < dbInfo.price) return alert("Insufficient funds!");
+
+    if (confirm(`Purchase Field ${field.id} for $${dbInfo.price.toLocaleString()}?`)) {
+      // 1. Deduct Money
+      await sb.from('profiles').update({ balance: myProfile.balance - dbInfo.price }).eq('id', myProfile.id);
+      // 2. Set Owner
+      await sb.from('land_registry').update({ owner_id: myProfile.id }).eq('id', dbInfo.id);
+      // 3. Log Activity
+      await sb.from('transactions').insert([{ user_id: myProfile.id, amount: dbInfo.price, type: 'expense', description: `Purchased Field ${field.id}` }]);
+      
+      alert("Purchase successful!");
+      loadAll(); // Refresh map
+    }
   };
 
   useEffect(() => {
@@ -35,18 +58,17 @@ export default function LiveMap() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading Montana Map...</div>;
+  if (!L) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Syncing Montana Map...</div>;
 
   const convert = (val: number) => ((val + 2048) / 4096) * 100;
 
   return (
     <div style={{ background:'#000', minHeight:'100vh' }}>
-      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', boxShadow:'0 4px 15px #000'}}>← Dashboard</button>
+      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px 15px', borderRadius:'8px', border:'none', background:'#1e293b', color:'#fff', cursor:'pointer', fontWeight:'bold', boxShadow:'0 4px 15px #000'}}>← Back</button>
       
-      <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%', background: '#111' }} zoom={3} center={[50,50]}>
+      <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%' }} zoom={3} center={[50,50]}>
         <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
         
-        {/* INTERACTIVE FIELDS */}
         {data?.fields?.map((f:any) => {
           const info = dbLand.find(l => l.field_number === f.id);
           const isOwned = info?.owner_id || f.isOwned;
@@ -63,16 +85,16 @@ export default function LiveMap() {
                   <strong style={{fontSize:'16px'}}>Field {f.id}</strong><br/>
                   <span style={{fontSize:'12px', color:'#666'}}>{info?.acres || '??'} Acres</span>
                   <div style={{margin:'8px 0', fontWeight:'bold', color: isOwned ? '#3b82f6' : '#166534'}}>
-                    {isOwned ? `Owner: ${info?.profiles?.username || 'System'}` : `$${info?.price?.toLocaleString() || 'N/A'}`}
+                    {isOwned ? `Owner: ${info?.profiles?.username || 'In-Game'}` : `$${info?.price?.toLocaleString() || 'N/A'}`}
                   </div>
-                  {!isOwned && <button onClick={()=>window.location.href='/land'} style={{background:'#22c55e', color:'#fff', border:'none', padding:'5px 10px', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}}>Buy Field</button>}
+                  {!isOwned && <button onClick={() => handleBuy(f, info)} style={{background:'#22c55e', color:'#fff', border:'none', padding:'8px 12px', borderRadius:'8px', cursor:'pointer', fontWeight:'bold'}}>Buy This Field</button>}
                 </div>
               </Popup>
             </CircleMarker>
           );
         })}
 
-        {/* LIVE TRACTORS */}
+        {/* LIVE VEHICLES */}
         {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => {
           const player = data?.slots?.players?.find((p:any) => p.isUsed && Math.abs(p.x - v.x) < 15 && Math.abs(p.z - v.z) < 15);
           return (
@@ -83,7 +105,7 @@ export default function LiveMap() {
                   </div>`,
                 className: '', iconSize: [22, 22]
               })}>
-              <Popup><div style={{textAlign:'center', color:'#000'}}><strong>{v.name}</strong><br/>{player ? 'Status: Working' : 'Status: Parked'}</div></Popup>
+              <Popup><div style={{textAlign:'center', color:'#000'}}><strong>{v.name}</strong><br/>{player ? 'Status: Active' : 'Status: Parked'}</div></Popup>
             </Marker>
           );
         })}

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Clock, Cloud, Megaphone, TrendingUp, Wallet, Landmark, Send, Map, BookOpen, LogOut, ShieldCheck, Briefcase } from 'lucide-react';
+import { Clock, Cloud, Megaphone, TrendingUp, Send, Map, BookOpen, LogOut, ShieldCheck, Briefcase, Landmark } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 
@@ -23,7 +23,7 @@ export default function Dash() {
     const { data: m } = await sb.from('market_prices').select('*').order('crop_name');
     const { data: ln } = await sb.from('loans').select('amount_remaining').eq('user_id', user.id).eq('status', 'active');
     
-    setP(pr); setTx(t || []); setNews(n?.[0]?.message || "Welcome!"); setMkt(m || []);
+    setP(pr); setTx(t || []); setNews(n?.[0]?.message || "Welcome to CTFG!"); setMkt(m || []);
     setDebt(ln?.reduce((a, c) => a + c.amount_remaining, 0) || 0);
     
     fetch('/api/server').then(r=>r.json()).then(d=>setS(d)).catch(()=>0);
@@ -39,7 +39,6 @@ export default function Dash() {
       <div style={{ maxWidth:'500px', margin:'0 auto' }}>
         <h1 style={{ color:'#22c55e', fontStyle:'italic', margin:0, fontSize:'24px' }}>CTFG PORTAL</h1>
         
-        {/* STATUS BAR */}
         <div style={{ display:'flex', justifyContent:'center', gap:'10px', margin:'15px 0' }}>
           <div style={{ background:'#131926', padding:'8px 12px', borderRadius:'12px', border:'1px solid #1e293b', display:'flex', alignItems:'center', gap:'8px', fontSize:'11px' }}>
             <div style={{ width:'8px', height:'8px', borderRadius:'50%', background: s?.slots?.used > 0 ? '#22c55e' : '#444' }}></div>
@@ -50,20 +49,17 @@ export default function Dash() {
           </div>
         </div>
 
-        {/* NEWS */}
         <div style={{ background:'rgba(34,197,94,0.1)', border:'1px solid #22c55e', padding:'12px', borderRadius:'15px', marginBottom:'15px', display:'flex', alignItems:'center', gap:'10px' }}>
           <Megaphone size={18} color="#22c55e" />
           <p style={{ margin:0, fontSize:'12px', textAlign:'left' }}>{news}</p>
         </div>
 
-        {/* BALANCE & DEBT */}
         <div style={{ background:'linear-gradient(135deg,#166534,#064e3b)', padding:'30px', borderRadius:'25px', marginBottom:'15px', boxShadow:'0 10px 20px rgba(0,0,0,0.4)' }}>
           <p style={{ margin:0, fontSize:'11px' }}>{p.username} • {p.rank}</p>
           <h2 style={{ margin:0, fontSize:'48px' }}>${p.balance?.toLocaleString()}</h2>
           {debt > 0 && <p style={{ margin:'10px 0 0 0', color:'#fca5a5', fontSize:'12px', fontWeight:'bold' }}>⚠️ Debt: ${debt.toLocaleString()}</p>}
         </div>
 
-        {/* CROP MARKET */}
         <div style={{ background:'#131926', padding:'15px', borderRadius:'20px', marginBottom:'15px', border:'1px solid #1e293b', textAlign:'left' }}>
           <p style={{ margin:'0 0 10px 0', fontSize:'12px', color:'#22c55e', fontWeight:'bold' }}><TrendingUp size={14} style={{verticalAlign:'middle'}}/> CROP MARKET</p>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
@@ -75,7 +71,6 @@ export default function Dash() {
           </div>
         </div>
 
-        {/* BUTTONS */}
         <div style={{ display:'flex', justifyContent:'center', gap:'6px', flexWrap:'wrap', marginBottom:'20px' }}>
           <button style={btn} onClick={()=>window.location.href='/bank'}><Send size={12}/> Bank</button>
           <button style={btn} onClick={()=>window.location.href='/land'}><Map size={12}/> Land</button>
@@ -87,10 +82,9 @@ export default function Dash() {
           <button style={{...btn, background:'#444'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={12}/></button>
         </div>
 
-        {/* ACTIVITY */}
         <div style={{ background:'#131926', padding:'15px', borderRadius:'15px', textAlign:'left', border:'1px solid #1e293b' }}>
           <p style={{ margin:'0 0 10px 0', fontSize:'11px', color:'#22c55e', fontWeight:'bold' }}><Clock size={12} style={{verticalAlign:'middle'}}/> ACTIVITY</p>
-          {tx.map(t => <div key={t.id} style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', padding:'5px 0', borderBottom:'1px solid #0b0f1a' }}><span>{t.description}</span><span style={{color:'#22c55e'}}>${t.amount}</span></div>)}
+          {tx.map(t => <div key={t.id} style={{ display:'flex', justifyContent:'space-between', fontSize:'11px', padding:'5px 0', borderBottom:'1px solid #0b0f1a' }}><span>{t.description}</span><span style={{color:'#22c55e'}}>${t.amount?.toLocaleString()}</span></div>)}
         </div>
       </div>
     </div>

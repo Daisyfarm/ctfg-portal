@@ -1,102 +1,64 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Briefcase, CheckCircle, ArrowLeft, Clock, Tractor } from 'lucide-react';
+import { Briefcase, ArrowLeft, Plus, Check } from 'lucide-react';
 
-const supabase = createClient(
-  'https://dlwhztcqntalrhfrefsk.supabase.co', 
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY'
-);
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function JobBoard() {
+export default function Jobs() {
   const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [myId, setMyId] = useState<string | null>(null);
+  const [u, setU] = useState<any>(null);
+  const [f, setF] = useState({ t: '', p: '' });
 
-  useEffect(() => { 
-    fetchData(); 
-  }, []);
-
-  const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setMyId(user?.id || null);
-
-    const { data } = await supabase.from('contracts').select('*').order('created_at', { ascending: false });
+  const ref = async () => {
+    const { data: { user } } = await sb.auth.getUser(); setU(user);
+    const { data } = await sb.from('contracts').select('*, profiles!contracts_assigned_to_fkey(username), employer:profiles!contracts_employer_id_fkey(username)').order('created_at', { ascending: false });
     setJobs(data || []);
-    setLoading(false);
+  };
+  useEffect(() => { ref(); }, []);
+
+  const post = async (e: any) => {
+    e.preventDefault();
+    await sb.from('contracts').insert([{ title: f.t, payout: parseInt(f.p), employer_id: u.id, status: 'available' }]);
+    fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `🚜 **SUB-CONTRACT:** ${f.t} ($${f.p}) posted by a farmer!` }) }).catch(()=>0);
+    setF({ t: '', p: '' }); ref();
   };
 
-  const claimJob = async (jobId: string) => {
-    if (!myId) return;
-    await supabase.from('contracts').update({ status: 'taken', assigned_to: myId }).eq('id', jobId);
-    alert("Contract Signed! Get to work, farmer.");
-    fetchData();
+  const claim = async (id: string) => { await sb.from('contracts').update({ status: 'taken', assigned_to: u.id }).eq('id', id); ref(); };
+  const finish = async (id: string) => { await sb.from('contracts').update({ status: 'pending' }).eq('id', id); ref(); };
+  
+  const pay = async (j: any) => {
+    const { error } = await sb.rpc('pay_contract', { contract_id: j.id, worker_id: j.assigned_to, employer_id: u.id, payout_amount: j.payout });
+    if (error) alert(error.message); else { alert("Worker Paid!"); ref(); }
   };
-
-  const finishJob = async (jobId: string) => {
-    await supabase.from('contracts').update({ status: 'pending' }).eq('id', jobId);
-    alert("Job submitted for review. Samuel will pay you once verified!");
-    fetchData();
-  };
-
-  if (loading) return <div style={{backgroundColor:'#0b0f1a', color:'white', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif'}}>Loading Job Board...</div>;
 
   return (
-    <div style={{ backgroundColor: '#0b0f1a', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', padding: '40px' }}>
-      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-        
-        <button onClick={() => window.location.href='/dashboard'} style={{ background: 'none', border: 'none', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>
-          <ArrowLeft size={18} /> Back to Dashboard
-        </button>
+    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'20px', fontFamily:'sans-serif' }}>
+      <div style={{ maxWidth:'600px', margin:'0 auto' }}>
+        <button onClick={()=>window.location.href='/dashboard'}>Back</button>
+        <h2 style={{color:'#22c55e'}}>CTFG Job Board</h2>
 
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '10px' }}>CTFG <span style={{ color: '#22c55e' }}>Job Board</span></h1>
-        <p style={{ color: '#94a3b8', marginBottom: '30px' }}>Claim contracts and earn money for your farm.</p>
+        <form onSubmit={post} style={{ background:'#131926', padding:'15px', borderRadius:'15px', marginBottom:'20px', display:'flex', gap:'5px' }}>
+          <input placeholder="Hiring for..." value={f.t} onChange={e=>setF({...f, t:e.target.value})} style={{flex:2, background:'#000', color:'#fff', border:'1px solid #333', padding:'8px'}} required />
+          <input placeholder="$" type="number" value={f.p} onChange={e=>setF({...f, p:e.target.value})} style={{flex:1, background:'#000', color:'#fff', border:'1px solid #333', padding:'8px'}} required />
+          <button type="submit" style={{background:'#22c55e', color:'#fff', border:'none', padding:'10px', borderRadius:'5px'}}>Post</button>
+        </form>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {jobs.length === 0 && <p style={{color: '#475569'}}>No contracts available currently.</p>}
-          
-          {jobs.map(job => (
-            <div key={job.id} style={{ backgroundColor: '#131926', padding: '25px', borderRadius: '24px', border: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                  <Briefcase size={16} color="#22c55e" />
-                  <h3 style={{ margin: 0, fontSize: '18px' }}>{job.title}</h3>
-                </div>
-                <p style={{ margin: 0, color: '#22c55e', fontWeight: 'bold', fontSize: '20px' }}>${job.payout.toLocaleString()}</p>
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                {job.status === 'available' && (
-                  <button onClick={() => claimJob(job.id)} style={{ backgroundColor: '#22c55e', border: 'none', color: 'white', padding: '12px 20px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
-                    Claim Job
-                  </button>
-                )}
-
-                {job.status === 'taken' && job.assigned_to === myId && (
-                  <button onClick={() => finishJob(job.id)} style={{ backgroundColor: '#f97316', border: 'none', color: 'white', padding: '12px 20px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
-                    Mark Finished
-                  </button>
-                )}
-
-                {job.status === 'taken' && job.assigned_to !== myId && (
-                  <span style={{ color: '#ef4444', fontSize: '14px', fontWeight: 'bold' }}>Occupied</span>
-                )}
-
-                {job.status === 'pending' && (
-                  <div style={{ color: '#94a3b8', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Clock size={16} /> Reviewing...
-                  </div>
-                )}
-
-                {job.status === 'completed' && (
-                  <div style={{ color: '#22c55e', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <CheckCircle size={16} /> Paid
-                  </div>
-                )}
-              </div>
+        {jobs.map(j => (
+          <div key={j.id} style={{ background:'#131926', padding:'15px', borderRadius:'15px', marginBottom:'10px', border:'1px solid #333' }}>
+            <div style={{display:'flex', justifyContent:'space-between'}}>
+              <b>{j.title}</b> <span style={{color:'#22c55e'}}>${j.payout}</span>
             </div>
-          ))}
-        </div>
+            <p style={{fontSize:'11px', color:'#94a3b8', margin:'5px 0'}}>Employer: {j.employer?.username || 'System Admin'}</p>
+            
+            {j.status === 'available' && j.employer_id !== u?.id && <button onClick={()=>claim(j.id)} style={{width:'100%', background:'#22c55e', border:'none', color:'#fff', padding:'8px', marginTop:'5px'}}>Claim Job</button>}
+            {j.status === 'taken' && j.assigned_to === u?.id && <button onClick={()=>finish(j.id)} style={{width:'100%', background:'#f97316', border:'none', color:'#fff', padding:'8px', marginTop:'5px'}}>Mark Finished</button>}
+            {j.status === 'pending' && j.employer_id === u?.id && <button onClick={()=>pay(j)} style={{width:'100%', background:'#3b82f6', border:'none', color:'#fff', padding:'8px', marginTop:'5px'}}>Approve & Pay Worker</button>}
+            {j.status === 'pending' && j.employer_id !== u?.id && <span style={{fontSize:'12px', color:'#94a3b8'}}>Waiting for Pay...</span>}
+            {j.status === 'completed' && <span style={{color:'#22c55e', fontSize:'12px'}}>✓ Completed</span>}
+          </div>
+        ))}
       </div>
     </div>
   );

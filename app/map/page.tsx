@@ -15,99 +15,63 @@ const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux
 
 export default function LiveMap() {
   const [data, setData] = useState<any>(null);
-  const [dbLand, setDbLand] = useState<any[]>([]);
-  const [myProfile, setMyProfile] = useState<any>(null);
+  const [land, setLand] = useState<any[]>([]);
+  const [u, setU] = useState<any>(null);
   const [L, setL] = useState<any>(null);
-  const [ready, setReady] = useState(false);
 
   const load = async () => {
     try {
       const res = await fetch('/api/server');
       const sData = await res.json();
       const { data: { user } } = await sb.auth.getUser();
-      const { data: prof } = await sb.from('profiles').select('*').eq('id', user?.id).maybeSingle();
-      const { data: land } = await sb.from('land_registry').select('*, profiles(username)');
+      const { data: dbL } = await sb.from('land_registry').select('*');
       
-      setMyProfile(prof);
+      setU(user);
       setData(sData);
-      setDbLand(land || []);
-      setReady(true);
-    } catch (e) { console.log("Syncing..."); }
+      setLand(dbL || []);
+    } catch (e) { console.log("error"); }
   };
 
   const buy = async (fId: number, price: number, rowId: string) => {
-    if (!myProfile) return alert("Log in to buy land!");
-    if (myProfile.balance < price) return alert("Insufficient funds!");
-    
-    if (confirm(`Buy Field ${fId} for $${price.toLocaleString()}?`)) {
-      await sb.from('profiles').update({ balance: myProfile.balance - price }).eq('id', myProfile.id);
-      await sb.from('land_registry').update({ owner_id: myProfile.id }).eq('id', rowId);
-      await sb.from('transactions').insert([{ user_id: myProfile.id, amount: price, type: 'expense', description: `Purchased Field ${fId}` }]);
-      
-      await fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
-          content: `🏡 **NEW LAND OWNER**\n**${myProfile.username}** has purchased **Field ${fId}** on the website portal!`
-      })});
-
-      alert("Field Purchased on Portal!");
-      load();
+    const { data: prof } = await sb.from('profiles').select('balance, username').eq('id', u.id).single();
+    if (prof.balance < price) return alert("No money!");
+    if (confirm(`Buy Field ${fId}?`)) {
+      await sb.from('profiles').update({ balance: prof.balance - price }).eq('id', u.id);
+      await sb.from('land_registry').update({ owner_id: u.id }).eq('id', rowId);
+      await fetch(HK, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content:`🏡 ${prof.username} bought Field ${fId}!`}) }).catch(()=>0);
+      alert("Bought!"); load();
     }
   };
 
   useEffect(() => {
     import('leaflet').then(l => setL(l));
     load();
-    const i = setInterval(load, 15000);
-    return () => clearInterval(i);
   }, []);
 
-  if (!L || !ready) return <div style={{background:'#0b0f1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading Montana Economy...</div>;
+  if (!L || !land.length) return <div style={{background:'#000',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading Map Data...</div>;
   const conv = (v: number) => ((v + 2048) / 4096) * 100;
 
   return (
     <div style={{ background:'#000', minHeight:'100vh' }}>
-      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute', zIndex:1001, top:10, left:10, padding:'10px 15px', background:'#1e293b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:'bold'}}>← Back</button>
-      
-      <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height: '100vh', width: '100%' }} zoom={3} center={[50,50]}>
+      <button onClick={()=>window.location.href='/dashboard'} style={{position:'absolute',zIndex:1001,top:10,left:10,padding:'10px',background:'#1e293b',color:'#fff',border:'none',borderRadius:'8px'}}>Back</button>
+      <MapContainer crs={L.CRS.Simple} bounds={[[0,0],[100,100]]} style={{ height:'100vh', width:'100%' }} zoom={3} center={[50,50]}>
         <ImageOverlay url="/map.PNG" bounds={[[0,0],[100,100]]} />
-        
         {data?.fields?.map((f:any) => {
-          const info = dbLand.find(l => Number(l.field_number) === Number(f.id));
-          
-          // CRITICAL FIX: We ONLY care if it has an owner_id in OUR database
-          const isOwnedOnWebsite = info?.owner_id ? true : false;
-          const ownerName = info?.profiles?.username || "Unknown";
-
+          const info = land.find(l => Number(l.field_number) === Number(f.id));
+          const owned = info?.owner_id ? true : false;
           return (
-            <CircleMarker 
-              key={`field-${f.id}`} 
-              center={[100 - conv(f.z), conv(f.x)]} 
-              radius={isOwnedOnWebsite ? 3 : 6} 
-              pathOptions={{ 
-                color: isOwnedOnWebsite ? '#3b82f6' : '#22c55e', 
-                fillColor: isOwnedOnWebsite ? '#3b82f6' : '#22c55e', 
-                fillOpacity: 0.7 
-              }}
-            >
-              <Popup>
-                <div style={{color:'#000', textAlign:'center', fontFamily:'sans-serif'}}>
-                  <strong style={{fontSize:'16px'}}>Field {f.id}</strong><br/>
-                  <span style={{fontSize:'12px', color:'#666'}}>{info?.acres || '10'} Acres</span>
-                  <div style={{margin:'8px 0', fontWeight:'bold', color: isOwnedOnWebsite ? '#3b82f6' : '#166534'}}>
-                    {isOwnedOnWebsite ? `Owner: ${ownerName}` : `$${info?.price?.toLocaleString() || '150,000'}`}
-                  </div>
-                  {!isOwnedOnWebsite && info && (
-                    <button onClick={() => buy(f.id, info.price, info.id)} style={{background:'#22c55e', color:'#fff', border:'none', padding:'8px 12px', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}}>Buy This Field</button>
-                  )}
-                </div>
-              </Popup>
+            <CircleMarker key={f.id} center={[100-conv(f.z), conv(f.x)]} radius={owned ? 3 : 6} pathOptions={{ color: owned ? '#3b82f6' : '#22c55e', fillColor: owned ? '#3b82f6' : '#22c55e', fillOpacity: 0.7 }}>
+              <Popup><div style={{color:'#000',textAlign:'center'}}>
+                <strong>Field {f.id}</strong><br/>
+                {owned ? "OWNED" : `$${info?.price?.toLocaleString() || '150,000'}`}<br/>
+                {!owned && info && <button onClick={()=>buy(f.id, info.price, info.id)} style={{background:'#22c55e',color:'#fff',border:'none',padding:'5px',borderRadius:'5px',marginTop:'5px'}}>Buy Now</button>}
+              </div></Popup>
             </CircleMarker>
           );
         })}
-
-        {/* EQUIPMENT */}
-        {data?.vehicles?.filter((v:any) => v.category !== "MISC").map((v:any, i:number) => (
-          <Marker key={i} position={[100 - conv(v.z), conv(v.x)]} icon={L.divIcon({ html: `<div style="background:#22c55e; border:2px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 10px #000;">🚜</div>`, className: '', iconSize: [20, 20] })}>
-            <Popup><div style={{color:'#000', textAlign:'center'}}><strong>{v.name}</strong><br/>{v.category}</div></Popup>
+        {data?.vehicles?.filter((v:any)=>v.category!=="MISC").map((v:any,i:number)=>(
+          <Marker key={i} position={[100-conv(v.z), conv(v.x)]} icon={L.divIcon({ html:`<div style="background:#22c55e;border:2px solid #fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;">🚜</div>`, className:'', iconSize:[20,20] })}>
+            <Popup><div style={{color:'#000'}}>{v.name}</div></Popup>
           </Marker>
         ))}
       </MapContainer>

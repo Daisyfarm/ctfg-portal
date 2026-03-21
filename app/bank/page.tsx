@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Wallet, Send, Landmark, ArrowLeft, Clock, ShieldCheck, ChevronDown, Cloud, LogOut, Briefcase, Map, TrendingUp, Tractor } from 'lucide-react';
+import { Wallet, Send, Landmark, Clock, Cloud, LogOut, Briefcase, Map, TrendingUp, Tractor, ChevronDown } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
@@ -32,12 +32,12 @@ export default function Bank() {
     const { error } = await sb.rpc('transfer_money', { sender_id: user?.id, target_username: target, amount_to_send: parseInt(amt), transfer_note: note });
     if (error) alert(error.message);
     else {
-      await fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💰 **FINANCIAL UPDATE**\n**${p.username}** initiated a wire transfer of **$${parseInt(amt).toLocaleString()}** to **${target}**.` }) });
-      alert("Wire Transfer Authorized."); load(); setTarget(""); setAmt(""); setNote("");
+      await fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content: `💰 **WIRE TRANSFER**\n**${p.username}** sent **$${parseInt(amt).toLocaleString()}** to **${target}**.` }) });
+      alert("Transfer Authorized."); load(); setTarget(""); setAmt(""); setNote("");
     }
   };
 
-  if (ld || !p) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Accessing Secure Bank Vault...</div>;
+  if (ld || !p) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Verifying Financial Credentials...</div>;
 
   const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
 
@@ -54,20 +54,21 @@ export default function Bank() {
             <span onClick={()=>window.location.href='/marketplace'} style={{cursor:'pointer'}}>Market</span>
           </div>
         </div>
-        <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626', border:'none', color:'#fff', padding:'6px 15px', fontSize:'11px', fontWeight:'bold', cursor:'pointer', borderRadius:'3px'}}>STAFF PANEL</button>
+        {p.rank === 'Admin' && <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626', border:'none', color:'#fff', padding:'6px 15px', fontSize:'11px', fontWeight:'bold', cursor:'pointer', borderRadius:'3px'}}>STAFF PANEL</button>}
       </div>
 
       <div style={{ display:'flex', flex:1 }}>
         {/* SIDEBAR */}
         <div style={{ width:'220px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginBottom:'10px', textTransform:'uppercase'}}>Operations</p>
+          <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
           <button style={sideBtn} onClick={()=>window.location.href='/contracts'}><Briefcase size={16}/> Field Work</button>
           <button style={sideBtn} onClick={()=>window.location.href='/land'}><Landmark size={16}/> Management</button>
           <button style={sideBtn} onClick={()=>window.location.href='/sell'}><TrendingUp size={16}/> Crop Sales</button>
           <button style={sideBtn} onClick={()=>window.location.href='/fleet'}><Tractor size={16}/> Equipment</button>
           <button style={sideBtn} onClick={()=>window.location.href='/map'}><Map size={16}/> Live Map</button>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginTop:'20px', marginBottom:'10px', textTransform:'uppercase'}}>Account</p>
-          <button style={{...sideBtn, background:'#333'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={16}/> Sign Out</button>
+          <button style={{...sideBtn}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={16}/> Sign Out</button>
         </div>
 
         {/* MAIN CONTENT */}
@@ -101,24 +102,23 @@ export default function Bank() {
                   </div>
                   <div>
                     <label style={{fontSize:'11px', color:'#555', fontWeight:'bold'}}>MEMO / REFERENCE</label>
-                    <input value={note} onChange={e=>setNote(e.target.value)} style={{width:'100%', padding:'12px', background:'#111', border:'1px solid #333', color:'#fff', marginTop:'5px'}} placeholder="What is this for?" />
+                    <input value={note} onChange={e=>setNote(e.target.value)} style={{width:'100%', padding:'12px', background:'#111', border:'1px solid #333', color:'#fff', marginTop:'5px'}} placeholder="Reason for transfer" />
                   </div>
                   <button type="submit" style={{padding:'15px', background:'#4a7ab5', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', marginTop:'10px', textTransform:'uppercase', fontSize:'12px'}}>Authorize Transaction</button>
                 </form>
               </div>
 
-              {/* LOAN INFO */}
+              {/* QUICK INFO */}
               <div style={{ background:'#222', padding:'30px', borderRadius:'4px', borderTop:'4px solid #7c3aed' }}>
                 <h3 style={{margin:'0 0 20px 0', fontSize:'18px', display:'flex', alignItems:'center', gap:'10px'}}><Landmark size={20} color="#7c3aed"/> Loan Center</h3>
                 <p style={{fontSize:'13px', color:'#888', lineHeight:'1.6'}}>Need capital for new equipment? The CTFG Loan Center offers competitive rates for verified members.</p>
                 <button onClick={()=>window.location.href='/loans'} style={{width:'100%', padding:'12px', background:'#333', color:'#fff', border:'1px solid #444', fontWeight:'bold', cursor:'pointer', marginTop:'20px'}}>ENTER LOAN OFFICE</button>
               </div>
-
             </div>
 
-            {/* AUDIT LOGS */}
+            {/* LEDGER */}
             <div style={{ marginTop:'40px' }}>
-                <h3 style={{fontSize:'14px', color:'#4a7ab5', marginBottom:'15px', textTransform:'uppercase'}}><Clock size={16} style={{verticalAlign:'middle'}}/> Full Transaction Ledger</h3>
+                <h3 style={{fontSize:'14px', color:'#4a7ab5', marginBottom:'15px', textTransform:'uppercase'}}><Clock size={16} style={{verticalAlign:'middle'}}/> System Audit Logs</h3>
                 <div style={{ background:'#222', borderRadius:'4px', overflow:'hidden' }}>
                     {tx.map((t, index) => (
                         <div key={t.id} style={{ display:'flex', justifyContent:'space-between', padding:'15px 20px', borderBottom: index === tx.length - 1 ? 'none' : '1px solid #111', fontSize:'13px', background: index % 2 === 0 ? '#1a1a1a' : '#222' }}>

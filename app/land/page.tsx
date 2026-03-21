@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Map, Landmark, ArrowLeft, Clock, Cloud, LogOut, Briefcase, TrendingUp, Tractor, ChevronDown, ShieldCheck, Globe } from 'lucide-react';
+import { ChevronDown, Cloud, LogOut, Briefcase, Map, TrendingUp, Tractor, Landmark, Info } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function LandRegistry() {
-  const [land, setLand] = useState<any[]>([]);
+export default function LandDeeds() {
   const [u, setU] = useState<any>(null);
+  const [land, setLand] = useState<any[]>([]);
   const [w, setW] = useState("");
   const [ld, setLd] = useState(true);
 
@@ -26,24 +25,7 @@ export default function LandRegistry() {
 
   useEffect(() => { load(); }, []);
 
-  const buy = async (field: any) => {
-    if (!u) return alert("Login required.");
-    if (u.balance < field.price) return alert("Insufficient capital for this acquisition.");
-
-    if (confirm(`Acquire Field ${field.field_number} for $${field.price.toLocaleString()}?`)) {
-      await sb.from('profiles').update({ balance: u.balance - field.price }).eq('id', u.id);
-      await sb.from('land_registry').update({ owner_id: u.id }).eq('id', field.id);
-      await sb.from('transactions').insert([{ user_id: u.id, amount: field.price, type: 'expense', description: `Acquired Field ${field.field_number}` }]);
-      
-      await fetch(HK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ 
-        content: `🏡 **LAND ACQUISITION**\n**${u.username}** has officially purchased **Field ${field.field_number}** for **$${field.price.toLocaleString()}**!` 
-      })});
-
-      alert("Acquisition Successful."); load();
-    }
-  };
-
-  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Accessing Land Registry...</div>;
+  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>Retrieving Land Deed Records...</div>;
 
   const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
 
@@ -60,7 +42,7 @@ export default function LandRegistry() {
             <span onClick={()=>window.location.href='/marketplace'} style={{cursor:'pointer'}}>Market</span>
           </div>
         </div>
-        {u.rank === 'Admin' && <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626', border:'none', color:'#fff', padding:'6px 15px', fontSize:'11px', fontWeight:'bold', cursor:'pointer', borderRadius:'3px'}}>STAFF PANEL</button>}
+        <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626', border:'none', color:'#fff', padding:'6px 15px', fontSize:'11px', fontWeight:'bold', cursor:'pointer', borderRadius:'3px'}}>STAFF PANEL</button>
       </div>
 
       <div style={{ display:'flex', flex:1 }}>
@@ -68,51 +50,72 @@ export default function LandRegistry() {
         <div style={{ width:'220px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginBottom:'10px', textTransform:'uppercase'}}>Operations</p>
           <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
-          <button style={sideBtn} onClick={()=>window.location.href='/contracts'}><Briefcase size={16}/> Field Work</button>
+          <button style={sideBtn} onClick={()=>window.location.href='/contracts'}>Field Work</button>
           <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/land'}><Landmark size={16}/> Management</button>
-          <button style={sideBtn} onClick={()=>window.location.href='/sell'}><TrendingUp size={16}/> Crop Sales</button>
           <button style={sideBtn} onClick={()=>window.location.href='/fleet'}><Tractor size={16}/> Equipment</button>
           <button style={sideBtn} onClick={()=>window.location.href='/map'}><Map size={16}/> Live Map</button>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginTop:'20px', marginBottom:'10px', textTransform:'uppercase'}}>Account</p>
-          <button style={sideBtn} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={16}/> Sign Out</button>
+          <button style={sideBtn} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}>Logout</button>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div style={{ flex:1, background:'#1a1a1a', padding:'40px', overflowY:'auto' }}>
-          <div style={{ maxWidth:'1200px', margin:'0 auto' }}>
-            
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'30px' }}>
-                <div>
-                    <p style={{margin:0, color:'#4a7ab5', fontWeight:'bold', fontSize:'12px', textTransform:'uppercase'}}>Montana Judith Plains</p>
-                    <h1 style={{margin:0, fontSize:'32px'}}>Land Registry</h1>
-                </div>
-                <div style={{textAlign:'right'}}>
-                    <p style={{margin:0, color:'#888', fontSize:'11px'}}>PERSONAL CAPITAL</p>
-                    <h2 style={{margin:0, color:'#22c55e', fontSize:'32px', fontFamily:'monospace'}}>${u.balance?.toLocaleString()}</h2>
+        {/* MAIN CONTENT Area Matching Screenshot */}
+        <div style={{ flex:1, background:'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize:'cover', position:'relative', overflowY:'auto' }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.7)' }}></div>
+          
+          <div style={{ position:'relative', zIndex:1, padding:'40px', maxWidth:'1200px', margin:'0 auto' }}>
+            <h1 style={{fontSize:'36px', margin:0, textTransform:'uppercase'}}>Land Deed Data</h1>
+            <p style={{fontSize:'12px', color:'#ccc', maxWidth:'900px', lineHeight:'1.6', margin:'15px 0 30px'}}>
+              HERE YOU CAN VIEW ALL LANDS IN CTFG, AND WHO CURRENTLY OWNS THEM. LIKEWISE, IN THE NEAR FUTURE, YOU WILL BE ABLE TO VIEW LAND HISTORY DETAILS. JUST SELECT THE MAP FROM THE DROPDOWN LIST TO SEE ALL LAND ASSOCIATED WITH THAT MAP!
+            </p>
+
+            {/* DROPDOWN SELECTOR */}
+            <div style={{ background:'#fff', padding:'2px', borderRadius:'2px', display:'flex', width:'100%', marginBottom:'15px' }}>
+                <select style={{ flex:1, border:'none', padding:'12px', fontSize:'14px', textTransform:'uppercase', background:'#fff', color:'#333' }}>
+                    <option>Montana Judith Plains 4X - Judith Basin County</option>
+                </select>
+                <div style={{ padding:'10px', display:'flex', alignItems:'center', background:'#fff' }}>
+                    <ChevronDown size={20} color="#333" />
                 </div>
             </div>
 
-            {/* LAND GRID */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'20px' }}>
+            <button style={{ background:'#4a7ab5', border:'none', color:'#fff', padding:'10px 25px', fontSize:'13px', fontWeight:'bold', cursor:'pointer', marginBottom:'40px', borderRadius:'2px' }}>
+                VIEW LAND INFO
+            </button>
+
+            {/* DATA TABLE HEADER */}
+            <div style={{ display:'flex', borderBottom:'1px solid #fff', padding:'10px 0', fontSize:'16px', fontWeight:'bold', textTransform:'uppercase', color:'#ddd' }}>
+                <div style={{ width:'250px' }}>UID/Image</div>
+                <div style={{ width:'150px' }}>Base Cost</div>
+                <div style={{ flex:1 }}>Fields</div>
+                <div style={{ width:'200px', textAlign:'right' }}>Current Owner</div>
+            </div>
+
+            {/* LAND ROWS */}
+            <div style={{ display:'flex', flexDirection:'column' }}>
               {land.map(f => (
-                <div key={f.id} style={{ background:'#222', borderRadius:'4px', borderTop: f.owner_id ? '4px solid #4a7ab5' : '4px solid #22c55e', overflow:'hidden', boxShadow:'0 4px 10px rgba(0,0,0,0.3)' }}>
-                  <img src={f.image_url || '/map.PNG'} style={{ width:'100%', height:'140px', objectFit:'cover', opacity:0.7 }} />
-                  <div style={{ padding:'20px' }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                        <h3 style={{margin:0, fontSize:'18px'}}>Field {f.field_number}</h3>
-                        <span style={{fontSize:'12px', color:'#aaa'}}>{f.acres} Acres</span>
-                    </div>
-                    <p style={{ fontSize:'22px', fontWeight:'bold', color:'#fff', margin:'15px 0', fontFamily:'monospace' }}>${f.price?.toLocaleString()}</p>
-                    
-                    {f.owner_id ? (
-                        <div style={{ background:'#111', padding:'10px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' }}>
-                            <Globe size={14} color="#4a7ab5" />
-                            <span style={{fontSize:'12px', color:'#888'}}>Owner: <b style={{color:'#fff'}}>{f.profiles?.username}</b></span>
-                        </div>
-                    ) : (
-                        <button onClick={()=>buy(f)} style={{ width:'100%', padding:'12px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', textTransform:'uppercase', fontSize:'12px', borderRadius:'2px' }}>Acquire Field</button>
-                    )}
+                <div key={f.id} style={{ display:'flex', alignItems:'center', padding:'20px 0', background:'rgba(30,30,30,0.6)', borderBottom:'1px solid #222', marginBottom:'2px' }}>
+                  
+                  {/* UID/IMAGE */}
+                  <div style={{ width:'250px' }}>
+                    <img src={f.image_url || '/map.PNG'} style={{ width:'200px', height:'120px', objectFit:'cover', border:'1px solid #444' }} />
+                    <p style={{ margin:'5px 0 0 0', fontSize:'18px', color:'#fff' }}>{f.field_number * 100}</p>
                   </div>
+
+                  {/* COST */}
+                  <div style={{ width:'150px', fontSize:'18px', color:'#ddd' }}>
+                    ${f.price?.toLocaleString()}
+                  </div>
+
+                  {/* FIELD INFO */}
+                  <div style={{ flex:1, fontSize:'18px', color:'#ddd' }}>
+                    #{f.field_number} - {f.acres} Acres
+                  </div>
+
+                  {/* OWNER */}
+                  <div style={{ width:'200px', textAlign:'right', fontSize:'18px', textTransform:'uppercase', color:'#aaa' }}>
+                    {f.profiles?.username || 'CTFG LAND'}
+                  </div>
+
                 </div>
               ))}
             </div>

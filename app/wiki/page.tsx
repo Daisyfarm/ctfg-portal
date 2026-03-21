@@ -76,7 +76,7 @@ export default function Wiki() {
         <div style={{ flex:1, padding:'60px 80px', overflowY:'auto' }}>
           <div style={{ maxWidth:'800px', position:'relative' }}>
             
-            {/* LOGO IMAGE ON THE RIGHT (Like screenshot) */}
+            https://i.ibb.co/Z8m6v8p/ctfg-placeholder.png
             <div style={{ position:'absolute', top:0, right:'-100px', width:'250px' }}>
               <img src="https://i.ibb.co/3ykG8z7/fs-logo.png" style={{ width:'100%', opacity:0.9 }} alt="FSN Logo" />
             </div>

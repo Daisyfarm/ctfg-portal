@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tractor } from 'lucide-react';
-import { sb } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,6 +20,8 @@ export default function LoginPage() {
   const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
+    const sb = getSupabase(); // ✅ moved here
 
     if (isRegister) {
       const { data, error } = await sb.auth.signUp({
@@ -94,44 +96,24 @@ export default function LoginPage() {
               <div style={{ textAlign: 'left', color: '#22c55e', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>
                 IN-GAME NAME
               </div>
-              <input
-                type="text"
-                required
-                style={inputStyle}
-                onChange={(e) => setUsername(e.target.value)}
-              />
+              <input type="text" required style={inputStyle} onChange={(e) => setUsername(e.target.value)} />
 
               <div style={{ textAlign: 'left', color: '#22c55e', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>
                 FARM OR COMPANY NAME
               </div>
-              <input
-                type="text"
-                required
-                style={inputStyle}
-                onChange={(e) => setFarmName(e.target.value)}
-              />
+              <input type="text" required style={inputStyle} onChange={(e) => setFarmName(e.target.value)} />
             </>
           )}
 
           <div style={{ textAlign: 'left', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>
             EMAIL ADDRESS
           </div>
-          <input
-            type="email"
-            required
-            style={inputStyle}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <input type="email" required style={inputStyle} onChange={(e) => setEmail(e.target.value)} />
 
           <div style={{ textAlign: 'left', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>
             PASSWORD
           </div>
-          <input
-            type="password"
-            required
-            style={inputStyle}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <input type="password" required style={inputStyle} onChange={(e) => setPassword(e.target.value)} />
 
           <button
             type="submit"
@@ -150,11 +132,7 @@ export default function LoginPage() {
               opacity: loading ? 0.6 : 1
             }}
           >
-            {loading
-              ? 'Loading...'
-              : isRegister
-                ? 'Register Account'
-                : 'Login to Network'}
+            {loading ? 'Loading...' : isRegister ? 'Register Account' : 'Login to Network'}
           </button>
         </form>
 
@@ -162,9 +140,7 @@ export default function LoginPage() {
           onClick={() => setIsRegister(!isRegister)}
           style={{ marginTop: '25px', cursor: 'pointer', color: '#94a3b8', fontSize: '14px' }}
         >
-          {isRegister
-            ? 'Already have an account? Login'
-            : 'Need an account? Register here'}
+          {isRegister ? 'Already have an account? Login' : 'Need an account? Register here'}
         </p>
       </div>
     </div>

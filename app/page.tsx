@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tractor } from 'lucide-react';
-import { sb } from '@/lib/supabase'; // ✅ using shared client
+import { sb } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();

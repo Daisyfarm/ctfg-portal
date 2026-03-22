@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Crown, Heart, Check, Star, Shield, ArrowLeft, Cloud, LogOut, MessageSquare, Landmark, FileText, Truck, LifeBuoy } from 'lucide-react';
+import { Crown, Heart, Check, Star, Shield, ArrowLeft, Cloud, LogOut, MessageSquare, Landmark, FileText, Tractor } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
@@ -32,7 +32,20 @@ export default function Subscriptions() {
   if (ld || !u) return <div style={{ background: '#111', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Accessing Treasury...</div>;
 
   const sBtn = {
-    width: '100%', padding: '12px 15px', background: 'transparent', color: '#aaa', border: 'none', marginBottom: '8px', textAlign: 'left' as const, cursor: 'pointer', fontWeight: 'bold', fontSize: '11px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '10px'
+    width: '100%',
+    padding: '12px 15px',
+    background: 'transparent',
+    color: '#aaa',
+    border: 'none',
+    marginBottom: '8px',
+    textAlign: 'left' as const,
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    fontSize: '11px',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
   };
 
   return (
@@ -45,9 +58,9 @@ export default function Subscriptions() {
       <div style={{ display: 'flex', flex: 1 }}>
         <div style={{ width: '240px', background: '#222', padding: '20px', borderRight: '1px solid #000' }}>
           <p style={{ fontSize: '10px', color: '#555', fontWeight: 'bold', marginBottom: '10px' }}>OPERATIONS</p>
-          <button style={sBtn} onClick={() => window.location.href = '/dashboard'}><Truck size={16} /> Dashboard</button>
+          <button style={sBtn} onClick={() => window.location.href = '/dashboard'}><Tractor size={16} /> Dashboard</button>
           <button style={{ ...sBtn, background: '#333', color: '#fff' }} onClick={() => window.location.href = '/subscriptions'}><Crown size={16} color="#f59e0b" /> Subscriptions</button>
-          <button style={sBtn} onClick={() => window.location.href = '/support'}><LifeBuoy size={16} /> Support</button>
+          <button style={sBtn} onClick={() => window.location.href = '/support'}><MessageSquare size={16} /> Support</button>
           <button style={sBtn} onClick={() => sb.auth.signOut().then(() => window.location.href = '/')}>Logout</button>
         </div>
 

@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
-// Changed from '@/lib/supabase' to relative path for better build compatibility
 import { sb } from "../../lib/supabase";
-import { LogOut, CheckCircle2, Hourglass } from 'lucide-react';
+import { LogOut, CheckCircle2, Hourglass, Landmark } from 'lucide-react';
 
 export default function Dash() {
   const [p, setP] = useState<any>(null); 
@@ -28,17 +27,18 @@ export default function Dash() {
     const amt = Number(e.target.amount.value);
     if (!p || amt > p.balance) return alert("Insufficient Portal Funds!");
     const { error } = await sb.from('transactions').insert([{ user_id: p.id, amount: amt, status: 'pending', type: 'sync' }]);
-    if (!error) { alert("Sync Request Sent to Admin!"); e.target.reset(); load(); }
+    if (!error) { alert("Sync Request Sent!"); e.target.reset(); load(); }
   };
 
-  if (ld || !p) return <div style={{background:'#111',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>LOADING...</div>;
+  if (ld || !p) return <div style={{background:'#111',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>LOADING PORTAL...</div>;
 
   return (
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'sans-serif' }}>
       <div style={{ background:'#222', padding:'15px 30px', display:'flex', justifyContent:'space-between', borderBottom:'2px solid #4a7ab5' }}>
         <h2 style={{margin:0, fontSize:'18px'}}>CTFG PORTAL</h2>
-        <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
-          {p.rank === 'Admin' && <button onClick={()=>window.location.href='/admin/bank'} style={{background:'#dc2626', color:'#fff', border:'none', padding:'5px 15px', cursor:'pointer', fontWeight:'bold', borderRadius:'4px'}}>ADMIN PANEL</button>}
+        <div style={{display:'flex', gap:'15px', alignItems:'center'}}>
+          <button onClick={()=>window.location.href='/bank'} style={{background:'#333', color:'#fff', border:'none', padding:'5px 15px', cursor:'pointer', borderRadius:'4px', display:'flex', alignItems:'center', gap:'5px'}}><Landmark size={14}/> BANK</button>
+          {p.rank === 'Admin' && <button onClick={()=>window.location.href='/admin/bank'} style={{background:'#dc2626', color:'#fff', border:'none', padding:'5px 15px', cursor:'pointer', fontWeight:'bold', borderRadius:'4px'}}>ADMIN</button>}
           <button onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')} style={{background:'none', border:'none', color:'#888', cursor:'pointer'}}><LogOut size={18}/></button>
         </div>
       </div>

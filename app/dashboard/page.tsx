@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { sb } from '@/lib/supabase';
+// Changed from '@/lib/supabase' to relative path for better build compatibility
+import { sb } from '../../lib/supabase';
 import { LogOut, CheckCircle2, Hourglass } from 'lucide-react';
 
 export default function Dash() {
@@ -25,7 +26,7 @@ export default function Dash() {
   const handleSync = async (e: any) => {
     e.preventDefault();
     const amt = Number(e.target.amount.value);
-    if (amt > p.balance) return alert("Insufficient Portal Funds!");
+    if (!p || amt > p.balance) return alert("Insufficient Portal Funds!");
     const { error } = await sb.from('transactions').insert([{ user_id: p.id, amount: amt, status: 'pending', type: 'sync' }]);
     if (!error) { alert("Sync Request Sent to Admin!"); e.target.reset(); load(); }
   };

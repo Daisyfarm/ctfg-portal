@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 // Changed to relative path for better Vercel build stability
-import { sb } from '../../lib/supabase';
+import { sb } from "../../../lib/supabase";
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function AdminBank() {

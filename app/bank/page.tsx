@@ -1,31 +1,38 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { sb } from "../../lib/supabase";
-import { ArrowLeft, Landmark } from 'lucide-react';
+import { ArrowLeft, Landmark, ShieldCheck } from 'lucide-react';
 
 export default function BankPage() {
   const [p, setP] = useState<any>(null);
 
   useEffect(() => {
     sb.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        sb.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => setP(data));
-      } else {
-        window.location.href = '/';
-      }
+      if (user) sb.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => setP(data));
     });
   }, []);
 
   return (
-    <div style={{ background:'#111', minHeight:'100vh', color:'#fff', padding:'40px', fontFamily:'sans-serif' }}>
-      <button onClick={()=>window.location.href='/dashboard'} style={{background:'none', border:'none', color:'#888', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', marginBottom:'20px'}}>
-        <ArrowLeft size={16}/> Back to Portal
+    <div style={{ background:'#1c1c1c', minHeight:'100vh', color:'#f5f5dc', padding:'40px', fontFamily:'serif' }}>
+      <button onClick={()=>window.location.href='/dashboard'} style={{background:'none', border:'none', color:'#d4af37', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', marginBottom:'40px'}}>
+        <ArrowLeft size={16}/> Return to Hub
       </button>
-      <div style={{ maxWidth:'500px', margin:'50px auto', background:'#222', padding:'40px', borderRadius:'8px', textAlign:'center', borderTop:'4px solid #4a7ab5' }}>
-        <Landmark size={48} color="#4a7ab5" style={{marginBottom:'20px'}}/>
-        <h2 style={{margin:0, color:'#888', fontSize:'14px'}}>TOTAL PORTAL SAVINGS</h2>
-        <h1 style={{fontSize:'54px', color:'#22c55e', margin:'10px 0'}}>${p?.balance?.toLocaleString() || '0'}</h1>
-        <p style={{color:'#444', fontSize:'12px'}}>Funds are synced with the CTFG Mainframe</p>
+      
+      <div style={{ maxWidth:'500px', margin:'0 auto', background:'#f5f5dc', color:'#1c1c1c', padding:'50px', borderRadius:'4px', boxShadow:'20px 20px 0px #d4af37', border:'1px solid #d4af37' }}>
+        <div style={{textAlign:'center', borderBottom:'2px solid #1c1c1c', paddingBottom:'20px', marginBottom:'30px'}}>
+          <Landmark size={40}/>
+          <h2 style={{margin:'10px 0 0 0', letterSpacing:'2px'}}>DAISY'S SAVINGS TRUST</h2>
+          <p style={{margin:0, fontSize:'10px', fontWeight:'bold'}}>OFFICIAL DEPOSITARY RECORD</p>
+        </div>
+        
+        <div style={{textAlign:'center'}}>
+          <p style={{margin:0, fontSize:'12px', color:'#666'}}>CURRENT HOLDINGS</p>
+          <h1 style={{fontSize:'64px', margin:'10px 0'}}>${p?.balance?.toLocaleString() || '0'}</h1>
+          <div style={{display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginTop:'20px', color:'#8da989'}}>
+            <ShieldCheck size={18}/>
+            <span style={{fontSize:'12px', fontWeight:'bold'}}>SECURED BY NETWORK PROTOCOL</span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { sb } from "../../../lib/supabase"; // Correct 3-level path
+import { sb } from "../../../lib/supabase"; 
 import { ShieldAlert, ArrowLeft, Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 export default function StaffAuthority() {
@@ -67,7 +67,7 @@ export default function StaffAuthority() {
   return (
     <div style={{ background: '#111', minHeight: '100vh', color: '#f5f5dc', padding: '40px', fontFamily:'serif' }}>
       <button onClick={()=>window.location.href='/dashboard'} style={{background:'none', border:'none', color:'#444', cursor:'pointer', marginBottom:'20px', display:'flex', alignItems:'center', gap:'5px'}}>
-        <ArrowLeft size={16}/> BACK
+        <ArrowLeft size={16}/> BACK TO HUB
       </button>
 
       <div style={{display:'flex', alignItems:'center', gap:'15px', borderBottom:'1px solid #d4af37', paddingBottom:'20px', marginBottom:'40px'}}>
@@ -79,7 +79,7 @@ export default function StaffAuthority() {
       </div>
 
       {reqs.length === 0 ? (
-        <p style={{textAlign:'center', color:'#333', marginTop:'50px'}}>NO PENDING LOGS</p>
+        <p style={{textAlign:'center', color:'#333', marginTop:'50px'}}>NO PENDING LOGS FOUND</p>
       ) : (
         reqs.map((r: any) => (
           <div key={r.id} style={{ background: '#1a1a1a', padding: '20px', marginBottom: '15px', display:'flex', justifyContent:'space-between', alignItems:'center', border:'1px solid #262626', borderRadius:'4px' }}>
@@ -92,8 +92,8 @@ export default function StaffAuthority() {
               <p style={{fontSize:'20px', fontWeight:'bold', color:'#d4af37', margin:0}}>${r.amount?.toLocaleString()}</p>
             </div>
             <div style={{display:'flex', gap:'10px'}}>
-              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, r.profiles?.balance || 0, r.profiles?.username || 'User', 'completed')} style={{background:'#8da989', color:'#111', padding:'8px 16px', border:'none', fontWeight:'bold', cursor:'pointer'}}>APPROVE</button>
-              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, r.profiles?.balance || 0, r.profiles?.username || 'User', 'denied')} style={{background:'#800000', color:'#fff', padding:'8px 16px', border:'none', fontWeight:'bold', cursor:'pointer'}}>DENY</button>
+              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, r.profiles?.balance || 0, r.profiles?.username || 'User', 'completed')} style={{background:'#8da989', color:'#111', padding:'8px 16px', border:'none', fontWeight:'bold', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px'}}><CheckCircle size={14}/> APPROVE</button>
+              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, r.profiles?.balance || 0, r.profiles?.username || 'User', 'denied')} style={{background:'#800000', color:'#fff', padding:'8px 16px', border:'none', fontWeight:'bold', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px'}}><XCircle size={14}/> DENY</button>
             </div>
           </div>
         ))

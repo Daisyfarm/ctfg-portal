@@ -1,3 +1,11 @@
+You've got the vision! Moving to a dedicated Admin folder is the right play for a pro setup. Since we're adding Discord notifications, you'll need to go to your Discord Server Settings > Integrations > Webhooks and copy a Webhook URL.
+
+Paste that URL into your Vercel Environment Variables as DISCORD_WEBHOOK_URL.
+
+Here is the fully rewritten, all-in-one code for your app/admin/bank/page.tsx.
+
+🏦 The Complete Admin Bank Command Center
+TypeScript
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
@@ -5,7 +13,7 @@ import { revalidatePath } from 'next/cache';
 export default async function AdminBankPage() {
   const supabase = await createClient();
 
-  // 1. SECURITY: Check if user is logged in AND is an admin
+  // 1. SECURITY: Ensure only logged-in Admins can see this
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
@@ -17,81 +25,103 @@ export default async function AdminBankPage() {
 
   if (!profile?.is_admin) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900 text-red-500">
-        <h1 className="text-2xl font-bold">⚠️ ACCESS DENIED: ADMINS ONLY</h1>
+      <div className="flex h-screen items-center justify-center bg-black text-red-500 font-mono">
+        [ ACCESS DENIED: SYSTEM OVERRIDE REQUIRED ]
       </div>
     );
   }
 
-  // 2. FETCH DATA: Get all pending withdrawals
-  const { data: transactions } = await supabase
+  // 2. FETCH: Get all pending requests
+  const { data: requests } = await supabase
     .from('transactions')
     .select('*, profiles(username)')
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
 
-  // 3. SERVER ACTION: This handles the "Approve" button click
-  async function approveTransfer(formData: FormData) {
+  // 3. SERVER ACTION: The "Logic" for approving and notifying Discord
+  async function processBankAction(formData: FormData) {
     'use server';
-    const id = formData.get('id');
     const supabase = await createClient();
+    const id = formData.get('id');
+    const player = formData.get('player');
+    const amount = formData.get('amount');
+    const actionType = formData.get('actionType'); // 'complete' or 'deny'
 
-    const { error } = await supabase
-      .from('transactions')
-      .update({ status: 'completed' })
-      .eq('id', id);
+    if (actionType === 'complete') {
+      await supabase.from('transactions').update({ status: 'completed' }).eq('id', id);
+      
+      // DISCORD NOTIFICATION
+      if (process.env.DISCORD_WEBHOOK_URL) {
+        await fetch(process.env.DISCORD_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `✅ **Bank Transfer Success!**\n**Player:** ${player}\n**Amount:** $${amount}\n*Transaction marked as paid in-game.*`
+          })
+        });
+      }
+    } else {
+      await supabase.from('transactions').update({ status: 'denied' }).eq('id', id);
+    }
 
-    if (!error) revalidatePath('/admin/bank');
+    revalidatePath('/admin/bank');
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8">
-      <header className="mb-10">
-        <h1 className="text-3xl font-black text-green-500 tracking-tighter">CTFG CENTRAL BANK</h1>
-        <p className="text-slate-400">Process player fund transfers to the game server.</p>
-      </header>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-12 font-sans">
+      <div className="max-w-5xl mx-auto">
+        <header className="flex justify-between items-end border-b border-zinc-800 pb-6 mb-8">
+          <div>
+            <h1 className="text-4xl font-black italic tracking-tighter text-green-500">ADMIN VAULT</h1>
+            <p className="text-zinc-500 uppercase text-xs tracking-widest mt-1">Enterprise Financial Management</p>
+          </div>
+          <div className="text-right">
+            <span className="text-zinc-500 text-xs">PENDING REQUESTS:</span>
+            <div className="text-2xl font-bold">{requests?.length || 0}</div>
+          </div>
+        </header>
 
-      <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-md">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-800/50 text-slate-400 text-sm uppercase tracking-widest">
-              <th className="p-4 font-medium">Player</th>
-              <th className="p-4 font-medium">Amount</th>
-              <th className="p-4 font-medium">Requested</th>
-              <th className="p-4 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800">
-            {transactions && transactions.length > 0 ? (
-              transactions.map((t) => (
-                <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="p-4 font-semibold text-green-400">{t.profiles?.username || 'Unknown'}</td>
-                  <td className="p-4 font-mono text-xl text-white">${t.amount.toLocaleString()}</td>
-                  <td className="p-4 text-slate-400 text-sm">
-                    {new Date(t.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-right">
-                    <form action={approveTransfer}>
-                      <input type="hidden" name="id" value={t.id} />
-                      <button 
-                        type="submit"
-                        className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-green-900/20 transition-all active:scale-95"
-                      >
-                        MARK AS PAID IN-GAME
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="p-10 text-center text-slate-500 italic">
-                  No pending transfers. The vault is quiet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="grid gap-4">
+          {requests && requests.length > 0 ? (
+            requests.map((t) => (
+              <div key={t.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 flex flex-col md:flex-row justify-between items-center group hover:border-green-900/50 transition-all">
+                <div className="mb-4 md:mb-0">
+                  <span className="text-zinc-500 text-xs block mb-1">PLAYER NAME</span>
+                  <h3 className="text-xl font-bold text-white">{t.profiles?.username || 'Unknown Farmer'}</h3>
+                </div>
+
+                <div className="mb-4 md:mb-0 text-center md:text-left">
+                  <span className="text-zinc-500 text-xs block mb-1">TRANSFER AMOUNT</span>
+                  <span className="text-2xl font-mono text-green-400 font-bold">${Number(t.amount).toLocaleString()}</span>
+                </div>
+
+                <div className="flex gap-2">
+                  <form action={processBankAction}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="player" value={t.profiles?.username} />
+                    <input type="hidden" name="amount" value={t.amount} />
+                    <input type="hidden" name="actionType" value="complete" />
+                    <button className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-md transition-transform active:scale-95 shadow-lg shadow-green-900/20">
+                      APPROVE & PAY
+                    </button>
+                  </form>
+                  
+                  <form action={processBankAction}>
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="actionType" value="deny" />
+                    <button className="bg-zinc-800 hover:bg-red-900 text-zinc-400 hover:text-white font-bold py-2 px-4 rounded-md transition-colors">
+                      ✕
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-xl">
+              <p className="text-zinc-600 italic">No farmers are currently at the window. Check back later.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

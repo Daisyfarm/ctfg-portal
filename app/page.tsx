@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tractor } from 'lucide-react';
-import { sb } from '@/lib/supabase';
+import { sb } from '../lib/supabase'; // ✅ FIXED IMPORT
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,7 +21,6 @@ export default function LoginPage() {
     setLoading(true);
 
     if (isRegister) {
-      // ✅ SIGN UP
       const { data, error } = await sb.auth.signUp({
         email,
         password
@@ -49,7 +48,6 @@ export default function LoginPage() {
       }
 
     } else {
-      // ✅ LOGIN
       const { error } = await sb.auth.signInWithPassword({
         email,
         password

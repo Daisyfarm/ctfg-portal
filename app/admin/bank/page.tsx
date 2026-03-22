@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { sb } from '@/lib/supabase';
+// Changed to relative path for better Vercel build stability
+import { sb } from '../../lib/supabase';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 export default function AdminBank() {
@@ -17,7 +18,6 @@ export default function AdminBank() {
       const { data: p } = await sb.from('profiles').select('rank').eq('id', user.id).single();
       if (p?.rank !== 'Admin') return window.location.href = '/dashboard';
 
-      // The 'any' cast here prevents the build from failing on relation types
       const { data, error } = await sb.from('transactions').select('*, profiles(username, balance)').eq('status', 'pending');
       if (error) console.error(error);
       

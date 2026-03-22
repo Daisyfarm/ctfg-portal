@@ -1,127 +1,59 @@
-You've got the vision! Moving to a dedicated Admin folder is the right play for a pro setup. Since we're adding Discord notifications, you'll need to go to your Discord Server Settings > Integrations > Webhooks and copy a Webhook URL.
+"use client";
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { CheckCircle2, XCircle, Clock, ArrowLeft } from 'lucide-react';
 
-Paste that URL into your Vercel Environment Variables as DISCORD_WEBHOOK_URL.
+const sb = createClient(
+  'https://dlwhztcqntalrhfrefsk.supabase.co', 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY'
+);
 
-Here is the fully rewritten, all-in-one code for your app/admin/bank/page.tsx.
+export default function AdminBank() {
+  const [reqs, setReqs] = useState<any[]>([]);
+  const [ld, setLd] = useState(true);
 
-🏦 The Complete Admin Bank Command Center
-TypeScript
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+  const load = async () => {
+    const { data } = await sb.from('transactions').select('*, profiles(username)').eq('status', 'pending').order('created_at', { ascending: false });
+    setReqs(data || []);
+    setLd(false);
+  };
 
-export default async function AdminBankPage() {
-  const supabase = await createClient();
+  useEffect(() => { load(); }, []);
 
-  // 1. SECURITY: Ensure only logged-in Admins can see this
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile?.is_admin) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-black text-red-500 font-mono">
-        [ ACCESS DENIED: SYSTEM OVERRIDE REQUIRED ]
-      </div>
-    );
-  }
-
-  // 2. FETCH: Get all pending requests
-  const { data: requests } = await supabase
-    .from('transactions')
-    .select('*, profiles(username)')
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
-
-  // 3. SERVER ACTION: The "Logic" for approving and notifying Discord
-  async function processBankAction(formData: FormData) {
-    'use server';
-    const supabase = await createClient();
-    const id = formData.get('id');
-    const player = formData.get('player');
-    const amount = formData.get('amount');
-    const actionType = formData.get('actionType'); // 'complete' or 'deny'
-
-    if (actionType === 'complete') {
-      await supabase.from('transactions').update({ status: 'completed' }).eq('id', id);
-      
-      // DISCORD NOTIFICATION
-      if (process.env.DISCORD_WEBHOOK_URL) {
-        await fetch(process.env.DISCORD_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `✅ **Bank Transfer Success!**\n**Player:** ${player}\n**Amount:** $${amount}\n*Transaction marked as paid in-game.*`
-          })
-        });
-      }
-    } else {
-      await supabase.from('transactions').update({ status: 'denied' }).eq('id', id);
+  const handleAction = async (id: string, userId: string, amount: number, action: 'completed' | 'denied') => {
+    if (action === 'completed') {
+      const { data: profile } = await sb.from('profiles').select('balance').eq('id', userId).single();
+      await sb.from('profiles').update({ balance: (profile?.balance || 0) - amount }).eq('id', userId);
     }
+    await sb.from('transactions').update({ status: action }).eq('id', id);
+    load();
+  };
 
-    revalidatePath('/admin/bank');
-  }
+  if (ld) return <div style={{background:'#111',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Loading Terminal...</div>;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-12 font-sans">
-      <div className="max-w-5xl mx-auto">
-        <header className="flex justify-between items-end border-b border-zinc-800 pb-6 mb-8">
-          <div>
-            <h1 className="text-4xl font-black italic tracking-tighter text-green-500">ADMIN VAULT</h1>
-            <p className="text-zinc-500 uppercase text-xs tracking-widest mt-1">Enterprise Financial Management</p>
-          </div>
-          <div className="text-right">
-            <span className="text-zinc-500 text-xs">PENDING REQUESTS:</span>
-            <div className="text-2xl font-bold">{requests?.length || 0}</div>
-          </div>
-        </header>
-
-        <div className="grid gap-4">
-          {requests && requests.length > 0 ? (
-            requests.map((t) => (
-              <div key={t.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-5 flex flex-col md:flex-row justify-between items-center group hover:border-green-900/50 transition-all">
-                <div className="mb-4 md:mb-0">
-                  <span className="text-zinc-500 text-xs block mb-1">PLAYER NAME</span>
-                  <h3 className="text-xl font-bold text-white">{t.profiles?.username || 'Unknown Farmer'}</h3>
-                </div>
-
-                <div className="mb-4 md:mb-0 text-center md:text-left">
-                  <span className="text-zinc-500 text-xs block mb-1">TRANSFER AMOUNT</span>
-                  <span className="text-2xl font-mono text-green-400 font-bold">${Number(t.amount).toLocaleString()}</span>
-                </div>
-
-                <div className="flex gap-2">
-                  <form action={processBankAction}>
-                    <input type="hidden" name="id" value={t.id} />
-                    <input type="hidden" name="player" value={t.profiles?.username} />
-                    <input type="hidden" name="amount" value={t.amount} />
-                    <input type="hidden" name="actionType" value="complete" />
-                    <button className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-md transition-transform active:scale-95 shadow-lg shadow-green-900/20">
-                      APPROVE & PAY
-                    </button>
-                  </form>
-                  
-                  <form action={processBankAction}>
-                    <input type="hidden" name="id" value={t.id} />
-                    <input type="hidden" name="actionType" value="deny" />
-                    <button className="bg-zinc-800 hover:bg-red-900 text-zinc-400 hover:text-white font-bold py-2 px-4 rounded-md transition-colors">
-                      ✕
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-20 border-2 border-dashed border-zinc-900 rounded-xl">
-              <p className="text-zinc-600 italic">No farmers are currently at the window. Check back later.</p>
+    <div style={{ background:'#111', minHeight:'100vh', color:'#fff', padding:'40px', fontFamily:'sans-serif' }}>
+      <button onClick={()=>window.location.href='/dashboard'} style={{background:'none', border:'none', color:'#888', cursor:'pointer', marginBottom:'20px', display:'flex', alignItems:'center', gap:'5px'}}><ArrowLeft size={16}/> Back to Dashboard</button>
+      <h1 style={{fontSize:'24px', fontWeight:'bold', borderBottom:'2px solid #dc2626', paddingBottom:'10px', marginBottom:'30px'}}>PENDING SYNC REQUESTS</h1>
+      
+      <div style={{display:'flex', flexDirection:'column', gap:'15px'}}>
+        {reqs.map(r => (
+          <div key={r.id} style={{background:'#222', padding:'20px', borderRadius:'4px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <div>
+              <p style={{margin:0, fontSize:'12px', color:'#888'}}>OPERATOR</p>
+              <p style={{margin:0, fontWeight:'bold', fontSize:'18px'}}>{r.profiles?.username}</p>
             </div>
-          )}
-        </div>
+            <div style={{textAlign:'center'}}>
+              <p style={{margin:0, fontSize:'12px', color:'#888'}}>AMOUNT</p>
+              <p style={{margin:0, fontWeight:'bold', fontSize:'20px', color:'#22c55e'}}>${r.amount.toLocaleString()}</p>
+            </div>
+            <div style={{display:'flex', gap:'10px'}}>
+              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, 'completed')} style={{background:'#22c55e', color:'#000', border:'none', padding:'10px 15px', borderRadius:'4px', cursor:'pointer', fontWeight:'bold'}}>APPROVE</button>
+              <button onClick={()=>handleAction(r.id, r.user_id, r.amount, 'denied')} style={{background:'#dc2626', color:'#fff', border:'none', padding:'10px 15px', borderRadius:'4px', cursor:'pointer', fontWeight:'bold'}}>DENY</button>
+            </div>
+          </div>
+        ))}
+        {reqs.length === 0 && <p style={{color:'#444', fontStyle:'italic'}}>No pending requests.</p>}
       </div>
     </div>
   );

@@ -1,18 +1,18 @@
-That build error is happening because the code is trying to import icons that don't exist in the version of lucide-react you have installed (or they are spelled differently).
-
-I also noticed in your error snippet that you have a Discord Webhook URL pasted directly into the code. This is a huge security risk—anyone visiting your site could find it. I've moved that logic so it stays safe.
-
-Here is the fully corrected code. I have removed the "broken" icons and simplified the imports to ensure Vercel passes the build.
-
-🚜 The "Build-Safe" Dashboard
-TypeScript
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
-  Tractor, Map, Briefcase, LogOut, Cloud, ShieldCheck, 
-  FileCheck, UserCheck, Trophy, Radio, BarChart3, 
-  BookOpen, Activity, Truck, CheckCircle2, Hourglass
+  LayoutDashboard, 
+  Map as MapIcon, 
+  Briefcase, 
+  LogOut, 
+  Cloud, 
+  Radio, 
+  BarChart3, 
+  Truck, 
+  CheckCircle2, 
+  Hourglass,
+  User
 } from 'lucide-react';
 
 // Initialize Supabase
@@ -26,7 +26,6 @@ export default function Dash() {
   const [tx, setTx] = useState<any[]>([]); 
   const [w, setW] = useState<string>("");
   const [radio, setRadio] = useState<any>(null);
-  const [co, setCo] = useState<any>(null); 
   const [ld, setLd] = useState(true);
 
   const load = async () => {
@@ -34,17 +33,15 @@ export default function Dash() {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return window.location.href = '/';
 
-      const [prRes, txRes, rdRes, coRes] = await Promise.all([
+      const [prRes, txRes, rdRes] = await Promise.all([
         sb.from('profiles').select('*').eq('id', user.id).single(),
         sb.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
-        sb.from('dispatch').select('*').order('created_at', { ascending: false }).limit(1),
-        sb.from('companies').select('*').eq('owner_id', user.id).maybeSingle()
+        sb.from('dispatch').select('*').order('created_at', { ascending: false }).limit(1)
       ]);
 
       setP(prRes.data); 
       setTx(txRes.data || []); 
       setRadio(rdRes.data?.[0] || { message: 'Standby', sender: 'Dispatch' }); 
-      setCo(coRes.data);
 
       fetch('https://api.open-meteo.com/v1/forecast?latitude=47.15&longitude=-110.22&current=temperature_2m&temperature_unit=fahrenheit')
         .then(r=>r.json()).then(d=>setW(Math.round(d.current.temperature_2m) + "°F")).catch(()=>0);
@@ -63,8 +60,6 @@ export default function Dash() {
     if (!amount || amount <= 0) return alert("Enter valid amount");
     if (Number(amount) > (p?.balance || 0)) return alert("Insufficient funds in Portal.");
 
-    // This adds the request to your database. 
-    // Your Admin Bank page will pick this up and send the Discord alert when you Approve it.
     const { error } = await sb.from('transactions').insert([
       { user_id: p.id, amount: Number(amount), status: 'pending', type: 'sync_request' }
     ]);
@@ -101,10 +96,10 @@ export default function Dash() {
       <div style={{ display:'flex', flex:1 }}>
         <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000', overflowY:'auto' }}>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginBottom:'10px', letterSpacing:'1px'}}>OPERATIONS</p>
-          <button style={{...sBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/dashboard'}><Activity size={16}/> Dashboard</button>
+          <button style={{...sBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/dashboard'}><LayoutDashboard size={16}/> Dashboard</button>
           <button style={sBtn} onClick={()=>window.location.href='/contracts'}><Briefcase size={16}/> Field Work</button>
           <button style={sBtn} onClick={()=>window.location.href='/logistics'}><Truck size={16} color="#3b82f6"/> Trucking</button>
-          <button style={sBtn} onClick={()=>window.location.href='/fleet'}><Tractor size={16}/> Equipment</button>
+          <button style={sBtn} onClick={()=>window.location.href='/map'}><MapIcon size={16}/> Live Map</button>
           <p style={{fontSize:'10px', color:'#555', fontWeight:'bold', marginTop:'20px'}}>FINANCE</p>
           <button style={sBtn} onClick={()=>window.location.href='/accounting'}><BarChart3 size={16}/> Accounting</button>
           <button style={{...sBtn, background:'#1a1a1a', marginTop:'20px', color:'#dc2626'}} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}><LogOut size={16}/> Sign Out</button>
@@ -121,7 +116,7 @@ export default function Dash() {
             <div style={{ display:'flex', flexWrap:'wrap', gap:'25px' }}>
               <div style={{ background:'rgba(0,0,0,0.85)', padding:'30px', borderRadius:'4px', minWidth:'380px', borderLeft:'6px solid #4a7ab5' }}>
                 <p style={{ margin:0, fontSize:'11px', color:'#888' }}>PORTAL BALANCE</p>
-                <h2 style={{ margin:'5px 0', fontSize:'22px' }}>{p?.username}</h2>
+                <h2 style={{ margin:'5px 0', fontSize:'22px' }}><User size={14} style={{display:'inline', marginRight:'5px'}} />{p?.username}</h2>
                 <h1 style={{ fontSize:'48px', margin:0, color:'#22c55e', fontFamily:'monospace' }}>${p?.balance?.toLocaleString() || '0'}</h1>
               </div>
 

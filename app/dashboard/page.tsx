@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 // Changed from '@/lib/supabase' to relative path for better build compatibility
-import { sb } from '../../lib/supabase';
+import { sb } from "../../lib/supabase";
 import { LogOut, CheckCircle2, Hourglass } from 'lucide-react';
 
 export default function Dash() {

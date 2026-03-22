@@ -1,14 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 "use client";
 import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { Tractor } from 'lucide-react';
-
-// ✅ Use env variables (IMPORTANT)
-const sb = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { sb } from '@/lib/supabase'; // ✅ using shared client
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,7 +58,7 @@ export default function LoginPage() {
       if (error) {
         alert(error.message);
       } else {
-        router.push('/dashboard'); // ✅ no reload
+        router.push('/dashboard');
       }
     }
 

@@ -2,31 +2,43 @@
 import { useEffect, useState } from 'react';
 import { sb } from "@/db/supabase"; 
 import { 
-  LogOut, Sprout, Loader2, Tractor, FileText, 
-  ShieldCheck, ShoppingCart, AlertTriangle, Map as MapIcon,
-  CloudRain, Sun, Wind, Info, Search, Database
+  LogOut, Sprout, Loader2, Tractor, Activity, 
+  ShieldCheck, ShoppingCart, TrendingUp, Users,
+  Coins, Fuel, Map as MapIcon, Database
 } from 'lucide-react';
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('hub');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('ops');
 
-  // XML DATA: Farmlands (Mapped from your XML)
-  const farmlands = [
-    { id: 1, farmId: 6, npc: "Brandon" },
-    { id: 7, farmId: 2, npc: "Brandon" },
-    { id: 14, farmId: 5, npc: "George" },
-    { id: 48, farmId: 1, npc: "David" },
-    { id: 71, farmId: 3, npc: "Maria" },
-    { id: 125, farmId: 0, npc: "PLAYER" },
-    { id: 136, farmId: 4, npc: "Brandon" },
-    // ... representing the 149 entries in your XML
+  // Mapped from your latest <farms> XML
+  const farmData = [
+    {
+      id: 1,
+      name: "Daisy Farmz",
+      money: 1313639.75,
+      loan: 0,
+      stats: {
+        distance: "631.87 km",
+        fuel: "3811.12 L",
+        animals: { cows: 5, sheep: 61 },
+        topPlayer: "CHUNK"
+      }
+    },
+    {
+      id: 2,
+      name: "Mayor Tim's Farm",
+      money: 181032.93,
+      loan: 0,
+      stats: {
+        distance: "1132.49 km",
+        fuel: "6882.78 L",
+        animals: { cows: 0, sheep: 0 },
+        topPlayer: "mihaly090"
+      }
+    }
   ];
-
-  // XML DATA: Environment
-  const envStatus = { day: 51, season: 'SUMMER', dayTime: '08:15' };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,10 +71,10 @@ export default function Dashboard() {
 
         <nav style={{ flex: 1, paddingTop: '10px' }}>
           {[
-            { id: 'hub', label: 'OPERATIONS', icon: <Tractor size={18} /> },
-            { id: 'land', label: 'FARMLAND REGISTRY', icon: <MapIcon size={18} /> },
-            { id: 'sales', label: 'MARKET PRICES', icon: <ShoppingCart size={18} /> },
-            { id: 'logs', label: 'SYSTEM LOGS', icon: <Database size={18} /> },
+            { id: 'ops', label: 'FARM OVERVIEW', icon: <Activity size={18} /> },
+            { id: 'fin', label: 'FINANCIALS', icon: <TrendingUp size={18} /> },
+            { id: 'land', label: 'LAND REGISTRY', icon: <MapIcon size={18} /> },
+            { id: 'users', label: 'PLAYER PERMS', icon: <Users size={18} /> },
           ].map(item => (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
               style={{ 
@@ -82,85 +94,78 @@ export default function Dashboard() {
       {/* MAIN CONTENT */}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
         
-        {/* HEADER */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', borderBottom: '1px solid #1a1a1a', paddingBottom: '20px' }}>
-          <div>
-            <h2 style={{ margin: 0, letterSpacing: '5px', fontSize: '11px', color: '#555' }}>TERMINAL // {activeTab.toUpperCase()}</h2>
-            <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
-              <span style={{ fontSize: '10px', color: '#d4af37' }}>DAY: {envStatus.day}</span>
-              <span style={{ fontSize: '10px', color: '#d4af37' }}>SEASON: {envStatus.season}</span>
-              <span style={{ fontSize: '10px', color: '#8da989' }}>TIME: {envStatus.dayTime}</span>
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '10px', color: '#444' }}>CREDITS: ${profile.balance?.toLocaleString()}</span>
-          </div>
+        <header style={{ marginBottom: '40px', borderBottom: '1px solid #1a1a1a', paddingBottom: '20px' }}>
+          <h2 style={{ margin: 0, letterSpacing: '5px', fontSize: '11px', color: '#555' }}>SYSTEM // {activeTab.toUpperCase()}</h2>
         </header>
 
-        {/* TAB: OPERATIONS (Summary) */}
-        {activeTab === 'hub' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ background: 'rgba(212,175,55,0.03)', border: '1px solid #d4af37', padding: '40px' }}>
-              <p style={{ color: '#d4af37', fontSize: '10px', letterSpacing: '3px' }}>ACTIVE OPERATOR</p>
-              <h1 style={{ fontSize: '32px', margin: '10px 0' }}>{profile.username}</h1>
-              <p style={{ fontSize: '12px', color: '#666' }}>Authorized access to Node 01. No current field alerts.</p>
-            </div>
-            <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '40px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#ff4d4d' }}>
-                <AlertTriangle size={20} />
-                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>SYSTEM NOTICE</span>
+        {/* TAB: FARM OVERVIEW */}
+        {activeTab === 'ops' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            {farmData.map(farm => (
+              <div key={farm.id} style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h3 style={{ margin: 0, color: '#d4af37', fontSize: '14px' }}>{farm.name.toUpperCase()}</h3>
+                  <span style={{ fontSize: '10px', color: '#444' }}>ID: {farm.id}</span>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                  <div>
+                    <p style={{ fontSize: '9px', color: '#444', margin: 0 }}>BALANCE</p>
+                    <p style={{ fontSize: '18px', color: '#fff' }}>${farm.money.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '9px', color: '#444', margin: 0 }}>DISTANCE</p>
+                    <p style={{ fontSize: '18px', color: '#fff' }}>{farm.stats.distance}</p>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid #141414', paddingTop: '15px', display: 'flex', justifyContent: 'space-between' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Fuel size={14} color="#d4af37" />
+                      <span style={{ fontSize: '11px' }}>{farm.stats.fuel}</span>
+                   </div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Users size={14} color="#8da989" />
+                      <span style={{ fontSize: '11px' }}>{farm.stats.topPlayer}</span>
+                   </div>
+                </div>
               </div>
-              <p style={{ fontSize: '11px', color: '#444', marginTop: '10px' }}>
-                XML environment loaded. 149 Farmlands indexed. Market volatility is currently LOW.
-              </p>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* TAB: FARMLAND REGISTRY (New XML Content) */}
-        {activeTab === 'land' && (
-          <div>
-            <div style={{ marginBottom: '20px', display: 'flex', background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '10px 15px', alignItems: 'center', gap: '10px' }}>
-              <Search size={16} color="#444" />
-              <input 
-                placeholder="SEARCH FARMLAND ID..." 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', fontSize: '12px', width: '100%' }}
-              />
-            </div>
-            <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', borderBottom: '1px solid #1a1a1a', color: '#444', fontSize: '10px' }}>
-                    <th style={{ padding: '15px' }}>LAND ID</th>
-                    <th style={{ padding: '15px' }}>FARM ID</th>
-                    <th style={{ padding: '15px' }}>OWNER INDEX</th>
-                    <th style={{ padding: '15px' }}>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {farmlands.filter(f => f.id.toString().includes(searchTerm)).map((farm) => (
-                    <tr key={farm.id} style={{ borderBottom: '1px solid #141414', fontSize: '11px' }}>
-                      <td style={{ padding: '15px', color: '#d4af37' }}>ID_{farm.id.toString().padStart(3, '0')}</td>
-                      <td style={{ padding: '15px' }}>GRP_{farm.farmId}</td>
-                      <td style={{ padding: '15px', color: '#8da989' }}>{farm.npc}</td>
-                      <td style={{ padding: '15px' }}>
-                         <span style={{ background: farm.farmId === 6 ? '#1a1a1a' : '#1e291e', color: farm.farmId === 6 ? '#444' : '#8da989', padding: '2px 8px', fontSize: '9px' }}>
-                           {farm.farmId === 6 ? 'AI_MANAGED' : 'OWNED'}
-                         </span>
-                      </td>
+        {/* TAB: FINANCIALS (XML DATA) */}
+        {activeTab === 'fin' && (
+           <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', padding: '30px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
+                 <Coins color="#d4af37" />
+                 <h3 style={{ margin: 0 }}>FINANCIAL AUDIT</h3>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                 <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #1a1a1a', color: '#444' }}>
+                       <th style={{ padding: '10px' }}>ENTITY</th>
+                       <th style={{ padding: '10px' }}>CASH ON HAND</th>
+                       <th style={{ padding: '10px' }}>LOANS</th>
+                       <th style={{ padding: '10px' }}>STATUS</th>
                     </tr>
-                  ))}
-                </tbody>
+                 </thead>
+                 <tbody>
+                    {farmData.map(farm => (
+                       <tr key={farm.id} style={{ borderBottom: '1px solid #141414' }}>
+                          <td style={{ padding: '15px' }}>{farm.name}</td>
+                          <td style={{ padding: '15px' }}>${farm.money.toLocaleString()}</td>
+                          <td style={{ padding: '15px', color: farm.loan > 0 ? '#ff4d4d' : '#8da989' }}>${farm.loan}</td>
+                          <td style={{ padding: '15px' }}>
+                             <span style={{ background: '#1a1a1a', padding: '3px 10px', fontSize: '10px', borderRadius: '2px' }}>ACTIVE</span>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
               </table>
-            </div>
-          </div>
+           </div>
         )}
-
-        {/* TAB: MARKET PRICES */}
-        {activeTab === 'sales' && (
-          <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a' }}>
-             <div style={{ padding: '20px', borderBottom: '1px solid #1a1a1a', fontSize: '10px', color: '#d4af37' }}>
-               LIVE ECONOMY STREAM // DATA_SOURCE: economy.xml
-             </div>
-             {/* Add market table logic here
+      </main>
+    </div>
+  );
+}

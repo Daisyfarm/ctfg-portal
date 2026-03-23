@@ -5,7 +5,7 @@ import {
   LogOut, Sprout, Landmark, Loader2, History, 
   ArrowUpRight, ArrowDownLeft, Send, Trophy, 
   Tractor, FileText, ShieldCheck, ClipboardList, 
-  ShoppingCart, Settings, AlertTriangle, CheckCircle
+  ShoppingCart, Settings, AlertTriangle, CheckCircle, Map
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -14,6 +14,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('hub');
   
+  // Field Management Data (Mock data based on reference images)
+  const [fields] = useState([
+    { id: 'F-101', crop: 'WHEAT', status: 'GROWING', yield: 'N/A' },
+    { id: 'F-204', crop: 'CORN', status: 'READY', yield: '180 BU/AC' },
+    { id: 'F-302', crop: 'SOYBEANS', status: 'HARVESTED', yield: '55 BU/AC' },
+  ]);
+
   // Transfer States
   const [recipientId, setRecipientId] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
@@ -24,7 +31,7 @@ export default function Dashboard() {
     if (!user) { window.location.href = '/'; return; }
     const { data: pData } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
     setProfile(pData || { username: 'Operator', balance: 0 });
-    const { data: tData } = await sb.from('transactions').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(8);
+    const { data: tData } = await sb.from('transactions').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(5);
     setTransactions(tData || []);
     setLoading(false);
   };
@@ -70,10 +77,10 @@ export default function Dashboard() {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {[
             { id: 'hub', label: 'FIELD WORK', icon: <Tractor size={18} /> },
+            { id: 'mgmt', label: 'MANAGEMENT', icon: <Map size={18} /> },
             { id: 'sales', label: 'CROP SALES', icon: <ShoppingCart size={18} /> },
             { id: 'insur', label: 'CROP INSURANCE', icon: <ShieldCheck size={18} /> },
             { id: 'permits', label: 'PERMITS', icon: <FileText size={18} /> },
-            { id: 'tasks', label: 'TASK MGMT', icon: <ClipboardList size={18} /> },
           ].map(item => (
             <button 
               key={item.id}
@@ -90,117 +97,75 @@ export default function Dashboard() {
             </button>
           ))}
         </nav>
-
-        <button 
-          onClick={() => sb.auth.signOut().then(() => window.location.href = '/')}
-          style={{ marginTop: 'auto', padding: '25px', background: 'transparent', border: 'none', color: '#333', cursor: 'pointer', fontSize: '11px', letterSpacing: '2px', textAlign: 'left' }}
-        >
-          <LogOut size={16} style={{ marginRight: '10px' }} /> LOGOUT
-        </button>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT AREA */}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
         
-        {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <div>
-            <h2 style={{ margin: 0, letterSpacing: '5px', fontSize: '14px', color: '#555' }}>
-              SYSTEM / {activeTab.toUpperCase()}
-            </h2>
-          </div>
-          <button onClick={() => window.location.href='/leaderboard'} style={{ background: 'none', border: '1px solid #d4af37', color: '#d4af37', padding: '10px 20px', cursor: 'pointer', fontSize: '11px', letterSpacing: '2px' }}>
-            <Trophy size={14} style={{ marginBottom: '-3px', marginRight: '8px' }} /> HALL OF HARVEST
-          </button>
+          <h2 style={{ margin: 0, letterSpacing: '5px', fontSize: '14px', color: '#555' }}>
+            DAISY_OS / {activeTab.toUpperCase()}
+          </h2>
         </div>
 
-        {/* --- TAB: FIELD WORK (Dashboard) --- */}
+        {/* --- TAB: FIELD WORK (Main Stats) --- */}
         {activeTab === 'hub' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px' }}>
-            <div>
-              <div style={{ background: 'rgba(212, 175, 55, 0.02)', padding: '60px', border: '1px solid #d4af37', position: 'relative', marginBottom: '30px' }}>
-                <p style={{ color: '#d4af37', fontSize: '10px', letterSpacing: '5px', margin: 0 }}>OPERATOR ASSETS</p>
-                <h1 style={{ fontSize: '72px', color: '#8da989', margin: '15px 0', fontFamily: 'serif' }}>
-                  ${profile.balance?.toLocaleString()}
-                </h1>
-                <Landmark size={100} style={{ position: 'absolute', bottom: '20px', right: '20px', opacity: 0.03 }} />
-              </div>
-
-              <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '30px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
-                  <Send size={16} color="#d4af37" />
-                  <span style={{ fontSize: '12px', letterSpacing: '2px' }}>WIRE TRANSFER</span>
-                </div>
-                <form onSubmit={handleTransfer} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px' }}>
-                  <input placeholder="RECIPIENT ID" value={recipientId} onChange={e => setRecipientId(e.target.value)} style={{ background: '#000', border: '1px solid #222', padding: '15px', color: '#fff' }} />
-                  <input placeholder="AMOUNT" type="number" value={transferAmount} onChange={e => setTransferAmount(e.target.value)} style={{ background: '#000', border: '1px solid #222', padding: '15px', color: '#d4af37' }} />
-                  <button style={{ background: '#d4af37', color: '#000', border: 'none', padding: '0 30px', fontWeight: 'bold', cursor: 'pointer' }}>INITIATE</button>
-                </form>
-                {transferStatus.msg && <p style={{ color: transferStatus.type === 'error' ? '#ff4d4d' : '#8da989', fontSize: '10px', marginTop: '15px', letterSpacing: '1px' }}>{transferStatus.msg.toUpperCase()}</p>}
-              </div>
+            <div style={{ background: 'rgba(212, 175, 55, 0.02)', padding: '60px', border: '1px solid #d4af37' }}>
+              <p style={{ color: '#d4af37', fontSize: '10px', letterSpacing: '5px', margin: 0 }}>OPERATOR ASSETS</p>
+              <h1 style={{ fontSize: '72px', color: '#8da989', margin: '15px 0' }}>${profile.balance?.toLocaleString()}</h1>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-              <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '25px' }}>
-                <p style={{ fontSize: '10px', color: '#444', letterSpacing: '2px', marginBottom: '15px' }}>OPERATOR CODENAME</p>
-                <h3 style={{ margin: 0, color: '#d4af37', letterSpacing: '2px' }}>{profile.username?.toUpperCase()}</h3>
-                <div style={{ marginTop: '20px', padding: '10px', background: '#000', border: '1px solid #222', fontSize: '10px', color: '#333', wordBreak: 'break-all' }}>
-                  UID: {profile.id}
-                </div>
-              </div>
-
-              <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '25px' }}>
-                <p style={{ fontSize: '10px', color: '#444', letterSpacing: '2px', marginBottom: '15px' }}>RECENT LOGS</p>
-                {transactions.map(t => (
-                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #1a1a1a', fontSize: '11px' }}>
-                    <span style={{ color: '#666' }}>{t.description.toUpperCase()}</span>
-                    <span style={{ color: t.amount > 0 ? '#8da989' : '#ff4d4d', fontWeight: 'bold' }}>
-                      {t.amount > 0 ? '+' : ''}{t.amount.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            
+            <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '25px' }}>
+              <p style={{ fontSize: '10px', color: '#444', letterSpacing: '2px', marginBottom: '15px' }}>WIRE TRANSFER</p>
+              <form onSubmit={handleTransfer} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input placeholder="RECIPIENT ID" value={recipientId} onChange={e => setRecipientId(e.target.value)} style={{ background: '#000', border: '1px solid #222', padding: '12px', color: '#fff' }} />
+                <input placeholder="AMOUNT" type="number" value={transferAmount} onChange={e => setTransferAmount(e.target.value)} style={{ background: '#000', border: '1px solid #222', padding: '12px', color: '#d4af37' }} />
+                <button style={{ background: '#d4af37', color: '#000', border: 'none', padding: '12px', fontWeight: 'bold', cursor: 'pointer' }}>SEND CREDITS</button>
+              </form>
             </div>
           </div>
         )}
 
-        {/* --- TAB: CROP SALES (Matches Image 4) --- */}
-        {activeTab === 'sales' && (
-          <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '60px', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid #d4af37', padding: '30px', maxWidth: '600px', margin: '0 auto' }}>
-              <AlertTriangle color="#d4af37" size={32} style={{ marginBottom: '15px' }} />
-              <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0' }}>EXPORT CENTER OFFLINE</h2>
-              <p style={{ color: '#666', fontSize: '12px', lineHeight: '1.6' }}>
-                SORRY OPERATOR. THE EXPORT CENTER IS TEMPORARILY CLOSED FOR MAINTENANCE. CHECK BACK SOON FOR UPDATED MARKET PRICES!
-              </p>
+        {/* --- TAB: MANAGEMENT (Field List) --- */}
+        {activeTab === 'mgmt' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <h3 style={{ fontSize: '12px', letterSpacing: '2px', marginBottom: '20px' }}>ACTIVE FIELD INVENTORY</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', background: '#111', padding: '15px', color: '#444', fontSize: '10px', letterSpacing: '2px' }}>
+              <span>FIELD ID</span><span>CROP TYPE</span><span>STATUS</span><span>EST. YIELD</span>
             </div>
-          </div>
-        )}
-
-        {/* --- TAB: CROP INSURANCE (Matches Image 5) --- */}
-        {activeTab === 'insur' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-            {[
-              { name: 'FSN NETWORK', credit: 700, color: '#8da989' },
-              { name: 'FIREBIRD PROTECTION', credit: 600, color: '#ff4d4d' },
-              { name: 'B&B INSURANCE', credit: 600, color: '#d4af37' }
-            ].map(agency => (
-              <div key={agency.name} style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 5px 0', letterSpacing: '1px' }}>{agency.name}</h4>
-                  <p style={{ margin: 0, fontSize: '10px', color: '#444' }}>MINIMUM CREDIT: {agency.credit}</p>
-                </div>
-                <button style={{ background: 'none', border: '1px solid #d4af37', color: '#d4af37', padding: '8px 15px', fontSize: '10px', cursor: 'pointer' }}>GET QUOTE</button>
+            {fields.map(field => (
+              <div key={field.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '20px', alignItems: 'center' }}>
+                <span style={{ color: '#d4af37', fontWeight: 'bold' }}>{field.id}</span>
+                <span>{field.crop}</span>
+                <span style={{ color: field.status === 'READY' ? '#8da989' : '#555' }}>{field.status}</span>
+                <span>{field.yield}</span>
               </div>
             ))}
           </div>
         )}
 
-        {/* --- OTHER TABS --- */}
-        {['permits', 'tasks'].includes(activeTab) && (
-          <div style={{ padding: '60px', textAlign: 'center', border: '1px dashed #1a1a1a' }}>
-            <p style={{ color: '#222', letterSpacing: '10px', fontSize: '18px' }}>DATA_ENCRYPTED</p>
-            <p style={{ color: '#444', fontSize: '11px', marginTop: '10px' }}>SELECT AN AUTHORIZED TERMINAL TO VIEW THESE RECORDS.</p>
+        {/* --- TAB: CROP SALES (Maintenance) --- */}
+        {activeTab === 'sales' && (
+          <div style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '60px', textAlign: 'center' }}>
+            <AlertTriangle color="#d4af37" size={32} style={{ marginBottom: '15px' }} />
+            <h2 style={{ letterSpacing: '3px' }}>EXPORT CENTER OFFLINE</h2>
+            <p style={{ color: '#666', fontSize: '12px' }}>SYSTEM UNDERGOING SCHEDULED PRICING UPDATES.</p>
+          </div>
+        )}
+
+        {/* --- TAB: CROP INSURANCE (Agencies) --- */}
+        {activeTab === 'insur' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {['FSN NETWORK', 'FIREBIRD PROTECTION'].map(name => (
+              <div key={name} style={{ background: '#0f0f0f', border: '1px solid #1a1a1a', padding: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h4 style={{ margin: 0 }}>{name}</h4>
+                  <p style={{ fontSize: '10px', color: '#444', marginTop: '5px' }}>CLICK FOR COVERAGE DETAILS</p>
+                </div>
+                <button style={{ background: 'none', border: '1px solid #d4af37', color: '#d4af37', padding: '10px', fontSize: '10px' }}>VIEW POLICY</button>
+              </div>
+            ))}
           </div>
         )}
 

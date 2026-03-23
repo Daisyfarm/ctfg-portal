@@ -46,6 +46,12 @@ export default function AdminBank() {
           <h1 style={{ letterSpacing: '5px' }}>BANKING TERMINAL</h1>
           <button onClick={exportToCSV} style={{ background: 'none', border: '1px solid #d4af37', color: '#d4af37', padding: '10px', cursor: 'pointer' }}><Download size={16} /></button>
         </div>
+        <input 
+          type="text" 
+          placeholder="Search users..." 
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ background: '#111', border: '1px solid #333', padding: '10px', color: '#fff', marginBottom: '20px', width: '100%' }}
+        />
         {users.filter(u => u.username?.toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
           <div key={u.id} style={{ background: '#111', padding: '20px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{u.username} (${u.balance})</span>

@@ -1,110 +1,106 @@
+Adding a Transfer feature is the final piece of a true economy. It allows your operators to trade, pay each other for services, or pool resources—all without you needing to manually intervene in the Admin Panel.
+
+To make this work safely, we need to handle three things:
+
+Check: Does the sender have enough money?
+
+Move: Subtract from the sender and add to the receiver.
+
+Log: Create two transaction records (one for each person).
+
+🛠️ The Transfer UI for the Dashboard (app/dashboard/page.tsx)
+Add this section below your Balance Card. It includes a "Recipient ID" field and an "Amount" field.
+
+TypeScript
 "use client";
 import { useEffect, useState } from 'react';
 import { sb } from "@/db/supabase"; 
-import { LogOut, Sprout, Landmark, Loader2, History, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Send, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+// ... Keep your existing imports and Profile/Transaction fetching code ...
 
 export default function Dashboard() {
-  const [profile, setProfile] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [recipientId, setRecipientId] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [status, setStatus] = useState({ type: '', msg: '' });
 
-  useEffect(() => {
-    async function fetchData() {
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) {
-        window.location.href = '/';
-        return;
-      }
+  const handleTransfer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseFloat(transferAmount);
+    const { data: { user } } = await sb.auth.getUser();
 
-      // 1. Fetch Profile
-      const { data: profileData } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-      setProfile(profileData || { username: 'Operator', balance: 0 });
-
-      // 2. Fetch Transactions (Assumes you have a 'transactions' table)
-      const { data: transData } = await sb
-        .from('transactions')
-        .select('*')
-        .eq('profile_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      setTransactions(transData || []);
-      setLoading(false);
+    if (!user || isNaN(amount) || amount <= 0) return;
+    if (profile.balance < amount) {
+      setStatus({ type: 'error', msg: 'Insufficient Credits' });
+      return;
     }
-    fetchData();
-  }, []);
 
-  if (loading) return (
-    <div style={{ background: '#0a0a0a', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Loader2 className="animate-spin" color="#d4af37" size={40} />
-    </div>
-  );
+    // 1. Deduct from Sender
+    await sb.from('profiles').update({ balance: profile.balance - amount }).eq('id', user.id);
+    
+    // 2. Add to Recipient
+    const { data: recp } = await sb.from('profiles').select('balance').eq('id', recipientId).single();
+    if (!recp) {
+      setStatus({ type: 'error', msg: 'Recipient ID Not Found' });
+      return;
+    }
+    await sb.from('profiles').update({ balance: recp.balance + amount }).eq('id', recipientId);
+
+    // 3. Log for both
+    await sb.from('transactions').insert([
+      { profile_id: user.id, amount: -amount, description: `Transfer to ${recipientId.substring(0,5)}...` },
+      { profile_id: recipientId, amount: amount, description: `Transfer from ${profile.username}` }
+    ]);
+
+    setStatus({ type: 'success', msg: 'Transfer Complete' });
+    setTransferAmount('');
+    setRecipientId('');
+    // Refresh your data here...
+  };
 
   return (
-    <div style={{ 
-      background: '#0a0a0a', 
-      minHeight: '100vh', 
-      color: '#f5f5dc', 
-      fontFamily: 'serif',
-      backgroundImage: 'linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.96)), url("/image_1451a7.jpg")',
-      backgroundSize: 'cover',
-      backgroundAttachment: 'fixed'
-    }}>
-      {/* Top Nav */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', backdropFilter: 'blur(10px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Sprout color="#d4af37" size={24} />
-          <span style={{ letterSpacing: '3px', fontWeight: 'bold', color: '#d4af37' }}>DAISY'S HUB</span>
-        </div>
-        <button onClick={() => sb.auth.signOut().then(() => window.location.href = '/')} style={{ background: 'none', border: '1px solid #333', color: '#666', padding: '8px 15px', cursor: 'pointer', borderRadius: '4px', fontSize: '12px' }}>
-          DISCONNECT
-        </button>
-      </nav>
+    <div style={{ /* Existing Styles */ }}>
+      {/* ... Existing Balance Card ... */}
 
-      <main style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px' }}>
-        
-        {/* Balance Card */}
-        <div style={{ background: 'rgba(20, 20, 20, 0.9)', padding: '40px', border: '1px solid #d4af37', marginBottom: '30px', position: 'relative' }}>
-          <p style={{ color: '#d4af37', fontSize: '11px', letterSpacing: '4px', margin: '0 0 10px 0' }}>CURRENT ASSETS</p>
-          <h1 style={{ fontSize: '64px', color: '#8da989', margin: 0 }}>
-            <span style={{ fontSize: '28px', marginRight: '5px' }}>$</span>
-            {profile?.balance?.toLocaleString()}
-          </h1>
-          <div style={{ position: 'absolute', top: '20px', right: '20px', color: '#222' }}>
-            <Landmark size={80} />
+      {/* NEW: TRANSFER CONSOLE */}
+      <div style={{ background: 'rgba(20,20,20,0.8)', border: '1px solid #d4af37', padding: '30px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <Send size={18} color="#d4af37" />
+          <h3 style={{ margin: 0, fontSize: '14px', letterSpacing: '2px' }}>INITIATE TRANSFER</h3>
+        </div>
+
+        <form onSubmit={handleTransfer} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '15px' }}>
+          <input 
+            type="text" 
+            placeholder="RECIPIENT OPERATOR ID" 
+            value={recipientId}
+            onChange={(e) => setRecipientId(e.target.value)}
+            style={{ background: '#000', border: '1px solid #333', padding: '12px', color: '#fff', fontSize: '12px' }}
+          />
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '10px', top: '12px', color: '#444' }}>$</span>
+            <input 
+              type="number" 
+              placeholder="0.00" 
+              value={transferAmount}
+              onChange={(e) => setTransferAmount(e.target.value)}
+              style={{ background: '#000', border: '1px solid #333', padding: '12px 12px 12px 25px', color: '#d4af37', width: '100%' }}
+            />
           </div>
-        </div>
+          <button style={{ background: '#d4af37', color: '#000', border: 'none', padding: '0 25px', fontWeight: 'bold', cursor: 'pointer' }}>
+            SEND
+          </button>
+        </form>
 
-        {/* Transaction History */}
-        <div style={{ background: 'rgba(15, 15, 15, 0.8)', border: '1px solid #222', padding: '30px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #222', paddingBottom: '10px' }}>
-            <History size={18} color="#d4af37" />
-            <h3 style={{ margin: 0, fontSize: '14px', letterSpacing: '2px', color: '#d4af37' }}>RECENT ACTIVITY</h3>
+        {status.msg && (
+          <div style={{ marginTop: '15px', color: status.type === 'error' ? '#ff4d4d' : '#8da989', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {status.type === 'error' ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
+            {status.msg}
           </div>
+        )}
+      </div>
 
-          {transactions.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {transactions.map((t) => (
-                <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', background: 'rgba(255,255,255,0.02)', border: '1px solid #1a1a1a' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {t.amount > 0 ? <ArrowUpRight color="#8da989" size={20} /> : <ArrowDownLeft color="#ff4d4d" size={20} />}
-                    <div>
-                      <p style={{ margin: 0, fontSize: '14px' }}>{t.description || 'Network Transaction'}</p>
-                      <p style={{ margin: 0, fontSize: '10px', color: '#555' }}>{new Date(t.created_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <span style={{ color: t.amount > 0 ? '#8da989' : '#ff4d4d', fontWeight: 'bold' }}>
-                    {t.amount > 0 ? '+' : ''}{t.amount.toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p style={{ textAlign: 'center', color: '#444', fontSize: '13px', padding: '20px' }}>No recent ledger entries found.</p>
-          )}
-        </div>
-
-      </main>
+      {/* ... Existing History Table ... */}
     </div>
   );
 }

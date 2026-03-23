@@ -1,99 +1,84 @@
 "use client";
 import { useState } from 'react';
 import { sb } from "@/db/supabase"; 
-import { ArrowRight, Lock, Sprout } from 'lucide-react';
+import { ArrowRight, Lock, Sprout, UserPlus } from 'lucide-react';
 
 export default function Homepage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showLogin, setShowLogin] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [status, setStatus] = useState({ type: '', msg: '' });
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) alert("Access Denied: " + error.message);
-    else window.location.href = '/dashboard';
+    setStatus({ type: '', msg: '' });
+
+    if (isRegistering) {
+      const { error } = await sb.auth.signUp({ email, password });
+      if (error) setStatus({ type: 'error', msg: error.message });
+      else setStatus({ type: 'success', msg: "Account Created! Check email or login." });
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) setStatus({ type: 'error', msg: "Access Denied: " + error.message });
+      else window.location.href = '/dashboard';
+    }
   };
 
   return (
     <main style={{ 
       backgroundImage: 'url("/image_1451a7.jpg")', 
-      backgroundSize: 'cover', 
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'serif'
+      backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed',
+      height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'serif'
     }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6))' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7))' }} />
 
       <div style={{ 
-        position: 'relative',
-        background: 'rgba(10, 10, 10, 0.8)', 
-        backdropFilter: 'blur(8px)',
-        padding: '60px 40px',
-        borderRadius: '4px',
-        border: '1px solid #d4af37',
-        textAlign: 'center',
-        width: '420px',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.8)'
+        position: 'relative', background: 'rgba(10, 10, 10, 0.85)', backdropFilter: 'blur(10px)',
+        padding: '50px 40px', borderRadius: '2px', border: '1px solid #d4af37',
+        textAlign: 'center', width: '400px', boxShadow: '0 25px 50px rgba(0,0,0,0.9)'
       }}>
-        {!showLogin ? (
-          <>
-            <div style={{ marginBottom: '30px' }}>
-              <Sprout color="#d4af37" size={40} style={{ marginBottom: '10px' }} />
-              <h1 style={{ color: '#d4af37', letterSpacing: '6px', fontSize: '32px', margin: 0 }}>DAISY'S DREAM</h1>
-              <p style={{ color: '#8da989', fontSize: '11px', letterSpacing: '3px', marginTop: '10px' }}>FARMING NETWORK PORTAL</p>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <button 
-                onClick={() => setShowLogin(true)}
-                style={{ background: '#d4af37', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-              >
-                ENTER NETWORK <ArrowRight size={18} />
-              </button>
+        <div style={{ marginBottom: '30px' }}>
+          <Sprout color="#d4af37" size={40} style={{ marginBottom: '10px' }} />
+          <h1 style={{ color: '#d4af37', letterSpacing: '6px', fontSize: '28px', margin: 0 }}>DAISY'S DREAM</h1>
+          <p style={{ color: '#8da989', fontSize: '10px', letterSpacing: '2px', marginTop: '10px' }}>
+            {isRegistering ? 'NEW OPERATOR ENROLLMENT' : 'ESTABLISHED UPLINK REQUIRED'}
+          </p>
+        </div>
 
-              <button 
-                disabled
-                style={{ background: 'rgba(255,255,255,0.05)', color: '#444', padding: '16px', border: '1px solid #222', fontWeight: 'bold', fontSize: '14px', cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-              >
-                <Lock size={16} /> STAFF CONSOLE
-              </button>
-            </div>
-          </>
-        ) : (
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h2 style={{ color: '#d4af37', fontSize: '18px', letterSpacing: '2px' }}>CREDENTIAL VERIFICATION</h2>
-            <input 
-              type="email" 
-              placeholder="OPERATOR EMAIL" 
-              required
-              onChange={e => setEmail(e.target.value)}
-              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center' }}
-            />
-            <input 
-              type="password" 
-              placeholder="ACCESS KEY" 
-              required
-              onChange={e => setPassword(e.target.value)}
-              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center' }}
-            />
-            <button style={{ background: '#8da989', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
-              INITIATE UPLINK
-            </button>
+        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <input 
+            type="email" placeholder="OPERATOR EMAIL" required
+            onChange={e => setEmail(e.target.value)}
+            style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center', fontSize: '12px' }}
+          />
+          <input 
+            type="password" placeholder="SECURE ACCESS KEY" required
+            onChange={e => setPassword(e.target.value)}
+            style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center', fontSize: '12px' }}
+          />
+          
+          <button style={{ 
+            background: isRegistering ? '#8da989' : '#d4af37', 
+            color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer',
+            letterSpacing: '2px', transition: '0.3s'
+          }}>
+            {isRegistering ? 'CREATE IDENTITY' : 'INITIATE UPLINK'}
+          </button>
+
+          {status.msg && (
+            <p style={{ color: status.type === 'error' ? '#ff4d4d' : '#8da989', fontSize: '11px' }}>{status.msg}</p>
+          )}
+
+          <div style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '20px' }}>
             <button 
               type="button"
-              onClick={() => setShowLogin(false)}
+              onClick={() => setIsRegistering(!isRegistering)}
               style={{ background: 'transparent', color: '#666', fontSize: '11px', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
             >
-              RETURN TO MAIN
+              {isRegistering ? 'ALREADY REGISTERED? LOGIN' : 'REQUEST NETWORK ACCESS'}
             </button>
-          </form>
-        )}
+          </div>
+        </form>
       </div>
     </main>
   );

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { sb } from "../../../lib/supabase"; 
+import { sb } from "../../../db/supabase";
 import { ShieldAlert, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function StaffAuthority() {

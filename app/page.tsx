@@ -1,11 +1,3 @@
-You're right. To make that brand-new Daisy's Dream artwork the star of the show, we need to ensure the code is pointing exactly to that file in your public folder.
-
-If the image you just uploaded is named image_1451a7.jpg, here is the updated CSS and layout for your app/page.tsx to make it look like a high-end splash screen.
-
-🛠️ The Updated Homepage (app/page.tsx)
-I’ve adjusted the overlay so the "Golden Hour" colors of your new photo really pop through behind the login box.
-
-TypeScript
 "use client";
 import { useState } from 'react';
 import { sb } from "@/db/supabase"; 
@@ -25,7 +17,7 @@ export default function Homepage() {
 
   return (
     <main style={{ 
-      backgroundImage: 'url("/image_1451a7.jpg")', // Ensure this filename matches exactly in /public
+      backgroundImage: 'url("/image_1451a7.jpg")', 
       backgroundSize: 'cover', 
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
@@ -36,7 +28,6 @@ export default function Homepage() {
       justifyContent: 'center',
       fontFamily: 'serif'
     }}>
-      {/* Subtle darkening overlay to make the gold text pop */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6))' }} />
 
       <div style={{ 
@@ -61,7 +52,7 @@ export default function Homepage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <button 
                 onClick={() => setShowLogin(true)}
-                style={{ background: '#d4af37', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.3s' }}
+                style={{ background: '#d4af37', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
               >
                 ENTER NETWORK <ArrowRight size={18} />
               </button>
@@ -77,26 +68,23 @@ export default function Homepage() {
         ) : (
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h2 style={{ color: '#d4af37', fontSize: '18px', letterSpacing: '2px' }}>CREDENTIAL VERIFICATION</h2>
-            
             <input 
               type="email" 
               placeholder="OPERATOR EMAIL" 
               required
               onChange={e => setEmail(e.target.value)}
-              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center', borderRadius: '2px' }}
+              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center' }}
             />
             <input 
               type="password" 
               placeholder="ACCESS KEY" 
               required
               onChange={e => setPassword(e.target.value)}
-              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center', borderRadius: '2px' }}
+              style={{ padding: '14px', background: '#000', border: '1px solid #333', color: '#fff', textAlign: 'center' }}
             />
-            
-            <button style={{ background: '#8da989', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
+            <button style={{ background: '#8da989', color: '#000', padding: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
               INITIATE UPLINK
             </button>
-            
             <button 
               type="button"
               onClick={() => setShowLogin(false)}
@@ -107,12 +95,6 @@ export default function Homepage() {
           </form>
         )}
       </div>
-
-      <footer style={{ position: 'absolute', bottom: '30px', textAlign: 'center', width: '100%', zIndex: 1 }}>
-        <p style={{ color: '#d4af37', fontSize: '10px', opacity: 0.6, letterSpacing: '4px' }}>
-          SECURE CONNECTION ESTABLISHED // PORT 8080
-        </p>
-      </footer>
     </main>
   );
 }

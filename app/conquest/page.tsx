@@ -19,7 +19,6 @@ export default function ConquestPage() {
 
   useEffect(() => {
     setMounted(true);
-    
     const initLeaflet = async () => {
       const L = (await import('leaflet')).default;
       const container = L.DomUtil.get('tactical-map-canvas');
@@ -64,3 +63,52 @@ export default function ConquestPage() {
   if (!mounted || !mapCRS || loading) {
     return (
       <div style={{ background: '#111', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader2 className="animate-spin" color="#d4af37" />
+      </div>
+    );
+  }
+
+  // Calculation variables
+  const capturedCount = boxes.filter(b => b.status === 'captured').length;
+  const progressPercent = ((capturedCount / 122) * 100).toFixed(1);
+
+  return (
+    <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', position: 'relative' }}>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      
+      <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000 }}>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37', textDecoration: 'none', fontSize: '12px', letterSpacing: '2px', marginBottom: '10px' }}>
+          <ChevronLeft size={16} /> RETURN TO HUB
+        </Link>
+        <h1 style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px' }}>
+          MONTANA 122: CONQUEST
+        </h1>
+        <p style={{ color: '#22c55e', fontWeight: 'bold', margin: 0 }}>SECURED: {progressPercent}%</p>
+      </div>
+
+      <MapContainer 
+        id="tactical-map-canvas"
+        ref={mapRef}
+        center={[0, 0]} 
+        zoom={0} 
+        minZoom={-1} 
+        maxZoom={2} 
+        crs={mapCRS}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <ImageOverlay url="/montana-map.jpg" bounds={[[-500, -500], [500, 500]]} />
+        {boxes.map((box, i) => (
+          <Rectangle 
+            key={box.id || i}
+            bounds={getBounds(i)}
+            pathOptions={{
+              color: box.status === 'captured' ? '#22c55e' : '#ff4444',
+              fillOpacity: 0.3,
+              weight: 1
+            }}
+          />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}

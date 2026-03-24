@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { sb } from "../../db/supabase"; // Using your existing connection
+import { sb } from "../../db/supabase"; 
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Dynamic imports to prevent Leaflet from crashing during build
+// Dynamic imports are good, but we need to ensure Leaflet is handled correctly
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -15,18 +15,27 @@ export default function ConquestPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [mapCRS, setMapCRS] = useState<any>(null);
+  
+  // Create a reference to the map instance
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
     setMounted(true);
     
-    // Load Leaflet CRS
     const initLeaflet = async () => {
       const L = (await import('leaflet')).default;
+      
+      // FIX: Check if map container is already initialized and reset it
+      const container = L.DomUtil.get('tactical-map-canvas');
+      if (container !== null) {
+        // @ts-ignore
+        container._leaflet_id = null;
+      }
+      
       setMapCRS(L.CRS.Simple);
     };
     initLeaflet();
 
-    // Fetch Tactical Data
     const fetchBoxes = async () => {
       try {
         const { data, error } = await sb.from('montana_conquest').select('*');
@@ -39,9 +48,15 @@ export default function ConquestPage() {
       }
     };
     fetchBoxes();
+
+    // CLEANUP: Tell React to destroy the map if this component unmounts
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
+    };
   }, []);
 
-  // Grid calibration for Daisy Hill Grain Elevator
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
@@ -66,7 +81,6 @@ export default function ConquestPage() {
     <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', position: 'relative' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
-      {/* Tactical HUD Overlay */}
       <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, pointerEvents: 'none' }}>
         <Link href="/dashboard" style={{ 
           display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37', 
@@ -82,5 +96,31 @@ export default function ConquestPage() {
       </div>
 
       <MapContainer 
-        center={[0, 0]} zoom={0} minZoom={-1} maxZoom={2} 
-        style={{
+        id="tactical-map-canvas"
+        ref={mapRef}
+        center={[0, 0]} 
+        zoom={0} 
+        minZoom={-1} 
+        maxZoom={2} 
+        crs={mapCRS}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <ImageOverlay 
+          url="/montana-map.jpg" 
+          bounds={[[-500, -500], [500, 500]]} 
+        />
+        {boxes.map((box, i) => (
+          <Rectangle 
+            key={box.id || i}
+            bounds={getBounds(i)}
+            pathOptions={{
+              color: box.status === 'captured' ? '#22c55e' : '#ff4444',
+              fillOpacity: 0.3,
+              weight: 1
+            }}
+          />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}

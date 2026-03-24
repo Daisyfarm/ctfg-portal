@@ -5,7 +5,7 @@ import { sb } from "../../db/supabase";
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Dynamic imports for Leaflet components
+// Dynamic imports
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -22,7 +22,7 @@ export default function ConquestPage() {
     const initLeaflet = async () => {
       const L = (await import('leaflet')).default;
       const container = L.DomUtil.get('tactical-map-canvas');
-      if (container !== null) {
+      if (container) {
         // @ts-ignore
         container._leaflet_id = null;
       }
@@ -30,33 +30,25 @@ export default function ConquestPage() {
     };
     initLeaflet();
 
-    const fetchBoxes = async () => {
-      try {
-        const { data } = await sb.from('montana_conquest').select('*');
-        if (data) setBoxes(data.sort((a, b) => (a.id || 0) - (b.id || 0)));
-      } catch (err) {
-        console.error("Sync Error:", err);
-      } finally {
-        setLoading(false);
-      }
+    const fetchData = async () => {
+      const { data } = await sb.from('montana_conquest').select('*');
+      if (data) setBoxes(data.sort((a, b) => (a.id || 0) - (b.id || 0)));
+      setLoading(false);
     };
-    fetchBoxes();
+    fetchData();
 
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-      }
+      if (mapRef.current) mapRef.current.remove();
     };
   }, []);
 
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
-    const width = 55; const height = 35;
     const startX = 220; const startY = -350; 
     return [
-      [startX - (row * height), startY + (col * width)], 
-      [startX - ((row + 1) * height), startY + ((col + 1) * width)]
+      [startX - (row * 35), startY + (col * 55)], 
+      [startX - ((row + 1) * 35), startY + ((col + 1) * 55)]
     ] as [[number, number], [number, number]];
   };
 
@@ -68,22 +60,21 @@ export default function ConquestPage() {
     );
   }
 
-  // Calculation variables
   const capturedCount = boxes.filter(b => b.status === 'captured').length;
   const progressPercent = ((capturedCount / 122) * 100).toFixed(1);
 
   return (
-    <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', position: 'relative' }}>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <div id="conquest-root" style={{ height: '100vh', width: '100%', background: '#050505', position: 'relative' }}>
+      <style dangerouslySetInnerHTML={{ __html: `.leaflet-container { background: #000 !important; }` }} />
       
       <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000 }}>
-        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37', textDecoration: 'none', fontSize: '12px', letterSpacing: '2px', marginBottom: '10px' }}>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37', textDecoration: 'none', fontSize: '12px', letterSpacing: '2px' }}>
           <ChevronLeft size={16} /> RETURN TO HUB
         </Link>
-        <h1 style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px' }}>
+        <h1 style={{ color: 'white', margin: '5px 0', fontSize: '24px', fontWeight: '900' }}>
           MONTANA 122: CONQUEST
         </h1>
-        <p style={{ color: '#22c55e', fontWeight: 'bold', margin: 0 }}>SECURED: {progressPercent}%</p>
+        <p style={{ color: '#22c55e', margin: 0 }}>SECURED: {progressPercent}%</p>
       </div>
 
       <MapContainer 
@@ -91,8 +82,6 @@ export default function ConquestPage() {
         ref={mapRef}
         center={[0, 0]} 
         zoom={0} 
-        minZoom={-1} 
-        maxZoom={2} 
         crs={mapCRS}
         style={{ height: '100%', width: '100%' }}
       >

@@ -1,145 +1,111 @@
-"use client";
-import { useState } from 'react';
-import { sb } from "@/db/supabase"; 
-import { ArrowRight, Lock, Sprout, UserPlus, ShieldCheck } from 'lucide-react';
+import { supabase } from '@/db/supabase';
 
-export default function Homepage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [status, setStatus] = useState({ type: '', msg: '' });
+export default async function Home() {
+  // 1. Fetch the conquest data from Supabase
+  const { data: fields, error } = await supabase
+    .from('montana_conquest')
+    .select('*')
+    .order('field_number', { ascending: true });
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus({ type: '', msg: '' });
+  if (error) {
+    console.error('Error fetching fields:', error);
+  }
 
-    if (isRegistering) {
-      // Create New Operator
-      const { data, error } = await sb.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: { username: email.split('@')[0] } // Default username from email
-        }
-      });
-      if (error) setStatus({ type: 'error', msg: error.message });
-      else setStatus({ type: 'success', msg: "ENROLLMENT SUCCESSFUL. YOU MAY NOW LOGIN." });
-    } else {
-      // Existing Operator Login
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) setStatus({ type: 'error', msg: "ACCESS DENIED: INVALID CREDENTIALS" });
-      else window.location.href = '/dashboard';
-    }
-  };
+  // 2. Calculate Stats
+  const ownedCount = fields?.filter((f: any) => f.is_owned).length || 0;
+  const totalFields = 122;
+  const progressPercentage = ((ownedCount / totalFields) * 100).toFixed(1);
 
   return (
-    <main style={{ 
-      backgroundImage: 'url("/image_1451a7.jpg")', 
-      backgroundSize: 'cover', 
-      backgroundPosition: 'center', 
-      backgroundAttachment: 'fixed',
-      height: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      fontFamily: 'serif'
-    }}>
-      {/* Dark Overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8))' }} />
-
-      <div style={{ 
-        position: 'relative', 
-        background: 'rgba(10, 10, 10, 0.9)', 
-        backdropFilter: 'blur(12px)',
-        padding: '60px 45px', 
-        borderRadius: '2px', 
-        border: '1px solid #d4af37',
-        textAlign: 'center', 
-        width: '420px', 
-        boxShadow: '0 30px 60px rgba(0,0,0,0.9)'
-      }}>
-        
-        {/* Logo Section */}
-        <div style={{ marginBottom: '40px' }}>
-          <Sprout color="#d4af37" size={45} style={{ marginBottom: '15px' }} />
-          <h1 style={{ color: '#d4af37', letterSpacing: '8px', fontSize: '32px', margin: 0, fontWeight: 'bold' }}>DAISY'S DREAM</h1>
-          <p style={{ color: '#8da989', fontSize: '11px', letterSpacing: '3px', marginTop: '12px' }}>
-            {isRegistering ? 'NEW OPERATOR ENROLLMENT' : 'SECURE FARMING NETWORK'}
-          </p>
-        </div>
-
-        {/* Auth Form */}
-        <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div style={{ textAlign: 'left' }}>
-            <label style={{ color: '#444', fontSize: '10px', letterSpacing: '1px', marginLeft: '5px' }}>OFFICIAL EMAIL</label>
-            <input 
-              type="email" 
-              required
-              onChange={e => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '14px', background: '#000', border: '1px solid #222', color: '#fff', fontSize: '13px', marginTop: '5px', outline: 'none' }}
-            />
-          </div>
-
-          <div style={{ textAlign: 'left' }}>
-            <label style={{ color: '#444', fontSize: '10px', letterSpacing: '1px', marginLeft: '5px' }}>ACCESS KEY</label>
-            <input 
-              type="password" 
-              required
-              onChange={e => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '14px', background: '#000', border: '1px solid #222', color: '#d4af37', fontSize: '13px', marginTop: '5px', outline: 'none' }}
-            />
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#F5BD02] selection:text-black">
+      
+      {/* HEADER SECTION */}
+      <header className="border-b border-white/10 bg-[#0f0f0f]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tighter uppercase italic flex items-center gap-2">
+              <span className="text-[#F5BD02]">Daisy Hill</span> Farms
+            </h1>
+            <p className="text-xs font-mono text-gray-500 uppercase tracking-widest">Montana 4X • Borderline Conquest</p>
           </div>
           
-          <button style={{ 
-            background: isRegistering ? '#8da989' : '#d4af37', 
-            color: '#000', 
-            padding: '18px', 
-            border: 'none', 
-            fontWeight: 'bold', 
-            cursor: 'pointer',
-            letterSpacing: '3px', 
-            fontSize: '13px',
-            marginTop: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px'
-          }}>
-            {isRegistering ? <UserPlus size={18}/> : <ShieldCheck size={18}/>}
-            {isRegistering ? 'REGISTER IDENTITY' : 'INITIATE UPLINK'}
-          </button>
-
-          {/* Status Message */}
-          {status.msg && (
-            <div style={{ 
-              padding: '10px', 
-              background: status.type === 'error' ? 'rgba(255,0,0,0.1)' : 'rgba(141,169,137,0.1)',
-              border: `1px solid ${status.type === 'error' ? '#ff4d4d' : '#8da989'}`,
-              borderRadius: '2px'
-            }}>
-              <p style={{ color: status.type === 'error' ? '#ff4d4d' : '#8da989', fontSize: '11px', margin: 0 }}>
-                {status.msg}
-              </p>
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="text-[10px] text-gray-400 uppercase font-bold">Land Captured</p>
+              <p className="text-2xl font-mono font-bold text-[#F5BD02]">{ownedCount}<span className="text-gray-600 text-sm">/122</span></p>
             </div>
-          )}
-
-          {/* Toggle Button */}
-          <div style={{ marginTop: '25px', borderTop: '1px solid #1a1a1a', paddingTop: '20px' }}>
-            <button 
-              type="button"
-              onClick={() => setIsRegistering(!isRegistering)}
-              style={{ background: 'transparent', color: '#555', fontSize: '11px', border: 'none', cursor: 'pointer', textDecoration: 'underline', letterSpacing: '1px' }}
+            <a 
+              href="https://youtube.com/@DaisyHillFarms" 
+              className="bg-[#F5BD02] text-black px-4 py-2 rounded font-black uppercase text-sm hover:bg-white transition-colors"
             >
-              {isRegistering ? 'RETURN TO LOGIN TERMINAL' : 'REQUEST NEW OPERATOR ACCESS'}
-            </button>
+              Watch Live
+            </a>
           </div>
-        </form>
-      </div>
+        </div>
+      </header>
 
-      {/* Footer Version Tag */}
-      <div style={{ position: 'absolute', bottom: '20px', color: '#333', fontSize: '10px', letterSpacing: '2px' }}>
-        DAISY_OS v2.0.4 - ENCRYPTED CONNECTION
-      </div>
-    </main>
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        
+        {/* PROGRESS DASHBOARD */}
+        <section className="mb-16">
+          <div className="bg-[#111] border border-white/5 rounded-2xl p-8 shadow-2xl">
+            <div className="flex justify-between items-end mb-4">
+              <h2 className="text-xl font-bold uppercase tracking-tight">Conquest Progress</h2>
+              <span className="text-[#F5BD02] font-mono font-bold">{progressPercentage}%</span>
+            </div>
+            {/* Progress Bar Container */}
+            <div className="w-full bg-white/5 h-4 rounded-full overflow-hidden border border-white/5">
+              <div 
+                className="h-full bg-gradient-to-r from-[#2D5A27] to-[#F5BD02] transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(245,189,2,0.3)]"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 122-FIELD GRID */}
+        <section>
+          <div className="flex items-center gap-4 mb-8">
+            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400">Field Registry</h3>
+            <div className="h-px flex-1 bg-white/10"></div>
+          </div>
+
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3">
+            {fields?.map((field: any) => (
+              <div 
+                key={field.field_number}
+                className={`group relative aspect-square flex flex-col items-center justify-center rounded-lg border transition-all duration-300 ${
+                  field.is_owned 
+                  ? 'bg-[#2D5A27]/20 border-[#2D5A27] text-white shadow-[inset_0_0_15px_rgba(45,90,39,0.4)]' 
+                  : 'bg-white/[0.02] border-white/10 text-gray-600 hover:border-white/30'
+                }`}
+              >
+                <span className="text-[10px] uppercase font-bold opacity-40 mb-1">Fld</span>
+                <span className={`text-xl font-bold font-mono ${field.is_owned ? 'text-green-400' : ''}`}>
+                  {field.field_number}
+                </span>
+                
+                {/* Status Indicator */}
+                <div className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full ${field.is_owned ? 'bg-green-400 animate-pulse' : 'bg-transparent'}`} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FOOTER INFO */}
+        <footer className="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-8 text-gray-500 text-sm">
+          <div>
+            <p className="font-bold text-white mb-2 uppercase tracking-tighter">Rig Specs</p>
+            <p>Ryzen 5 3600 | GTX 1660 Super</p>
+            <p>AMD FSR 3.0 Quality Mode</p>
+          </div>
+          <div className="text-right">
+            <p className="italic">"One acre at a time."</p>
+            <p>© 2026 Daisy Hill Farms</p>
+          </div>
+        </footer>
+
+      </main>
+    </div>
   );
 }

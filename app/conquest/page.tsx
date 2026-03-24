@@ -1,60 +1,86 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { sb } from "../../db/supabase"; 
-import { LogOut, Flower2, Loader2, Map as MapIcon } from 'lucide-react'; // Added MapIcon
-import Link from 'next/link'; // Added Link for navigation
+import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { sb } from "../../db/supabase"; // Using your existing connection
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
-export default function Dashboard() {
-  const [profile, setProfile] = useState<any>(null);
+// Dynamic imports to prevent Leaflet from crashing during build
+const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
+const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
+const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
+
+export default function ConquestPage() {
+  const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [mapCRS, setMapCRS] = useState<any>(null);
 
   useEffect(() => {
-    async function checkUser() {
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) {
-        window.location.href = '/';
-        return;
+    setMounted(true);
+    
+    // Load Leaflet CRS
+    const initLeaflet = async () => {
+      const L = (await import('leaflet')).default;
+      setMapCRS(L.CRS.Simple);
+    };
+    initLeaflet();
+
+    // Fetch Tactical Data
+    const fetchBoxes = async () => {
+      try {
+        const { data, error } = await sb.from('montana_conquest').select('*');
+        if (error) throw error;
+        if (data) setBoxes(data.sort((a, b) => (a.id || 0) - (b.id || 0)));
+      } catch (err) {
+        console.error("Tactical Sync Error:", err);
+      } finally {
+        setLoading(false);
       }
-      const { data } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-      setProfile(data || { username: 'Operator', balance: 0 });
-      setLoading(false);
-    }
-    checkUser();
+    };
+    fetchBoxes();
   }, []);
 
-  if (loading) return (
-    <div style={{ background: '#111', color: '#d4af37', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Loader2 className="animate-spin" />
+  // Grid calibration for Daisy Hill Grain Elevator
+  const getBounds = (index: number) => {
+    const row = Math.floor(index / 11);
+    const col = index % 11;
+    const width = 55; const height = 35;
+    const startX = 220; const startY = -350; 
+    return [
+      [startX - (row * height), startY + (col * width)], 
+      [startX - ((row + 1) * height), startY + ((col + 1) * width)]
+    ] as [[number, number], [number, number]];
+  };
+
+  if (!mounted || !mapCRS) return (
+    <div style={{ background: '#111', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Loader2 className="animate-spin" color="#d4af37" />
     </div>
   );
+
+  const capturedCount = boxes.filter(b => b.status === 'captured').length;
+  const progress = ((capturedCount / 122) * 100).toFixed(1);
 
   return (
-    <div style={{ background: '#111', minHeight: '100vh', color: '#f5f5dc', padding: '40px', fontFamily: 'serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #d4af37', paddingBottom: '20px' }}>
-        <h2 style={{ margin: 0, letterSpacing: '2px' }}>DAISY'S HUB</h2>
-        <button onClick={() => sb.auth.signOut().then(() => window.location.href = '/')} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>
-          <LogOut size={20} />
-        </button>
+    <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', position: 'relative' }}>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      
+      {/* Tactical HUD Overlay */}
+      <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, pointerEvents: 'none' }}>
+        <Link href="/dashboard" style={{ 
+          display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37', 
+          textDecoration: 'none', fontSize: '12px', letterSpacing: '2px', marginBottom: '10px',
+          pointerEvents: 'auto'
+        }}>
+          <ChevronLeft size={16} /> RETURN TO HUB
+        </Link>
+        <h1 style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px' }}>
+          MONTANA 122: CONQUEST
+        </h1>
+        <p style={{ color: '#22c55e', fontWeight: 'bold', margin: 0 }}>SECURED: {progress}%</p>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '80px' }}>
-        <Flower2 color="#d4af37" size={48} />
-        <p style={{ fontSize: '10px', color: '#555', marginTop: '20px', letterSpacing: '2px' }}>CREDIT BALANCE</p>
-        <h1 style={{ fontSize: '64px', color: '#8da989', margin: 0 }}>${profile?.balance?.toLocaleString()}</h1>
-        
-        {/* NEW: TACTICAL MAP LINK */}
-        <div style={{ marginTop: '50px' }}>
-          <Link href="/conquest" style={{ 
-            display: 'inline-flex', alignItems: 'center', gap: '10px',
-            padding: '12px 24px', border: '1px solid #d4af37', color: '#d4af37',
-            textDecoration: 'none', fontSize: '12px', letterSpacing: '2px',
-            transition: 'all 0.3s ease'
-          }}>
-            <MapIcon size={16} />
-            OPEN MONTANA 122 MAP
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+      <MapContainer 
+        center={[0, 0]} zoom={0} minZoom={-1} maxZoom={2} 
+        style={{

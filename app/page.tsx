@@ -14,11 +14,19 @@ const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), 
 
 export default function FarmMap() {
   const [boxes, setBoxes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBoxes = async () => {
-      const { data } = await supabase.from('montana_conquest').select('*').order('id', { ascending: true });
-      if (data) setBoxes(data);
+      try {
+        const { data, error } = await supabase.from('montana_conquest').select('*');
+        if (error) throw error;
+        if (data) setBoxes(data.sort((a, b) => a.id - b.id));
+      } catch (err) {
+        console.error("Supabase Error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchBoxes();
   }, []);
@@ -36,9 +44,7 @@ export default function FarmMap() {
     ] as [[number, number], [number, number]];
   };
 
-  const percentage = boxes.length > 0 
-    ? ((boxes.filter(b => b.status === 'captured').length / 122) * 100).toFixed(1) 
-    : "0.0";
+  const capturedCount = boxes.filter(b => b.status === 'captured').length;
 
   return (
     <div style={{ height: '100vh', width: '100%', background: '#0a0a0a' }}>
@@ -47,18 +53,13 @@ export default function FarmMap() {
       <div style={{ position: 'absolute', top: '25px', left: '70px', zIndex: 1000, color: 'white', textShadow: '2px 2px 4px black' }}>
         <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900' }}>DAISY HILL FARMS</h1>
         <p style={{ fontSize: '18px', color: '#22c55e', fontWeight: 'bold' }}>
-          CONQUEST: {percentage}%
+          {loading ? "SYNCING..." : `CONQUEST: ${((capturedCount / 122) * 100).toFixed(1)}%`}
         </p>
       </div>
 
-      <MapContainer 
-        center={[0, 0]} 
-        zoom={0} 
-        style={{ height: '100%', width: '100%' }} 
-        attributionControl={false}
-      >
+      <MapContainer center={[0, 0]} zoom={0} style={{ height: '100%', width: '100%' }} attributionControl={false}>
         <ImageOverlay url="/map.png" bounds={[[-400, -600], [400, 600]]} />
-        {boxes.map((box, i) => (
+        {!loading && boxes.map((box, i) => (
           <Rectangle
             key={box.id || i}
             bounds={getBounds(i)}
@@ -69,9 +70,7 @@ export default function FarmMap() {
               fillOpacity: box.status === 'captured' ? 0.5 : 0.0,
             }}
             eventHandlers={{
-              mouseover: (e) => {
-                e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.8 }); 
-              },
+              mouseover: (e) => { e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.8 }); },
               mouseout: (e) => {
                 e.target.setStyle({
                   fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
@@ -79,10 +78,8 @@ export default function FarmMap() {
                 });
               },
               click: async () => {
-                const { error } = await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
-                if (!error) {
-                  setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
-                }
+                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
+                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
               }
             }}
           />

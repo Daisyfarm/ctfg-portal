@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { supabase } from '@/db/supabase';
+import { sb } from '@/db/supabase'; // Swapped from supabase to sb
 
 export default function GoalAlert() {
   const [isReached, setIsReached] = useState(false);
@@ -10,7 +10,7 @@ export default function GoalAlert() {
   useEffect(() => {
     // Initial Fetch
     const fetchTotal = async () => {
-      const { data } = await supabase.from('montana_conquest').select('sponsor_amount');
+      const { data } = await sb.from('montana_conquest').select('sponsor_amount');
       const currentTotal = data?.reduce((sum, f) => sum + (f.sponsor_amount || 0), 0) || 0;
       setTotal(currentTotal);
       if (currentTotal >= GOAL_TARGET) setIsReached(true);
@@ -19,7 +19,7 @@ export default function GoalAlert() {
     fetchTotal();
 
     // Real-time listener for sponsorship updates
-    const channel = supabase
+    const channel = sb
       .channel('goal-tracking')
       .on(
         'postgres_changes',
@@ -30,7 +30,7 @@ export default function GoalAlert() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { sb.removeChannel(channel); };
   }, []);
 
   if (!isReached) return null;
@@ -67,7 +67,7 @@ export default function GoalAlert() {
         </div>
       </div>
 
-      {/* Background Spark Effects (CSS-only) */}
+      {/* Background Spark Effects */}
       <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-transparent via-[#F5BD02]/20 to-transparent animate-pulse" />
       <div className="absolute top-0 right-1/4 w-1 h-full bg-gradient-to-b from-transparent via-[#F5BD02]/20 to-transparent animate-pulse delay-500" />
     </div>

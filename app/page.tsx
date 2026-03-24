@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Dynamic imports to prevent SSR issues
+// Dynamic imports are essential for Leaflet in Next.js
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -17,25 +17,26 @@ export default function FarmMap() {
   const [boxes, setBoxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [crs, setCrs] = useState<any>(null);
+  const [mapCRS, setMapCRS] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Safety check to set CRS only when Leaflet is available in the window
-    const loadLeaflet = async () => {
-      const L = await import('leaflet');
-      setCrs(L.CRS.Simple);
-    };
-    loadLeaflet();
 
+    // 1. Safe Leaflet Loading: Import L directly to access CRS.Simple
+    const initLeaflet = async () => {
+      const L = (await import('leaflet')).default;
+      setMapCRS(L.CRS.Simple);
+    };
+    initLeaflet();
+
+    // 2. Data Fetching
     const fetchBoxes = async () => {
       try {
         const { data, error } = await supabase.from('montana_conquest').select('*');
         if (error) throw error;
         if (data) setBoxes(data.sort((a, b) => a.id - b.id));
       } catch (err) {
-        console.error("Sync Error:", err);
+        console.error("Supabase Sync Error:", err);
       } finally {
         setLoading(false);
       }
@@ -43,7 +44,7 @@ export default function FarmMap() {
     fetchBoxes();
   }, []);
 
-  // PERFECTION: Grid coordinates for the Daisy Hill image
+  // PERFECTION: Calibrated grid for the Daisy Hill wide-angle photo
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
@@ -57,8 +58,10 @@ export default function FarmMap() {
     ] as [[number, number], [number, number]];
   };
 
-  // Don't render until the browser is ready
-  if (!mounted || !crs) return <div style={{ background: '#050505', height: '100vh' }} />;
+  // Prevent rendering until both the component is mounted AND Leaflet is ready
+  if (!mounted || !mapCRS) {
+    return <div style={{ background: '#050505', height: '100vh', width: '100%' }} />;
+  }
 
   const capturedCount = boxes.filter(b => b.status === 'captured').length;
   const progress = boxes.length > 0 ? ((capturedCount / boxes.length) * 100).toFixed(1) : "0.0";
@@ -68,10 +71,19 @@ export default function FarmMap() {
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
       {/* Tactical HUD Header */}
-      <div style={{ position: 'absolute', top: '30px', left: '70px', zIndex: 1000, color: 'white', textShadow: '0px 0px 10px rgba(34, 197, 94, 0.5)' }}>
-        <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '3px' }}>DAISY HILL FARMS</h1>
+      <div style={{ 
+        position: 'absolute', top: '30px', left: '70px', zIndex: 1000, 
+        color: 'white', textShadow: '0px 0px 10px rgba(34, 197, 94, 0.5)' 
+      }}>
+        <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '3px' }}>
+          DAISY HILL FARMS
+        </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
-          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: loading ? '#facc15' : '#22c55e', boxShadow: '0 0 8px currentColor' }}></div>
+          <div style={{ 
+            width: '10px', height: '10px', borderRadius: '50%', 
+            background: loading ? '#facc15' : '#22c55e', 
+            boxShadow: '0 0 8px currentColor' 
+          }}></div>
           <p style={{ fontSize: '20px', color: '#22c55e', fontWeight: 'bold', margin: 0 }}>
             {loading ? "SYNCING..." : `CONQUEST: ${progress}%`}
           </p>
@@ -85,7 +97,7 @@ export default function FarmMap() {
         maxZoom={2} 
         style={{ height: '100%', width: '100%' }} 
         attributionControl={false}
-        crs={crs}
+        crs={mapCRS} // Injected safely after loading
       >
         <ImageOverlay url="/map.png" bounds={[[-600, -800], [600, 800]]} />
         
@@ -100,7 +112,9 @@ export default function FarmMap() {
               fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
             }}
             eventHandlers={{
-              mouseover: (e) => { e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7, color: '#fbbf24' }); },
+              mouseover: (e) => { 
+                e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7, color: '#fbbf24' }); 
+              },
               mouseout: (e) => {
                 e.target.setStyle({
                   color: 'rgba(255,255,255,0.15)',
@@ -109,5 +123,14 @@ export default function FarmMap() {
                 });
               },
               click: async () => {
-                // Instant update for speed
-                set
+                // Optimistic UI for zero lag
+                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
+                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
+              }
+            }}
+          />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}

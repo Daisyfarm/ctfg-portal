@@ -23,27 +23,65 @@ export default function FarmMap() {
     fetchBoxes();
   }, []);
 
-  // NEW CALIBRATED GRID FOR YOUR PHOTO
   const getBounds = (index: number) => {
-    const row = Math.floor(index / 11); // 11 boxes wide
+    const row = Math.floor(index / 11);
     const col = index % 11;
-    const width = 35;   // Smaller width to fit the photo perspective
-    const height = 25;  // Smaller height
-    const startX = 150;  // Moves the whole grid up/down
-    const startY = -200; // Moves the whole grid left/right
-    
+    const width = 35;
+    const height = 25;
+    const startX = 150;
+    const startY = -200;
     return [
       [startX - (row * height), startY + (col * width)], 
       [startX - ((row + 1) * height), startY + ((col + 1) * width)]
     ] as [[number, number], [number, number]];
   };
 
+  const capturedCount = boxes.filter(b => b.status === 'captured').length;
+  const percentage = ((capturedCount / 122) * 100).toFixed(1);
+
   return (
     <div style={{ height: '100vh', width: '100%', background: '#0a0a0a' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
-      {/* HUD Header */}
-      <div style={{ position: 'absolute', top: 25, left: 70, zIndex: 1000, color: 'white', textShadow: '2px 2px 4px black' }}>
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', letterSpacing: '2px' }}>DAISY HILL FARMS</h1>
+      <div style={{ position: 'absolute', top: '25px', left: '70px', zIndex: 1000, color: 'white', textShadow: '2px 2px 4px black' }}>
+        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900' }}>DAISY HILL FARMS</h1>
         <p style={{ fontSize: '18px', color: '#22c55e', fontWeight: 'bold' }}>
-          CONQUEST: {((boxes.filter(b => b.status === 'captured').length / 122) * 1
+          CONQUEST: {percentage}%
+        </p>
+      </div>
+
+      <MapContainer center={[0, 0]} zoom={0} style={{ height: '100%', width: '100%' }} attributionControl={false}>
+        <ImageOverlay url="/map.png" bounds={[[-400, -600], [400, 600]]} />
+        {boxes.map((box, i) => (
+          <Rectangle
+            key={box.id || i}
+            bounds={getBounds(i)}
+            pathOptions={{
+              color: 'rgba(255,255,255,0.2)',
+              weight: 1,
+              fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
+              fillOpacity: box.status === 'captured' ? 0.5 : 0.0,
+            }}
+            eventHandlers={{
+              mouseover: (e) => {
+                e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.8 }); 
+              },
+              mouseout: (e) => {
+                e.target.setStyle({
+                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
+                  fillOpacity: box.status === 'captured' ? 0.5 : 0.0,
+                });
+              },
+              click: async () => {
+                const { error } = await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
+                if (!error) {
+                  setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
+                }
+              }
+            }}
+          />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}

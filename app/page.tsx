@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { createClient } from '@supabase/supabase-js';
 
+// 1. Initialize Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// 2. Load Leaflet components safely for Next.js
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -15,21 +17,26 @@ const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), 
 export default function FarmMap() {
   const [boxes, setBoxes] = useState<any[]>([]);
 
+  // 3. Fetch the 122 boxes from your Supabase table
   useEffect(() => {
     const fetchBoxes = async () => {
-      const { data } = await supabase.from('montana_conquest').select('*').order('id', { ascending: true });
+      const { data } = await supabase
+        .from('montana_conquest')
+        .select('*')
+        .order('id', { ascending: true });
       if (data) setBoxes(data);
     };
     fetchBoxes();
   }, []);
 
+  // 4. Grid Logic: This positions the 122 boxes in a clean grid
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
-    const width = 90;  
-    const height = 70; 
-    const startX = 420; 
-    const startY = -490; 
+    const width = 85;  
+    const height = 65; 
+    const startX = 400; 
+    const startY = -480; 
     
     return [
       [startX - (row * height), startY + (col * width)], 
@@ -39,51 +46,23 @@ export default function FarmMap() {
 
   return (
     <div style={{ height: '100vh', width: '100%', background: '#050505' }}>
+      {/* Stylesheet for the map */}
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
-      <div style={{ position: 'absolute', top: 25, left: 70, zIndex: 1000, color: 'white', textShadow: '3px 3px 5px black' }}>
-        <h1 style={{ margin: 0, fontSize: '32px', letterSpacing: '3px', fontWeight: '900' }}>DAISY HILL FARMS</h1>
-        <p style={{ fontSize: '20px', color: '#4ade80', marginTop: '5px' }}>
-          LIVE CONQUEST: {((boxes.filter(b => b.status === 'captured').length / 122) * 100).toFixed(1)}%
+      {/* Tactical HUD Header */}
+      <div style={{ position: 'absolute', top: 25, left: 70, zIndex: 1000, color: 'white', textShadow: '2px 2px 4px black' }}>
+        <h1 style={{ margin: 0, fontSize: '28px', letterSpacing: '2px', fontWeight: 'bold' }}>DAISY HILL FARMS</h1>
+        <p style={{ fontSize: '18px', color: '#22c55e', fontWeight: 'bold' }}>
+          CONQUEST PROGRESS: {((boxes.filter(b => b.status === 'captured').length / 122) * 100).toFixed(1)}%
         </p>
       </div>
 
-      <MapContainer center={[0, 0]} zoom={0} style={{ height: '100%', width: '100%' }} attributionControl={false}>
+      <MapContainer 
+        center={[0, 0]} 
+        zoom={0} 
+        style={{ height: '100%', width: '100%' }} 
+        attributionControl={false}
+      >
         
-        {/* Working 2026 Direct Link */}
-        <ImageOverlay 
-          url="https://i.ibb.co/v4y8X4z/farm-map-tactical.png" 
-          bounds={[[-1000, -1000], [1000, 1000]]} 
-        />
-
-        {boxes.map((box, i) => (
-          <Rectangle
-            key={box.id}
-            bounds={getBounds(i)}
-            pathOptions={{
-              color: 'rgba(255,255,255,0.2)',
-              weight: 1,
-              fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-              fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
-            }}
-            eventHandlers={{
-              mouseover: (e) => {
-                e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7 }); 
-              },
-              mouseout: (e) => {
-                e.target.setStyle({
-                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-                  fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
-                });
-              },
-              click: async () => {
-                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
-                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
-              }
-            }}
-          />
-        ))}
-      </MapContainer>
-    </div>
-  );
-}
+        {/* 5. IMAGE BACKGROUND: Points to the 'map.png' in your GitHub /public folder */}
+        <ImageOverlay

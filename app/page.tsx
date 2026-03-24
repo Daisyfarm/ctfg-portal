@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { sb } from "../db/supabase"; 
 import { Shield, Terminal } from 'lucide-react';
@@ -17,6 +17,9 @@ export default function MontanaTerminal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // Ref to manage the looping radar sound
+  const radarAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -26,35 +29,50 @@ export default function MontanaTerminal() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // --- AMBIENT RADAR LOOP LOGIC ---
   useEffect(() => {
-    if (session) {
+    if (session && mounted) {
+      // Start radar loop when logged in
+      const audio = new Audio("https://cdn.freesound.org/previews/250/250711_4503881-lq.mp3");
+      audio.loop = true;
+      audio.volume = 0.15; // Keep it subtle in the background
+      audio.play().catch(() => console.log("Radar sound blocked until interaction"));
+      radarAudioRef.current = audio;
+
+      // Fetch Data
       sb.from('montana_conquest').select('*').then(({ data }) => data && setBoxes(data));
       sb.from('players').select('*').eq('id', session.user.id).single().then(({ data }) => data && setPlayer(data));
+    } else {
+      // Stop radar loop on logout
+      if (radarAudioRef.current) {
+        radarAudioRef.current.pause();
+        radarAudioRef.current = null;
+      }
     }
-  }, [session]);
+    return () => {
+      if (radarAudioRef.current) radarAudioRef.current.pause();
+    };
+  }, [session, mounted]);
 
-  // --- TACTICAL AUDIO ENGINE ---
-  const playSound = (url: string, volume = 0.4) => {
+  const playEffect = (url: string, volume = 0.4) => {
     const audio = new Audio(url);
     audio.volume = volume;
-    audio.play().catch(() => {}); // Catch prevents errors if browser blocks auto-play
+    audio.play().catch(() => {});
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
     setter(e.target.value);
-    // Light mechanical keyboard click
-    playSound("https://cdn.freesound.org/previews/256/256113_3263901-lq.mp3", 0.1);
+    playEffect("https://cdn.freesound.org/previews/256/256113_3263901-lq.mp3", 0.05);
   };
 
   const handleLogin = async () => {
     setLoading(true);
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
-      alert("ACCESS DENIED: " + error.message);
-      playSound("https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3", 0.5); // Error buzz
+      alert("ACCESS DENIED");
+      playEffect("https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3", 0.4);
     } else {
-      playSound("https://cdn.freesound.org/previews/219/219477_4058123-lq.mp3", 0.6); // Success Sonar
+      playEffect("https://cdn.freesound.org/previews/219/219477_4058123-lq.mp3", 0.5);
     }
     setLoading(false);
   };
@@ -64,57 +82,28 @@ export default function MontanaTerminal() {
   if (!session) {
     return (
       <div style={{ height: '100vh', width: '100%', position: 'relative', overflow: 'hidden', backgroundColor: '#000', fontFamily: 'monospace' }}>
-        
-        {/* THE MOUNTAIN BACKDROP */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '200%', height: '100%',
           backgroundImage: 'url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80")', 
           backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.5,
           animation: 'panBackground 80s linear infinite'
         }} />
-
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%)', backgroundSize: '100% 4px', zIndex: 1, pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '360px', padding: '45px', backgroundColor: 'rgba(5, 5, 5, 0.9)', border: '1px solid #d4af3733', textAlign: 'center', backdropFilter: 'blur(3px)', boxShadow: '0 0 50px rgba(0,0,0,0.8)' }}>
+          <div style={{ width: '360px', padding: '45px', backgroundColor: 'rgba(5, 5, 5, 0.9)', border: '1px solid #d4af3733', textAlign: 'center', backdropFilter: 'blur(3px)' }}>
             <Shield size={42} color="#d4af37" style={{ marginBottom: '25px' }} />
             <h2 style={{ color: '#d4af37', letterSpacing: '4px', fontSize: '12px', marginBottom: '35px' }}>DAISY HILL SECURE UPLINK</h2>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <input 
-                type="email" 
-                placeholder="OPERATIVE EMAIL" 
-                value={email} 
-                onChange={(e) => handleTyping(e, setEmail)} 
-                style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} 
-              />
-              <input 
-                type="password" 
-                placeholder="ACCESS KEY" 
-                value={password} 
-                onChange={(e) => handleTyping(e, setPassword)} 
-                style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} 
-              />
-              <button 
-                onClick={handleLogin} 
-                disabled={loading} 
-                style={{ background: '#d4af37', color: '#000', padding: '14px', fontWeight: 'bold', border: 'none', letterSpacing: '2px', cursor: 'pointer', transition: 'all 0.2s' }}
-                onMouseEnter={() => playSound("https://cdn.freesound.org/previews/268/268168_5121236-lq.mp3", 0.1)} // Hover blip
-              >
+              <input type="email" placeholder="OPERATIVE EMAIL" value={email} onChange={(e) => handleTyping(e, setEmail)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} />
+              <input type="password" placeholder="ACCESS KEY" value={password} onChange={(e) => handleTyping(e, setPassword)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} />
+              <button onClick={handleLogin} disabled={loading} style={{ background: '#d4af37', color: '#000', padding: '14px', fontWeight: 'bold', border: 'none', letterSpacing: '2px', cursor: 'pointer' }}>
                 {loading ? "INITIALIZING..." : "INITIATE ACCESS"}
               </button>
             </div>
-            <p style={{ fontSize: '9px', color: '#444', marginTop: '25px' }}>DAISY HILL TACTICAL // SECURE NODE</p>
           </div>
         </div>
-
-        <style jsx global>{`
-          @keyframes panBackground {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(-25%); }
-            100% { transform: translateX(0); }
-          }
-        `}</style>
+        <style jsx global>{` @keyframes panBackground { 0% { transform: translateX(0); } 50% { transform: translateX(-25%); } 100% { transform: translateX(0); } } `}</style>
       </div>
     );
   }
@@ -126,7 +115,7 @@ export default function MontanaTerminal() {
         <header style={{ position: 'absolute', top: 0, width: '100%', height: '50px', background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', alignItems: 'center', padding: '0 20px', borderBottom: '1px solid #d4af3722', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Terminal size={18} style={{ color: '#d4af37' }} />
-            <span style={{ letterSpacing: '2px', fontSize: '10px' }}>MONTANA 122 // ACTIVE</span>
+            <span style={{ letterSpacing: '2px', fontSize: '10px' }}>MONTANA 122 // TACTICAL FEED</span>
           </div>
           <button onClick={() => sb.auth.signOut()} style={{ background: 'none', border: '1px solid #ff4444', color: '#ff4444', padding: '4px 10px', fontSize: '9px', cursor: 'pointer' }}>DISCONNECT</button>
         </header>

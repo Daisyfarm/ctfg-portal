@@ -1,13 +1,16 @@
-import { supabase } from '@/db/supabase';
 import { NextResponse } from 'next/server';
+import { sb } from '@/db/supabase'; // Changed to sb
 
 export async function GET() {
-  const { data: fields } = await supabase
-    .from('montana_conquest')
-    .select('is_owned');
+  try {
+    const { data, error } = await sb
+      .from('montana_conquest')
+      .select('*');
 
-  const ownedCount = fields?.filter((f: any) => f.is_owned).length || 0;
+    if (error) throw error;
 
-  // This returns just the number or a short string for the bot to read
-  return new NextResponse(`${ownedCount}/122`);
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }

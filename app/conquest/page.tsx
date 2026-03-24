@@ -5,7 +5,7 @@ import { sb } from "../../db/supabase";
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Dynamic imports are good, but we need to ensure Leaflet is handled correctly
+// Dynamic imports for Leaflet components
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -15,8 +15,6 @@ export default function ConquestPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [mapCRS, setMapCRS] = useState<any>(null);
-  
-  // Create a reference to the map instance
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
@@ -24,32 +22,27 @@ export default function ConquestPage() {
     
     const initLeaflet = async () => {
       const L = (await import('leaflet')).default;
-      
-      // FIX: Check if map container is already initialized and reset it
       const container = L.DomUtil.get('tactical-map-canvas');
       if (container !== null) {
         // @ts-ignore
         container._leaflet_id = null;
       }
-      
       setMapCRS(L.CRS.Simple);
     };
     initLeaflet();
 
     const fetchBoxes = async () => {
       try {
-        const { data, error } = await sb.from('montana_conquest').select('*');
-        if (error) throw error;
+        const { data } = await sb.from('montana_conquest').select('*');
         if (data) setBoxes(data.sort((a, b) => (a.id || 0) - (b.id || 0)));
       } catch (err) {
-        console.error("Tactical Sync Error:", err);
+        console.error("Sync Error:", err);
       } finally {
         setLoading(false);
       }
     };
     fetchBoxes();
 
-    // CLEANUP: Tell React to destroy the map if this component unmounts
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
@@ -68,7 +61,7 @@ export default function ConquestPage() {
     ] as [[number, number], [number, number]];
   };
 
-  if (!mounted || !mapCRS) return (
+  if (!mounted || !mapCRS || loading) return (
     <div style={{ background: '#111', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Loader2 className="animate-spin" color="#d4af37" />
     </div>
@@ -97,30 +90,4 @@ export default function ConquestPage() {
 
       <MapContainer 
         id="tactical-map-canvas"
-        ref={mapRef}
-        center={[0, 0]} 
-        zoom={0} 
-        minZoom={-1} 
-        maxZoom={2} 
-        crs={mapCRS}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <ImageOverlay 
-          url="/montana-map.jpg" 
-          bounds={[[-500, -500], [500, 500]]} 
-        />
-        {boxes.map((box, i) => (
-          <Rectangle 
-            key={box.id || i}
-            bounds={getBounds(i)}
-            pathOptions={{
-              color: box.status === 'captured' ? '#22c55e' : '#ff4444',
-              fillOpacity: 0.3,
-              weight: 1
-            }}
-          />
-        ))}
-      </MapContainer>
-    </div>
-  );
-}
+        ref={mapRef

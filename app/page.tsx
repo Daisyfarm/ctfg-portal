@@ -47,10 +47,7 @@ export default function FarmMap() {
     const height = 35;
     const startX = 220; 
     const startY = -350; 
-    return [
-      [startX - (row * height), startY + (col * width)], 
-      [startX - ((row + 1) * height), startY + ((col + 1) * width)]
-    ] as [[number, number], [number, number]];
+    return [[startX - (row * height), startY + (col * width)], [startX - ((row + 1) * height), startY + ((col + 1) * width)]] as [[number, number], [number, number]];
   };
 
   const handleReset = async () => {
@@ -72,10 +69,20 @@ export default function FarmMap() {
     <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', fontFamily: 'sans-serif' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
+      {/* Animation Styles injected safely */}
+      <style>{`
+        @keyframes missionPulse {
+          0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+          100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+        }
+      `}</style>
+      
       {isComplete && (
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          zIndex: 2000, pointerEvents: 'none', textAlign: 'center', width: '100%'
+          zIndex: 2000, pointerEvents: 'none', textAlign: 'center', width: '100%',
+          animation: 'missionPulse 3s infinite ease-in-out'
         }}>
           <h2 style={{ 
             color: '#22c55e', fontSize: 'clamp(30px, 8vw, 80px)', fontWeight: '900', margin: 0, 
@@ -104,4 +111,39 @@ export default function FarmMap() {
         </div>
       </div>
 
-      <MapContainer
+      <MapContainer 
+        center={[0, 0]} zoom={0} minZoom={-1} maxZoom={2} 
+        style={{ height: '100%', width: '100%' }} attributionControl={false}
+        crs={mapCRS}
+      >
+        <ImageOverlay url="/map.png" bounds={[[-600, -800], [600, 800]]} />
+        
+        {!loading && boxes.map((box, i) => (
+          <Rectangle
+            key={box.id || i}
+            bounds={getBounds(i)}
+            pathOptions={{
+              color: 'rgba(255,255,255,0.15)', weight: 1,
+              fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
+              fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
+            }}
+            eventHandlers={{
+              mouseover: (e) => { e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7, color: '#fbbf24' }); },
+              mouseout: (e) => {
+                e.target.setStyle({
+                  color: 'rgba(255,255,255,0.15)',
+                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
+                  fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
+                });
+              },
+              click: async () => {
+                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
+                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
+              }
+            }}
+          />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}

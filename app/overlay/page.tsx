@@ -1,26 +1,50 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import { supabase } from '@/db/supabase';
 
-export default async function Home() {
-  // 1. Data Fetching
-  const { data: fields, error } = await supabase
-    .from('montana_conquest')
-    .select('*')
-    .order('field_number', { ascending: true });
+export default function Home() {
+  const [fields, setFields] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: recentCaptures } = await supabase
-    .from('montana_conquest')
-    .select('*')
-    .eq('is_owned', true)
-    .order('updated_at', { ascending: false })
-    .limit(3);
+  // 1. Load Data
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
-  const ownedCount = fields?.filter((f: any) => f.is_owned).length || 0;
+  async function fetchFields() {
+    const { data } = await supabase
+      .from('montana_conquest')
+      .select('*')
+      .order('field_number', { ascending: true });
+    if (data) setFields(data);
+    setLoading(false);
+  }
+
+  // 2. Update Function (The "Click" Logic)
+  async function handleFieldClick(fieldNumber: number, currentStatus: boolean) {
+    const { error } = await supabase
+      .from('montana_conquest')
+      .update({ is_owned: !currentStatus, updated_at: new Date().toISOString() })
+      .eq('field_number', fieldNumber);
+
+    if (!error) {
+      // Update the UI immediately without a full page reload
+      setFields(prev => prev.map(f => 
+        f.field_number === fieldNumber ? { ...f, is_owned: !currentStatus } : f
+      ));
+    }
+  }
+
+  const ownedCount = fields.filter((f: any) => f.is_owned).length || 0;
   const progressPercentage = ((ownedCount / 122) * 100).toFixed(1);
 
   // Survival Goal Data
   const goalCurrent = 12; 
   const goalTarget = 150;
   const goalProgress = ((goalCurrent / goalTarget) * 100).toFixed(1);
+
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-[#F5BD02] font-black tracking-tighter text-3xl italic">LOADING INTEL...</div>;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#F5BD02] selection:text-black relative overflow-x-hidden">
@@ -71,8 +95,6 @@ export default async function Home() {
         
         {/* DASHBOARD GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-          
-          {/* PROGRESS CARD */}
           <div className="lg:col-span-2 bg-white/[0.03] border border-white/10 rounded-sm p-8 backdrop-blur-md">
             <div className="flex justify-between items-end mb-6">
               <div>
@@ -89,16 +111,13 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* RECENT ACTIVITY */}
           <div className="bg-white/[0.03] border border-white/10 rounded-sm p-6 backdrop-blur-md">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F5BD02] mb-4">Recent Captures</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F5BD02] mb-4">Latest Status</h3>
             <div className="space-y-4">
-              {recentCaptures?.map((field: any) => (
-                <div key={field.id} className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs font-bold text-gray-300 italic uppercase">Field #{field.field_number}</span>
-                  <span className="text-[9px] font-mono text-green-500 uppercase">Acquired</span>
-                </div>
-              ))}
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-bold text-gray-300 italic uppercase">System State</span>
+                <span className="text-[9px] font-mono text-green-500 uppercase">Live & Interactive</span>
+              </div>
             </div>
           </div>
         </div>
@@ -106,20 +125,21 @@ export default async function Home() {
         {/* 122-FIELD GRID */}
         <section className="mb-20">
           <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-8 flex items-center gap-4">
-            Tactical Map <div className="h-px flex-1 bg-white/10"></div>
+            Tactical Map (Click to Toggle) <div className="h-px flex-1 bg-white/10"></div>
           </h3>
           <div className="grid grid-cols-6 sm:grid-cols-10 lg:grid-cols-12 xl:grid-cols-[repeat(15,minmax(0,1fr))] gap-2">
-            {fields?.map((field: any) => (
-              <div 
+            {fields.map((field: any) => (
+              <button 
                 key={field.field_number}
-                className={`aspect-square flex items-center justify-center text-[10px] font-mono font-bold border transition-all duration-500 ${
+                onClick={() => handleFieldClick(field.field_number, field.is_owned)}
+                className={`aspect-square flex items-center justify-center text-[10px] font-mono font-bold border transition-all duration-300 transform active:scale-90 ${
                   field.is_owned 
                   ? 'bg-[#2D5A27] border-[#2D5A27] text-white shadow-[0_0_15px_rgba(45,90,39,0.3)]' 
-                  : 'bg-transparent border-white/10 text-gray-700 hover:border-white/40'
+                  : 'bg-transparent border-white/10 text-gray-700 hover:border-white/40 hover:text-white'
                 }`}
               >
                 {field.field_number}
-              </div>
+              </button>
             ))}
           </div>
         </section>
@@ -139,12 +159,10 @@ export default async function Home() {
             <ul className="text-xs font-mono space-y-2 text-gray-400">
               <li>Ryzen 5 3600 (Stable)</li>
               <li>GTX 1660 Super (60FPS Cap)</li>
-              <li>FSR 3.0 (Quality Mode)</li>
             </ul>
           </div>
           <div className="p-6 bg-gradient-to-br from-[#F5BD02]/10 to-transparent border border-[#F5BD02]/20">
             <h4 className="text-[10px] font-black text-[#F5BD02] uppercase mb-4 tracking-widest italic">The Seed Fund</h4>
-            <p className="text-[11px] text-gray-500 mb-4 font-medium">Fuel the grind. Help us get that 2nd monitor.</p>
             <a href="https://streamelements.com/daisyhillfarms/tip" className="block text-center py-2 bg-[#F5BD02] text-black text-[10px] font-black uppercase tracking-tighter hover:bg-white transition-colors">
               CONTRIBUTE
             </a>
@@ -153,10 +171,6 @@ export default async function Home() {
 
         <footer className="py-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 opacity-30">
           <p className="text-[9px] font-mono tracking-widest uppercase">© 2026 DAISY HILL FARMS • MONTANA CONQUEST</p>
-          <div className="flex gap-6">
-             <div className="h-4 w-4 bg-white/20 rounded-full" />
-             <div className="h-4 w-4 bg-white/20 rounded-full" />
-          </div>
         </footer>
       </main>
     </div>

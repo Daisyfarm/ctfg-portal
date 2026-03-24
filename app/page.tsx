@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { sb } from "../db/supabase"; 
-import { Shield, Terminal } from 'lucide-react';
+import { Shield, Terminal, Loader2 } from 'lucide-react';
 
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
@@ -17,6 +17,7 @@ export default function MontanaTerminal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [capturing, setCapturing] = useState<number | null>(null);
   
   const radarAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -36,17 +37,29 @@ export default function MontanaTerminal() {
       audio.play().catch(() => {});
       radarAudioRef.current = audio;
 
-      sb.from('montana_conquest').select('*').then(({ data }) => data && setBoxes(data));
-      sb.from('players').select('*').eq('id', session.user.id).single().then(({ data }) => data && setPlayer(data));
+      const refreshData = async () => {
+        const { data: mapData } = await sb.from('montana_conquest').select('*');
+        if (mapData) setBoxes(mapData);
+        const { data: pData } = await sb.from('players').select('*').eq('id', session.user.id).single();
+        if (pData) setPlayer(pData);
+      };
+      refreshData();
+    } else if (radarAudioRef.current) {
+        radarAudioRef.current.pause();
     }
   }, [session, mounted]);
+
+  const handleCapture = (id: number) => {
+    setCapturing(id);
+    const audio = new Audio("https://cdn.freesound.org/previews/268/268168_5121236-lq.mp3");
+    audio.play();
+    setTimeout(() => setCapturing(null), 3000); // Simulated 3s capture
+  };
 
   const handleLogin = async () => {
     setLoading(true);
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
-      const audio = new Audio("https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3");
-      audio.play();
       alert("ACCESS DENIED: " + error.message);
     }
     setLoading(false);
@@ -57,7 +70,6 @@ export default function MontanaTerminal() {
   if (!session) {
     return (
       <div style={{ height: '100vh', width: '100%', position: 'relative', overflow: 'hidden', backgroundColor: '#000', fontFamily: 'monospace' }}>
-        {/* Background Panning Image */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '200%', height: '100%',
           backgroundImage: 'url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80")', 
@@ -65,7 +77,6 @@ export default function MontanaTerminal() {
           animation: 'panBackground 80s linear infinite'
         }} />
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%)', backgroundSize: '100% 4px', zIndex: 1, pointerEvents: 'none' }} />
-
         <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: '360px', padding: '45px', backgroundColor: 'rgba(5, 5, 5, 0.9)', border: '1px solid #d4af3733', textAlign: 'center', backdropFilter: 'blur(3px)' }}>
             <Shield size={42} color="#d4af37" style={{ marginBottom: '25px' }} />
@@ -89,23 +100,32 @@ export default function MontanaTerminal() {
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         
-        {/* --- TACTICAL SCANNING LINE --- */}
+        {/* SCANNING LINE */}
         <div style={{
           position: 'absolute', top: 0, left: '-10%', width: '15px', height: '100%',
           background: 'rgba(34, 197, 94, 0.2)', boxShadow: '0 0 30px rgba(34, 197, 94, 0.5)',
           zIndex: 1000, pointerEvents: 'none', animation: 'scanMap 8s linear infinite'
         }} />
 
+        {/* PROGRESS OVERLAY */}
+        {capturing !== null && (
+          <div style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', zIndex: 2001, background: 'rgba(0,0,0,0.9)', padding: '15px 30px', border: '1px solid #22c55e', display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <Loader2 className="animate-spin" color="#22c55e" size={20} />
+            <span style={{ color: '#22c55e', fontSize: '10px', letterSpacing: '2px' }}>UPLINKING SECTOR {capturing}...</span>
+          </div>
+        )}
+
         <MapContainer center={[0, 0]} zoom={0} crs={L.CRS.Simple} style={{ height: '100%', width: '100%', background: '#000' }} zoomControl={false}>
           <ImageOverlay url="/map.png" bounds={[[-500, -500], [500, 500]]} />
           {boxes.map((box, i) => (
             <Rectangle 
               key={i} 
+              eventHandlers={{ click: () => handleCapture(i) }}
               bounds={[[220 - (Math.floor(i/11)*35), -350 + ((i%11)*55)], [220 - ((Math.floor(i/11)+1)*35), -350 + (((i%11)+1)*55)]]} 
               pathOptions={{ 
                 color: box.status === 'captured' ? '#22c55e' : '#ff4444', 
                 fillOpacity: 0.15,
-                className: 'grid-flicker' // Added animation class
+                className: 'grid-flicker'
               }} 
             />
           ))}
@@ -121,16 +141,10 @@ export default function MontanaTerminal() {
 
       <style jsx global>{` 
         @keyframes scanMap { 0% { left: -5%; } 100% { left: 105%; } }
-        
-        /* Grid Flicker Effect */
-        .grid-flicker {
-          animation: sectorPulse 4s infinite alternate;
-        }
-
-        @keyframes sectorPulse {
-          0% { stroke-opacity: 0.3; fill-opacity: 0.1; }
-          100% { stroke-opacity: 0.8; fill-opacity: 0.25; }
-        }
+        .grid-flicker { animation: sectorPulse 4s infinite alternate; }
+        @keyframes sectorPulse { 0% { stroke-opacity: 0.3; fill-opacity: 0.1; } 100% { stroke-opacity: 0.8; fill-opacity: 0.25; } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );

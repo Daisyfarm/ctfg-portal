@@ -18,7 +18,6 @@ export default function MontanaTerminal() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   
-  // Ref to manage the looping radar sound
   const radarAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -29,50 +28,26 @@ export default function MontanaTerminal() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // --- AMBIENT RADAR LOOP LOGIC ---
   useEffect(() => {
     if (session && mounted) {
-      // Start radar loop when logged in
       const audio = new Audio("https://cdn.freesound.org/previews/250/250711_4503881-lq.mp3");
       audio.loop = true;
-      audio.volume = 0.15; // Keep it subtle in the background
-      audio.play().catch(() => console.log("Radar sound blocked until interaction"));
+      audio.volume = 0.15;
+      audio.play().catch(() => {});
       radarAudioRef.current = audio;
 
-      // Fetch Data
       sb.from('montana_conquest').select('*').then(({ data }) => data && setBoxes(data));
       sb.from('players').select('*').eq('id', session.user.id).single().then(({ data }) => data && setPlayer(data));
-    } else {
-      // Stop radar loop on logout
-      if (radarAudioRef.current) {
-        radarAudioRef.current.pause();
-        radarAudioRef.current = null;
-      }
     }
-    return () => {
-      if (radarAudioRef.current) radarAudioRef.current.pause();
-    };
   }, [session, mounted]);
-
-  const playEffect = (url: string, volume = 0.4) => {
-    const audio = new Audio(url);
-    audio.volume = volume;
-    audio.play().catch(() => {});
-  };
-
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
-    setter(e.target.value);
-    playEffect("https://cdn.freesound.org/previews/256/256113_3263901-lq.mp3", 0.05);
-  };
 
   const handleLogin = async () => {
     setLoading(true);
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
-      alert("ACCESS DENIED");
-      playEffect("https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3", 0.4);
-    } else {
-      playEffect("https://cdn.freesound.org/previews/219/219477_4058123-lq.mp3", 0.5);
+      const audio = new Audio("https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3");
+      audio.play();
+      alert("ACCESS DENIED: " + error.message);
     }
     setLoading(false);
   };
@@ -82,6 +57,7 @@ export default function MontanaTerminal() {
   if (!session) {
     return (
       <div style={{ height: '100vh', width: '100%', position: 'relative', overflow: 'hidden', backgroundColor: '#000', fontFamily: 'monospace' }}>
+        {/* Background Panning Image */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '200%', height: '100%',
           backgroundImage: 'url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80")', 
@@ -95,8 +71,8 @@ export default function MontanaTerminal() {
             <Shield size={42} color="#d4af37" style={{ marginBottom: '25px' }} />
             <h2 style={{ color: '#d4af37', letterSpacing: '4px', fontSize: '12px', marginBottom: '35px' }}>DAISY HILL SECURE UPLINK</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <input type="email" placeholder="OPERATIVE EMAIL" value={email} onChange={(e) => handleTyping(e, setEmail)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} />
-              <input type="password" placeholder="ACCESS KEY" value={password} onChange={(e) => handleTyping(e, setPassword)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px', fontSize: '11px' }} />
+              <input type="email" placeholder="OPERATIVE EMAIL" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px' }} />
+              <input type="password" placeholder="ACCESS KEY" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '12px' }} />
               <button onClick={handleLogin} disabled={loading} style={{ background: '#d4af37', color: '#000', padding: '14px', fontWeight: 'bold', border: 'none', letterSpacing: '2px', cursor: 'pointer' }}>
                 {loading ? "INITIALIZING..." : "INITIATE ACCESS"}
               </button>
@@ -111,28 +87,51 @@ export default function MontanaTerminal() {
   return (
     <div style={{ height: '100vh', width: '100%', background: '#050505', display: 'flex', color: 'white', fontFamily: 'monospace' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-      <div style={{ flex: 1, position: 'relative' }}>
-        <header style={{ position: 'absolute', top: 0, width: '100%', height: '50px', background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', alignItems: 'center', padding: '0 20px', borderBottom: '1px solid #d4af3722', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Terminal size={18} style={{ color: '#d4af37' }} />
-            <span style={{ letterSpacing: '2px', fontSize: '10px' }}>MONTANA 122 // TACTICAL FEED</span>
-          </div>
-          <button onClick={() => sb.auth.signOut()} style={{ background: 'none', border: '1px solid #ff4444', color: '#ff4444', padding: '4px 10px', fontSize: '9px', cursor: 'pointer' }}>DISCONNECT</button>
-        </header>
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        
+        {/* --- TACTICAL SCANNING LINE --- */}
+        <div style={{
+          position: 'absolute', top: 0, left: '-10%', width: '15px', height: '100%',
+          background: 'rgba(34, 197, 94, 0.2)', boxShadow: '0 0 30px rgba(34, 197, 94, 0.5)',
+          zIndex: 1000, pointerEvents: 'none', animation: 'scanMap 8s linear infinite'
+        }} />
 
         <MapContainer center={[0, 0]} zoom={0} crs={L.CRS.Simple} style={{ height: '100%', width: '100%', background: '#000' }} zoomControl={false}>
           <ImageOverlay url="/map.png" bounds={[[-500, -500], [500, 500]]} />
           {boxes.map((box, i) => (
-            <Rectangle key={i} bounds={[[220 - (Math.floor(i/11)*35), -350 + ((i%11)*55)], [220 - ((Math.floor(i/11)+1)*35), -350 + (((i%11)+1)*55)]]} pathOptions={{ color: box.status === 'captured' ? '#22c55e' : '#ff4444', fillOpacity: 0.15 }} />
+            <Rectangle 
+              key={i} 
+              bounds={[[220 - (Math.floor(i/11)*35), -350 + ((i%11)*55)], [220 - ((Math.floor(i/11)+1)*35), -350 + (((i%11)+1)*55)]]} 
+              pathOptions={{ 
+                color: box.status === 'captured' ? '#22c55e' : '#ff4444', 
+                fillOpacity: 0.15,
+                className: 'grid-flicker' // Added animation class
+              }} 
+            />
           ))}
         </MapContainer>
       </div>
+
       <div style={{ width: '350px', background: '#000', borderLeft: '1px solid #222', padding: '20px' }}>
         <div style={{ border: '1px solid #d4af3744', padding: '20px' }}>
           <div style={{ fontSize: '10px', color: '#d4af37' }}>OPERATIVE STATUS</div>
           <div style={{ fontSize: '28px', fontWeight: 'bold' }}>${player?.balance?.toLocaleString() || "0.00"}</div>
         </div>
       </div>
+
+      <style jsx global>{` 
+        @keyframes scanMap { 0% { left: -5%; } 100% { left: 105%; } }
+        
+        /* Grid Flicker Effect */
+        .grid-flicker {
+          animation: sectorPulse 4s infinite alternate;
+        }
+
+        @keyframes sectorPulse {
+          0% { stroke-opacity: 0.3; fill-opacity: 0.1; }
+          100% { stroke-opacity: 0.8; fill-opacity: 0.25; }
+        }
+      `}</style>
     </div>
   );
 }

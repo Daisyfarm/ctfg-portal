@@ -36,8 +36,9 @@ export default function FarmMap() {
     ] as [[number, number], [number, number]];
   };
 
-  const capturedCount = boxes.filter(b => b.status === 'captured').length;
-  const percentage = ((capturedCount / 122) * 100).toFixed(1);
+  const percentage = boxes.length > 0 
+    ? ((boxes.filter(b => b.status === 'captured').length / 122) * 100).toFixed(1) 
+    : "0.0";
 
   return (
     <div style={{ height: '100vh', width: '100%', background: '#0a0a0a' }}>
@@ -50,7 +51,12 @@ export default function FarmMap() {
         </p>
       </div>
 
-      <MapContainer center={[0, 0]} zoom={0} style={{ height: '100%', width: '100%' }} attributionControl={false}>
+      <MapContainer 
+        center={[0, 0]} 
+        zoom={0} 
+        style={{ height: '100%', width: '100%' }} 
+        attributionControl={false}
+      >
         <ImageOverlay url="/map.png" bounds={[[-400, -600], [400, 600]]} />
         {boxes.map((box, i) => (
           <Rectangle

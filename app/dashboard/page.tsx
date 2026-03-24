@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { sb } from "../../db/supabase"; 
 import { LogOut, Loader2, Map as MapIcon, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+// Import Leaflet directly for the cleanup check
+import L from 'leaflet';
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -19,6 +21,16 @@ export default function Dashboard() {
       setProfile(data || { username: 'Operator', balance: 0 });
       setLoading(false);
     }
+
+    // MAP CLEANUP LOGIC:
+    // This looks for a div with id="map" and clears its Leaflet memory 
+    // to prevent the "Already Initialized" error.
+    const container = L.DomUtil.get('map');
+    if (container !== null) {
+      // @ts-ignore
+      container._leaflet_id = null;
+    }
+
     checkUser();
   }, []);
 
@@ -62,4 +74,21 @@ export default function Dashboard() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px' }}>
         <ShieldCheck color="#d4af37" size={50} strokeWidth={1} style={{ marginBottom: '20px' }} />
         <span style={{ fontSize: '11px', color: '#8da989', letterSpacing: '5px', textTransform: 'uppercase' }}>Available Credits</span>
-        <h1 style={{ fontSize: '90px', margin: '10px 0', fontWeight: '900', textShadow: '2px 4px 20px rgba(0,0,
+        <h1 style={{ fontSize: '90px', margin: '10px 0', fontWeight: '900', textShadow: '2px 4px 20px rgba(0,0,0,0.5)', color: '#22c55e' }}>
+          ${profile?.balance?.toLocaleString() || '0'}
+        </h1>
+        <p style={{ fontSize: '14px', color: '#d4af37', letterSpacing: '2px', textTransform: 'uppercase' }}>
+          Operator: {profile?.username}
+        </p>
+      </div>
+
+      {/* Navigation Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', padding: '40px 50px', background: 'rgba(0,0,0,0.8)' }}>
+        <Link href="/map" style={{ textDecoration: 'none', color: '#fff', padding: '20px', border: '1px solid rgba(212,175,55,0.2)', textAlign: 'center', borderRadius: '4px' }}>
+          <MapIcon color="#d4af37" style={{ marginBottom: '10px' }} />
+          <div style={{ fontSize: '12px', letterSpacing: '2px' }}>LIVE TACTICAL MAP</div>
+        </Link>
+      </div>
+    </main>
+  );
+}

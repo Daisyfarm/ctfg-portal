@@ -10,7 +10,6 @@ const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), 
 
 export default function VirtualTerminal() {
   const [accessGranted, setAccessGranted] = useState(false);
-  const [bootStatus, setBootStatus] = useState("INITIALIZING...");
   const [mounted, setMounted] = useState(false);
   const [L, setL] = useState<any>(null);
   const [boxes, setBoxes] = useState<any[]>([]);
@@ -18,62 +17,48 @@ export default function VirtualTerminal() {
   useEffect(() => {
     setMounted(true);
     import('leaflet').then((mod) => setL(mod.default));
-    
-    const sequences = ["ESTABLISHING SECURE CONNECTION...", "UPLOADING TACTICAL GRID...", "SYNCING SUPABASE NODE...", "ACCESS GRANTED."];
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < sequences.length) { setBootStatus(sequences[i]); i++; } 
-      else { clearInterval(interval); setTimeout(() => setAccessGranted(true), 1000); }
-    }, 600);
+    setTimeout(() => setAccessGranted(true), 1500);
 
     const getData = async () => {
       const { data } = await sb.from('montana_conquest').select('*').order('id', { ascending: true });
       if (data) setBoxes(data);
     };
     getData();
-    return () => clearInterval(interval);
   }, []);
 
-  if (!accessGranted) {
+  if (!accessGranted || !mounted || !L) {
     return (
-      <div style={{height:'100vh', width:'100%', background:'#000', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:'monospace'}}>
+      <div style={{height:'100vh', width:'100%', background:'#000', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'monospace'}}>
         <div style={{padding:'40px', border:'1px solid rgba(212,175,55,0.2)', background:'#050505', textAlign:'center'}}>
-          <Shield style={{color:'#d4af37', marginBottom:'20px'}} size={48} />
-          <h2 style={{color:'#d4af37', letterSpacing:'5px', fontSize:'14px', textTransform:'uppercase'}}>Daisy Hill Tactical</h2>
-          <p style={{color:'rgba(212,175,55,0.6)', fontSize:'10px', marginTop:'15px'}}>{bootStatus}</p>
+          <Shield style={{color:'#d4af37', marginBottom:'20px'}} size={48} className="animate-pulse" />
+          <h2 style={{color:'#d4af37', letterSpacing:'5px', textTransform:'uppercase'}}>Daisy Hill Operations</h2>
+          <p style={{color:'rgba(212,175,55,0.4)', fontSize:'10px', marginTop:'15px'}}>ESTABLISHING SECURE LINK...</p>
         </div>
       </div>
     );
   }
 
-  if (!mounted || !L) return null;
-
-  const mapBounds: [[number, number], [number, number]] = [[-500, -500], [500, 500]];
-
   return (
     <div style={{ height: '100vh', width: '100%', background: '#050505', display: 'flex', flexDirection: 'column', color: 'white', fontFamily: 'sans-serif', overflow: 'hidden' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-      {/* HEADER */}
+      {/* TACTICAL HEADER */}
       <header style={{ height: '60px', borderBottom: '1px solid rgba(212,175,55,0.3)', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', zIndex: 2000 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <Terminal size={20} style={{ color: '#d4af37' }} />
-          <h1 style={{ margin: 0, fontSize: '14px', letterSpacing: '3px', fontWeight: '900' }}>
-            DAISY HILL <span style={{ color: '#d4af37' }}>OPERATIONS</span>
-          </h1>
+          <h1 style={{ margin: 0, fontSize: '14px', letterSpacing: '3px', fontWeight: '900' }}>DAISY HILL <span style={{ color: '#d4af37' }}>TACTICAL</span></h1>
         </div>
         <div style={{ fontSize: '10px', color: '#666', fontFamily: 'monospace', textAlign: 'right' }}>
-          <div>SYSTEM: <span style={{ color: '#22c55e' }}>STABLE</span></div>
-          <div style={{ color: '#d4af37', fontWeight: 'bold' }}>ID: MONTANA_122</div>
+          <div>STATUS: <span style={{ color: '#22c55e' }}>CONNECTED</span></div>
+          <div style={{ color: '#d4af37' }}>SECTOR: MONTANA_122</div>
         </div>
       </header>
 
       {/* VIEWPORT */}
       <div style={{ flex: 1, position: 'relative' }}>
-        
-        {/* HUD RIGHT */}
+        {/* HUD UI */}
         <div style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 1000, width: '180px', background: 'rgba(0,0,0,0.85)', border: '1px solid rgba(212,175,55,0.2)', padding: '15px', backdropFilter: 'blur(10px)' }}>
-          <h3 style={{ color: '#d4af37', fontSize: '10px', margin: '0 0 10px 0', letterSpacing: '2px', textTransform: 'uppercase' }}>Intelligence</h3>
+          <h3 style={{ color: '#d4af37', fontSize: '10px', margin: '0 0 10px 0', letterSpacing: '2px', textTransform: 'uppercase' }}>Live Intel</h3>
           <div style={{ fontSize: '11px', fontFamily: 'monospace', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
               <span style={{ color: '#888' }}>SECURED:</span>
@@ -91,7 +76,9 @@ export default function VirtualTerminal() {
           style={{ height: '100%', width: '100%', background: '#000' }}
           attributionControl={false} zoomControl={false}
         >
-          <ImageOverlay url="/map.png" bounds={mapBounds} />
+          {/* Points to the map.png from your screenshot */}
+          <ImageOverlay url="/map.png" bounds={[[-500, -500], [500, 500]]} />
+          
           {boxes.map((box, i) => {
             const row = Math.floor(i / 11);
             const col = i % 11;
@@ -120,16 +107,9 @@ export default function VirtualTerminal() {
 
       {/* FOOTER */}
       <footer style={{ height: '30px', background: '#000', borderTop: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontSize: '9px', color: '#555', fontFamily: 'monospace' }}>
-        <div>COORD: 45.362 / -111.022 | ENCRYPTION: ACTIVE</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <Lock size={10} style={{ color: '#d4af37' }} /> AUTHORIZED PERSONNEL ONLY
-        </div>
+        <div>GPS: 45.362 / -111.022 | ENCRYPTION: ACTIVE</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Lock size={10} style={{ color: '#d4af37' }} /> SECURE SYSTEM</div>
       </footer>
-
-      <style jsx global>{`
-        .leaflet-container { background: #000 !important; cursor: crosshair !important; }
-        .leaflet-container::after { content:''; position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
-      `}</style>
     </div>
   );
 }

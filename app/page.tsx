@@ -75,10 +75,10 @@ export default function FarmMap() {
       {isComplete && (
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          zIndex: 2000, pointerEvents: 'none', textAlign: 'center'
+          zIndex: 2000, pointerEvents: 'none', textAlign: 'center', width: '100%'
         }}>
           <h2 style={{ 
-            color: '#22c55e', fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: '900', margin: 0, 
+            color: '#22c55e', fontSize: 'clamp(30px, 8vw, 80px)', fontWeight: '900', margin: 0, 
             letterSpacing: '10px', textShadow: '0 0 30px rgba(34, 197, 94, 0.8)'
           }}>MISSION COMPLETE</h2>
           <p style={{ color: 'white', fontSize: '20px', letterSpacing: '5px' }}>DAISY HILL SECURED</p>
@@ -104,47 +104,4 @@ export default function FarmMap() {
         </div>
       </div>
 
-      <MapContainer 
-        center={[0, 0]} zoom={0} minZoom={-1} maxZoom={2} 
-        style={{ height: '100%', width: '100%' }} attributionControl={false}
-        crs={mapCRS}
-      >
-        <ImageOverlay url="/map.png" bounds={[[-600, -800], [600, 800]]} />
-        
-        {!loading && boxes.map((box, i) => (
-          <Rectangle
-            key={box.id || i}
-            bounds={getBounds(i)}
-            pathOptions={{
-              color: 'rgba(255,255,255,0.15)', weight: 1,
-              fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-              fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
-            }}
-            eventHandlers={{
-              mouseover: (e) => { e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7, color: '#fbbf24' }); },
-              mouseout: (e) => {
-                e.target.setStyle({
-                  color: 'rgba(255,255,255,0.15)',
-                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-                  fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
-                });
-              },
-              click: async () => {
-                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
-                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
-              }
-            }}
-          />
-        ))}
-      </MapContainer>
-
-      <style jsx global>{`
-        @keyframes pulse {
-          0% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-          100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-        }
-      `}</style>
-    </div>
-  );
-}
+      <MapContainer

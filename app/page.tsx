@@ -3,13 +3,11 @@ import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { createClient } from '@supabase/supabase-js';
 
-// 1. Initialize Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// 2. Load Leaflet safely for Vercel (prevents window is not defined error)
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
 const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
@@ -17,26 +15,22 @@ const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), 
 export default function FarmMap() {
   const [boxes, setBoxes] = useState<any[]>([]);
 
-  // 3. Fetch data from Supabase
   useEffect(() => {
     const fetchBoxes = async () => {
-      const { data } = await supabase
-        .from('montana_conquest')
-        .select('*')
-        .order('id', { ascending: true });
+      const { data } = await supabase.from('montana_conquest').select('*').order('id', { ascending: true });
       if (data) setBoxes(data);
     };
     fetchBoxes();
   }, []);
 
-  // 4. Grid Logic: positions 122 boxes in a clean layout
+  // ADJUSTED GRID MATH FOR YOUR PHOTO
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
-    const width = 85;  
-    const height = 65; 
-    const startX = 400; 
-    const startY = -480; 
+    const width = 60;  // Smaller boxes to fit the photo perspective
+    const height = 40; 
+    const startX = 200; // Centered vertically
+    const startY = -330; // Centered horizontally
     return [
       [startX - (row * height), startY + (col * width)], 
       [startX - ((row + 1) * height), startY + ((col + 1) * width)]
@@ -47,64 +41,11 @@ export default function FarmMap() {
     <div style={{ height: '100vh', width: '100%', background: '#000' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
-      {/* Tactical HUD Header */}
       <div style={{ position: 'absolute', top: 25, left: 70, zIndex: 1000, color: 'white', textShadow: '2px 2px 4px black' }}>
-        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', letterSpacing: '2px' }}>DAISY HILL FARMS</h1>
+        <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold' }}>DAISY HILL FARMS</h1>
         <p style={{ fontSize: '18px', color: '#22c55e', fontWeight: 'bold' }}>
           CONQUEST: {((boxes.filter(b => b.status === 'captured').length / 122) * 100).toFixed(1)}%
         </p>
       </div>
 
-      <MapContainer 
-        center={[0, 0]} 
-        zoom={0} 
-        style={{ height: '100%', width: '100%' }} 
-        attributionControl={false}
-      >
-        {/* 5. BACKGROUND IMAGE: This pulls from public/map.png */}
-        <ImageOverlay 
-          url="/map.png" 
-          bounds={[[-1000, -1000], [1000, 1000]]} 
-        />
-        
-        {/* 6. INTERACTIVE RECTANGLES */}
-        {boxes.map((box, i) => (
-          <Rectangle
-            key={box.id || i}
-            bounds={getBounds(i)}
-            pathOptions={{
-              color: 'rgba(255,255,255,0.2)',
-              weight: 1,
-              fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-              fillOpacity: box.status === 'captured' ? 0.5 : 0.0,
-            }}
-            eventHandlers={{
-              // GOLD GLOW ON HOVER
-              mouseover: (e) => {
-                e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.8 }); 
-              },
-              // RETURN TO NORMAL ON MOUSE OUT
-              mouseout: (e) => {
-                e.target.setStyle({
-                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
-                  fillOpacity: box.status === 'captured' ? 0.5 : 0.0,
-                });
-              },
-              // UPDATE STATUS ON CLICK
-              click: async () => {
-                await supabase
-                  .from('montana_conquest')
-                  .update({ status: 'captured' })
-                  .eq('id', box.id);
-                
-                setBoxes(prev => prev.map(b => 
-                  b.id === box.id ? {...b, status: 'captured'} : b
-                ));
-              }
-            }}
-          />
-        ))}
-      </MapContainer>
-    </div>
-  );
-}
+      <MapContainer center={[0, 0]} zoom={0} style={{ height: '1

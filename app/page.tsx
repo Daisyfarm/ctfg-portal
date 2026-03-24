@@ -30,7 +30,7 @@ export default function FarmMap() {
       try {
         const { data, error } = await supabase.from('montana_conquest').select('*');
         if (error) throw error;
-        if (data) setBoxes(data.sort((a, b) => a.id - b.id));
+        if (data) setBoxes(data.sort((a, b) => (a.id || 0) - (b.id || 0)));
       } catch (err) {
         console.error("Sync Error:", err);
       } finally {
@@ -43,12 +43,26 @@ export default function FarmMap() {
   const getBounds = (index: number) => {
     const row = Math.floor(index / 11);
     const col = index % 11;
-    const width = 55; const height = 35;
-    const startX = 220; const startY = -350; 
-    return [[startX - (row * height), startY + (col * width)], [startX - ((row + 1) * height), startY + ((col + 1) * width)]] as [[number, number], [number, number]];
+    const width = 55; 
+    const height = 35;
+    const startX = 220; 
+    const startY = -350; 
+    return [
+      [startX - (row * height), startY + (col * width)], 
+      [startX - ((row + 1) * height), startY + ((col + 1) * width)]
+    ] as [[number, number], [number, number]];
   };
 
-  if (!mounted || !mapCRS) return <div style={{ background: '#050505', height: '100vh' }} />;
+  const handleReset = async () => {
+    if (!confirm("CAUTION: Reset all tactical progress?")) return;
+    setLoading(true);
+    const { error } = await supabase.from('montana_conquest').update({ status: 'pending' }).neq('status', 'pending');
+    if (!error) window.location.reload();
+  };
+
+  if (!mounted || !mapCRS) {
+    return <div style={{ background: '#050505', height: '100vh', width: '100%' }} />;
+  }
 
   const capturedCount = boxes.filter(b => b.status === 'captured').length;
   const isComplete = capturedCount >= 122 && !loading;
@@ -58,24 +72,26 @@ export default function FarmMap() {
     <div style={{ height: '100vh', width: '100%', background: '#050505', overflow: 'hidden', fontFamily: 'sans-serif' }}>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       
-      {/* Victory Overlay */}
       {isComplete && (
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
           zIndex: 2000, pointerEvents: 'none', textAlign: 'center'
         }}>
           <h2 style={{ 
-            color: '#22c55e', fontSize: '80px', fontWeight: '900', margin: 0, 
-            letterSpacing: '10px', textShadow: '0 0 30px rgba(34, 197, 94, 0.8)',
-            animation: 'pulse 2s infinite'
+            color: '#22c55e', fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: '900', margin: 0, 
+            letterSpacing: '10px', textShadow: '0 0 30px rgba(34, 197, 94, 0.8)'
           }}>MISSION COMPLETE</h2>
           <p style={{ color: 'white', fontSize: '20px', letterSpacing: '5px' }}>DAISY HILL SECURED</p>
         </div>
       )}
 
-      {/* HUD Header */}
       <div style={{ position: 'absolute', top: '30px', left: '70px', zIndex: 1000, color: 'white', textShadow: '0px 0px 10px rgba(34, 197, 94, 0.5)' }}>
-        <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '3px' }}>DAISY HILL FARMS</h1>
+        <h1 
+          onClick={handleReset}
+          style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer' }}
+        >
+          DAISY HILL FARMS
+        </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
           <div style={{ 
             width: '10px', height: '10px', borderRadius: '50%', 
@@ -105,4 +121,30 @@ export default function FarmMap() {
               fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
             }}
             eventHandlers={{
-              mouseover: (e) => {
+              mouseover: (e) => { e.target.setStyle({ fillColor: '#fbbf24', fillOpacity: 0.7, color: '#fbbf24' }); },
+              mouseout: (e) => {
+                e.target.setStyle({
+                  color: 'rgba(255,255,255,0.15)',
+                  fillColor: box.status === 'captured' ? '#22c55e' : 'transparent',
+                  fillOpacity: box.status === 'captured' ? 0.4 : 0.0,
+                });
+              },
+              click: async () => {
+                setBoxes(prev => prev.map(b => b.id === box.id ? {...b, status: 'captured'} : b));
+                await supabase.from('montana_conquest').update({ status: 'captured' }).eq('id', box.id);
+              }
+            }}
+          />
+        ))}
+      </MapContainer>
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+          100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+        }
+      `}</style>
+    </div>
+  );
+}

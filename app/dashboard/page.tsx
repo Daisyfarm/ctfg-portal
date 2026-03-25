@@ -1,78 +1,64 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { sb } from "@/db/supabase";
-import { Loader2 } from 'lucide-react';
+import { sb } from "../db/supabase";
+import { Terminal, Send, ShieldCheck } from 'lucide-react';
 
-// This is the CRITICAL part that stops the "window is not defined" error
-const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { 
-  ssr: false,
-  loading: () => <div style={{background: '#000', height: '100vh'}} /> 
-});
-const ImageOverlay = dynamic(() => import('react-leaflet').then(m => m.ImageOverlay), { ssr: false });
-const Rectangle = dynamic(() => import('react-leaflet').then(m => m.Rectangle), { ssr: false });
-
-export default function Dashboard() {
-  const [mounted, setMounted] = useState(false);
-  const [L, setL] = useState<any>(null);
-  const [boxes, setBoxes] = useState<any[]>([]);
+export default function StaffDashboard() {
+  const [command, setCommand] = useState("");
+  const [status, setStatus] = useState("SYSTEM_READY");
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    setMounted(true);
-    // Only import Leaflet inside useEffect (where 'window' exists)
-    import('leaflet').then((mod) => setL(mod.default));
-    
-    const getData = async () => {
-      const { data } = await sb.from('montana_conquest').select('*').order('id', { ascending: true });
-      if (data) setBoxes(data);
-    };
-    getData();
-
-    return () => {
-      const container = document.getElementById('dashboard-map');
-      if (container) {
-        // @ts-ignore
-        container._leaflet_id = null;
-      }
-    };
+    sb.auth.getSession().then(({ data: { session } }) => setSession(session));
   }, []);
 
-  // Don't even try to render the map until we are in the browser
-  if (!mounted || !L) {
-    return (
-      <div style={{ background: '#000', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 className="animate-spin" color="#d4af37" size={40} />
-      </div>
-    );
-  }
+  const executeCommand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!command.startsWith("/")) return;
+
+    const [action, ...args] = command.split(" ");
+    const message = args.join(" ");
+
+    try {
+      if (action === "/dispatch") {
+        setStatus("UPLOADING_INTEL...");
+        const { error } = await sb.from('tactical_news').insert([{ headline: message }]);
+        if (error) throw error;
+        setStatus("DISPATCH_SENT");
+      } 
+      
+      if (action === "/balance") {
+        setStatus("SYNCING_FUNDS...");
+        const { error } = await sb.from('profiles')
+          .update({ balance: parseInt(message) })
+          .eq('id', session.user.id);
+        if (error) throw error;
+        setStatus("FUNDS_VERIFIED");
+      }
+      
+      setCommand("");
+      setTimeout(() => setStatus("SYSTEM_READY"), 3000);
+    } catch (err) {
+      setStatus("COMMAND_FAILED");
+      console.error(err);
+    }
+  };
 
   return (
-    <div style={{ height: '100vh', width: '100%', background: '#000' }}>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-      <MapContainer 
-        id="dashboard-map"
-        center={[0, 0]} 
-        zoom={0} 
-        crs={L.CRS.Simple}
-        style={{ height: '100%', width: '100%' }}
-        attributionControl={false}
-      >
-        <ImageOverlay url="/montanna-map.jpg" bounds={[[-500, -500], [500, 500]]} />
-        {boxes.map((box, i) => (
-          <Rectangle 
-            key={box.id || i}
-            bounds={[[220 - (Math.floor(i/11)*35), -350 + ((i%11)*55)], [220 - ((Math.floor(i/11)+1)*35), -350 + (((i%11)+1)*55)]]}
-            pathOptions={{ color: box.status === 'captured' ? '#22c55e' : '#ff4444', fillOpacity: 0.25 }}
-            eventHandlers={{
-              click: async () => {
-                const nextStatus = box.status === 'captured' ? 'pending' : 'captured';
-                const { error } = await sb.from('montana_conquest').update({ status: nextStatus }).eq('id', box.id);
-                if (!error) setBoxes(prev => prev.map(b => b.id === box.id ? { ...b, status: nextStatus } : b));
-              }
-            }}
-          />
-        ))}
-      </MapContainer>
+    <div style={{ position: 'fixed', bottom: '20px', left: '280px', right: '40px', zIndex: 100 }}>
+      <form onSubmit={executeCommand} style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(0,0,0,0.8)', padding: '10px 20px', borderRadius: '4px', border: '1px solid #d4af3722', backdropFilter: 'blur(10px)' }}>
+        <Terminal size={16} color="#d4af37" />
+        <input 
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
+          placeholder="ENTER COMMAND (/dispatch [msg] or /balance [amount])"
+          style={{ flex: 1, background: 'none', border: 'none', color: '#fff', fontFamily: 'monospace', fontSize: '11px', outline: 'none' }}
+        />
+        <div style={{ fontSize: '9px', color: '#444', letterSpacing: '2px' }}>{status}</div>
+        <button type="submit" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37' }}>
+          <Send size={14} />
+        </button>
+      </form>
     </div>
   );
 }

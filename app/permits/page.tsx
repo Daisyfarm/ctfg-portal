@@ -2,46 +2,51 @@ import React from 'react';
 
 export default function PermitsPage() {
   return (
-    <div style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto' }}>
-      <header style={{ borderLeft: '5px solid #F2C94C', paddingLeft: '20px', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+    <div style={{ padding: '60px 20px', maxWidth: '1100px', margin: '0 auto' }}>
+      <div style={{ borderLeft: '4px solid #F2C94C', paddingLeft: '24px', marginBottom: '50px' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, textTransform: 'uppercase', margin: 0 }}>
           Permit Office
         </h1>
-        <p style={{ color: '#8b949e' }}>Official Certification for Iron Daisy Agri Operations</p>
-      </header>
+        <p style={{ color: '#8b949e', marginTop: '10px', fontSize: '1.1rem' }}>
+          Authorized Operating Licenses for Iron Daisy Agri Personnel.
+        </p>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '25px' }}>
         
-        {/* CDL CARD */}
         <div style={cardStyle}>
-          <h2 style={{ color: '#F2C94C' }}>🚛 CLASS A CDL</h2>
-          <p>Required for all Semi-Truck and Grain Logistics operations.</p>
+          <div style={tagStyle}>LOGISTICS</div>
+          <h2 style={{ color: '#F2C94C', marginTop: '15px' }}>CLASS A CDL</h2>
+          <p style={descStyle}>Mandatory for all heavy hauling and grain transport units.</p>
+          <div style={reqHeader}>REQUIREMENTS:</div>
           <ul style={listStyle}>
-            <li>Pass: 53ft Reverse Docking Test</li>
-            <li>Pass: Montana Road Safety Exam</li>
-            <li>Cost: $5,000 Application Fee</li>
+            <li>Advanced 53ft Reverse Docking</li>
+            <li>Zero-Damage Safety Rating</li>
+            <li>$5,000 Application Fee</li>
           </ul>
         </div>
 
-        {/* LAS CARD */}
         <div style={cardStyle}>
-          <h2 style={{ color: '#F2C94C' }}>🐾 LIVESTOCK (LAS)</h2>
-          <p>Required for handling Cattle, Sheep, and Pig assets.</p>
+          <div style={tagStyle}>LIVESTOCK</div>
+          <h2 style={{ color: '#F2C94C', marginTop: '15px' }}>LAS CERTIFICATION</h2>
+          <p style={descStyle}>Authorized for Cattle, Sheep, and Pig management.</p>
+          <div style={reqHeader}>REQUIREMENTS:</div>
           <ul style={listStyle}>
-            <li>Requirement: Maintain 100% Health</li>
-            <li>Knowledge: TMR Feed Ratios</li>
-            <li>Cost: $7,500 Application Fee</li>
+            <li>100% Health Maintenance Record</li>
+            <li>TMR Feed Ratio Mastery</li>
+            <li>$7,500 Application Fee</li>
           </ul>
         </div>
 
-        {/* HEP CARD */}
         <div style={cardStyle}>
-          <h2 style={{ color: '#F2C94C' }}>🏗️ HEAVY EQUIPMENT (HEP)</h2>
-          <p>Required for Forestry, Cranes, and Construction gear.</p>
+          <div style={tagStyle}>INDUSTRIAL</div>
+          <h2 style={{ color: '#F2C94C', marginTop: '15px' }}>HEP CLEARANCE</h2>
+          <p style={descStyle}>Specialized permit for Forestry and Construction assets.</p>
+          <div style={reqHeader}>REQUIREMENTS:</div>
           <ul style={listStyle}>
-            <li>Test: Precision Load Stabilization</li>
-            <li>Test: Clean-Cut Forestry Standards</li>
-            <li>Cost: $10,000 Application Fee</li>
+            <li>Precision Load Stabilization Test</li>
+            <li>Safe Logging Protocol</li>
+            <li>$10,000 Application Fee</li>
           </ul>
         </div>
 
@@ -52,14 +57,21 @@ export default function PermitsPage() {
 
 const cardStyle = {
   background: '#161b22',
-  padding: '25px',
-  borderRadius: '5px',
-  border: '1px solid #30363d'
+  padding: '30px',
+  borderRadius: '4px',
+  border: '1px solid #30363d',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
 };
 
-const listStyle = {
-  marginTop: '15px',
-  fontSize: '0.9rem',
-  lineHeight: '1.6',
-  color: '#c9d1d9'
+const tagStyle = {
+  fontSize: '0.7rem',
+  background: '#30363d',
+  padding: '4px 8px',
+  display: 'inline-block',
+  borderRadius: '2px',
+  letterSpacing: '1px'
 };
+
+const descStyle = { color: '#8b949e', fontSize: '0.95rem', marginBottom: '20px' };
+const reqHeader = { fontSize: '0.8rem', fontWeight: 'bold', color: 'white', borderBottom: '1px solid #30363d', paddingBottom: '5px' };
+const listStyle = { marginTop: '10px', fontSize: '0.9rem', color: '#c9d1d9', paddingLeft: '20px' };

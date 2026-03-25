@@ -1,28 +1,45 @@
-"use client";
 import React from 'react';
-import { Shield, Tractor, Scale, MessageSquare, ArrowLeft } from 'lucide-react';
 
-export default function Rules() {
+export default function RulesPage() {
   return (
-    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'#fff', padding:'40px 20px', fontFamily:'sans-serif' }}>
-      <div style={{ maxWidth:'600px', margin:'0 auto' }}>
-        <button onClick={()=>window.location.href='/dashboard'} style={{ background:'none', border:'none', color:'#94a3b8', cursor:'pointer', marginBottom:'20px', display:'flex', alignItems:'center', gap:'5px' }}><ArrowLeft size={16}/> Back</button>
-        <h1 style={{ textAlign:'center', color:'#22c55e' }}>CTFG Rulebook</h1>
-        <div style={{ display:'flex', flexDirection:'column', gap:'15px', marginTop:'20px' }}>
-          <div style={{ background:'#131926', padding:'20px', borderRadius:'15px', border:'1px solid #1e293b' }}>
-            <h3 style={{ margin:0, color:'#22c55e' }}>1. Realism</h3>
-            <p style={{ fontSize:'14px', color:'#94a3b8' }}>Stay on roads. No cutting across fields. Use turn signals on main roads.</p>
-          </div>
-          <div style={{ background:'#131926', padding:'20px', borderRadius:'15px', border:'1px solid #1e293b' }}>
-            <h3 style={{ margin:0, color:'#f97316' }}>2. Economy</h3>
-            <p style={{ fontSize:'14px', color:'#94a3b8' }}>All work must be claimed on the Job Board. Faking jobs results in a ban.</p>
-          </div>
-          <div style={{ background:'#131926', padding:'20px', borderRadius:'15px', border:'1px solid #1e293b' }}>
-            <h3 style={{ margin:0, color:'#3b82f6' }}>3. Etiquette</h3>
-            <p style={{ fontSize:'14px', color:'#94a3b8' }}>Respect other farmers. Return equipment refueled and repaired.</p>
-          </div>
+    <div style={{ padding: '60px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <header style={{ textAlign: 'center', marginBottom: '60px' }}>
+        <h1 style={{ color: '#ff4d4d', fontSize: '3rem', fontWeight: 900, marginBottom: '10px' }}>
+          [ICE] COMPLIANCE
+        </h1>
+        <div style={{ height: '2px', background: '#ff4d4d', width: '100px', margin: '0 auto' }}></div>
+        <p style={{ marginTop: '20px', color: '#8b949e', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          Iron Compliance & Enforcement | Standard Operating Procedures
+        </p>
+      </header>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        <div style={ruleBox}>
+          <h3 style={{ color: 'white', marginBottom: '10px' }}>01. FLEET CONDUCT</h3>
+          <p style={{ color: '#8b949e' }}>Speed limits are strictly enforced: 50MPH (Roads) / 20MPH (Farm). Machinery must be repaired and cleaned after every shift. Abandoned gear will result in an immediate Tier 1 fine.</p>
+        </div>
+
+        <div style={ruleBox}>
+          <h3 style={{ color: 'white', marginBottom: '10px' }}>02. FINANCIAL INTEGRITY</h3>
+          <p style={{ color: '#8b949e' }}>The 5% Treasury Tax is mandatory. All sales must be screenshot and posted to #harvest-reports. Tax evasion will lead to permanent seizure of all business licenses.</p>
+        </div>
+
+        <div style={ruleBox}>
+          <h3 style={{ color: 'white', marginBottom: '10px' }}>03. DISCIPLINARY SCALE</h3>
+          <ul style={{ color: '#ff4d4d', paddingLeft: '20px' }}>
+            <li><strong>TIER 1 ($5,000):</strong> Negligence, Speeding, Bad Parking.</li>
+            <li><strong>TIER 2 ($15,000):</strong> Unpaid Tax, Repeated Damage.</li>
+            <li><strong>TIER 3 (EXCLUSION):</strong> Theft, Griefing, Contract Violation.</li>
+          </ul>
         </div>
       </div>
     </div>
   );
 }
+
+const ruleBox = {
+  background: 'rgba(255, 77, 77, 0.05)',
+  border: '1px solid rgba(255, 77, 77, 0.2)',
+  padding: '30px',
+  borderRadius: '4px'
+};

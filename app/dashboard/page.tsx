@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { sb } from "../db/supabase";
 import { 
   Shield, Radio, Clock, LogOut, Terminal, 
-  Send, Navigation, Zap, LayoutDashboard, MapPin, Truck, Wrench, AlertTriangle
+  Send, Navigation, Zap, LayoutDashboard, MapPin, Truck, Wrench, Timer
 } from 'lucide-react';
 
 export default function MasterDashboard() {
@@ -15,17 +15,15 @@ export default function MasterDashboard() {
   const [view, setView] = useState('MAP'); 
   const [command, setCommand] = useState("");
   const [status, setStatus] = useState("SYSTEM_READY");
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     sb.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) fetchAllData(session.user.id);
     });
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchAllData(session.user.id);
-    });
-    return () => subscription.unsubscribe();
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchAllData = async (uid: string) => {
@@ -33,35 +31,28 @@ export default function MasterDashboard() {
     if (prof) setProfile(prof);
     const { data: intel } = await sb.from('tactical_news').select('*').order('created_at', { ascending: false }).limit(5);
     if (intel) setNews(intel);
-    const { data: jobs } = await sb.from('active_missions').select('*').order('created_at', { ascending: false });
+    // Fetch from the VIEW we created in SQL
+    const { data: jobs } = await sb.from('available_missions').select('*').order('expires_at', { ascending: true });
     if (jobs) setMissions(jobs);
     const { data: fleet } = await sb.from('garage').select('*').order('truck_name', { ascending: true });
     if (fleet) setTrucks(fleet);
   };
 
+  const getTimeLeft = (expiryStr: string) => {
+    const expiry = new Date(expiryStr);
+    const diff = expiry.getTime() - now.getTime();
+    if (diff <= 0) return "EXPIRED";
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    return `${mins}m ${secs}s`;
+  };
+
   const handleRepair = async (truckId: string, currentCondition: number) => {
-    const needed = 100 - currentCondition;
-    const cost = needed * 500; // $500 per 1% repair cost
-
-    if (profile.balance < cost) {
-      setStatus("INSUFFICIENT_FUNDS");
-      return;
-    }
-
-    setStatus("INITIATING_REPAIRS...");
-    const { error } = await sb.rpc('repair_truck', { 
-      truck_id: truckId, 
-      repair_cost: cost, 
-      new_condition: 100 
-    });
-
-    if (error) {
-      setStatus("REPAIR_FAILED");
-    } else {
-      setStatus(`REPAIRED_FOR_$${cost.toLocaleString()}`);
-      fetchAllData(session.user.id);
-    }
-    setTimeout(() => setStatus("SYSTEM_READY"), 3000);
+    const cost = (100 - currentCondition) * 500;
+    if (profile.balance < cost) return setStatus("INSUFFICIENT_FUNDS");
+    setStatus("REPAIRING...");
+    const { error } = await sb.rpc('repair_truck', { truck_id: truckId, repair_cost: cost, new_condition: 100 });
+    if (!error) { setStatus("REPAIR_COMPLETE"); fetchAllData(session.user.id); }
   };
 
   const executeCommand = async (e: React.FormEvent) => {
@@ -72,16 +63,18 @@ export default function MasterDashboard() {
 
     try {
       if (action === "/dispatch") await sb.from('tactical_news').insert([{ headline: val }]);
-      if (action === "/balance") {
-        const amt = parseInt(val.replace(/,/g, ''));
-        await sb.from('profiles').update({ balance: amt }).eq('id', session.user.id);
-      }
-      if (action === "/buy_truck") {
-        await sb.from('garage').insert([{ truck_name: val, model: 'Heavy_Duty', owner_id: session.user.id, condition_pct: 100 }]);
+      if (action === "/balance") await sb.from('profiles').update({ balance: parseInt(val) }).eq('id', session.user.id);
+      if (action === "/contract") {
+        // Creates a job that expires in 15 minutes
+        await sb.from('active_missions').insert([{ 
+          title: val, 
+          payout: 35000, 
+          expires_at: new Date(Date.now() + 15 * 60000).toISOString() 
+        }]);
       }
       setCommand("");
-      setStatus("CMD_EXECUTED");
-      setTimeout(() => { setStatus("SYSTEM_READY"); fetchAllData(session.user.id); }, 2000);
+      setStatus("CMD_OK");
+      setTimeout(() => { setStatus("SYSTEM_READY"); fetchAllData(session.user.id); }, 1500);
     } catch (err) { setStatus("ERROR"); }
   };
 
@@ -93,12 +86,12 @@ export default function MasterDashboard() {
       backgroundImage: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80")',
       backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative'
     }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 1 }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 1 }} />
 
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', height: '100%' }}>
         
         {/* SIDEBAR */}
-        <div style={{ width: '260px', borderRight: '1px solid #1a1a1a', padding: '40px 20px', background: 'rgba(5,5,5,0.9)' }}>
+        <div style={{ width: '260px', borderRight: '1px solid #1a1a1a', padding: '40px 20px', background: 'rgba(0,0,0,0.9)' }}>
           <div style={{ color: '#d4af37', fontSize: '12px', letterSpacing: '4px', marginBottom: '50px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Shield size={20} /> CTFG_ADMIN
           </div>
@@ -112,36 +105,44 @@ export default function MasterDashboard() {
 
         {/* MAIN PANEL */}
         <div style={{ flex: 1, padding: '40px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(15,15,15,0.9)', borderLeft: '4px solid #d4af37', display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(10,10,10,0.9)', borderLeft: '4px solid #d4af37', display: 'flex', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: '10px', color: '#d4af37' }}>OPERATOR: {profile?.username || 'Samuel_Founder'}</div>
               <div style={{ fontSize: '32px', color: '#22c55e', fontWeight: 'bold' }}>${profile?.balance?.toLocaleString()}</div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '10px', color: '#444' }}>
+              <div>COORD: 46.8797° N, 110.3626° W</div>
+              <div style={{ color: '#d4af37' }}>{now.toLocaleTimeString()}</div>
             </div>
           </div>
 
           <div style={{ flex: 1, background: 'rgba(0,0,0,0.7)', border: '1px solid #1a1a1a', borderRadius: '4px', overflowY: 'auto' }}>
             {view === 'MAP' && (
               <div style={{ height: '100%', width: '100%', position: 'relative' }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#1a1a1a 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-                <div style={{ padding: '20px', color: '#d4af37', fontSize: '10px' }}>[ SATELLITE_UPLINK: ACTIVE ]</div>
-                {trucks.filter(t => t.status === 'ON_JOB').map((t, i) => (
-                   <div key={t.id} style={{ position: 'absolute', top: `${40 + (i*10)}%`, left: `${45 + (i*5)}%` }}>
-                    <MapPin color="#d4af37" size={20} className="pulse" />
-                    <div style={{ fontSize: '8px', color: '#fff', background: '#000', padding: '2px' }}>{t.truck_name}</div>
-                   </div>
-                ))}
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#222 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.3 }} />
+                <div style={{ padding: '20px', color: '#d4af37', fontSize: '10px' }}>[ SATELLITE_UPLINK_LIVE ]</div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                  <MapPin color="#d4af37" size={24} className="pulse" />
+                  <div style={{ fontSize: '8px', color: '#fff', background: '#000', padding: '2px' }}>TITAN_01</div>
+                </div>
               </div>
             )}
 
             {view === 'FIELD' && (
               <div style={{ padding: '30px', display: 'grid', gap: '15px' }}>
+                {missions.length === 0 && <div style={{ color: '#444', fontSize: '11px' }}>NO ACTIVE CONTRACTS DETECTED...</div>}
                 {missions.map((m) => (
-                  <div key={m.id} style={{ padding: '20px', border: '1px solid #1a1a1a', background: 'rgba(20,20,20,0.6)', display: 'flex', justifyContent: 'space-between' }}>
+                  <div key={m.id} style={{ padding: '20px', border: '1px solid #1a1a1a', background: 'rgba(20,20,20,0.6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#fff' }}>{m.title}</div>
-                      <div style={{ fontSize: '9px', color: '#444' }}>{m.origin} ➔ {m.destination}</div>
+                      <div style={{ fontSize: '12px', color: '#fff', letterSpacing: '1px' }}>{m.title}</div>
+                      <div style={{ fontSize: '9px', color: '#444', marginTop: '4px' }}>{m.origin} ➔ {m.destination}</div>
                     </div>
-                    <div style={{ color: '#22c55e' }}>+${m.payout.toLocaleString()}</div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ color: '#22c55e', fontSize: '14px' }}>+${m.payout.toLocaleString()}</div>
+                      <div style={{ color: '#ff4444', fontSize: '9px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end' }}>
+                        <Timer size={10} /> {getTimeLeft(m.expires_at)}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -153,22 +154,15 @@ export default function MasterDashboard() {
                   <div key={t.id} style={{ padding: '20px', border: '1px solid #222', background: 'rgba(25,25,25,0.9)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                       <Truck size={18} color={t.condition_pct > 80 ? '#22c55e' : '#d4af37'} />
-                      <div style={{ fontSize: '9px', color: t.status === 'REPAIR' ? '#ff4444' : '#666' }}>{t.status}</div>
+                      <div style={{ fontSize: '9px', color: '#444' }}>{t.status}</div>
                     </div>
                     <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{t.truck_name}</div>
-                    <div style={{ fontSize: '10px', color: '#444', marginBottom: '15px' }}>{t.model}</div>
-                    
-                    <div style={{ height: '2px', background: '#111', width: '100%', marginBottom: '5px' }}>
+                    <div style={{ height: '2px', background: '#111', width: '100%', margin: '15px 0' }}>
                       <div style={{ height: '100%', background: '#d4af37', width: `${t.condition_pct}%` }} />
                     </div>
-                    <div style={{ fontSize: '9px', color: '#666', marginBottom: '15px' }}>CONDITION: {t.condition_pct}%</div>
-
                     {t.condition_pct < 100 && (
-                      <button 
-                        onClick={() => handleRepair(t.id, t.condition_pct)}
-                        style={{ width: '100%', padding: '8px', background: 'none', border: '1px solid #d4af37', color: '#d4af37', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                      >
-                        <Wrench size={12} /> REPAIR (${((100 - t.condition_pct) * 500).toLocaleString()})
+                      <button onClick={() => handleRepair(t.id, t.condition_pct)} style={{ width: '100%', padding: '8px', background: 'none', border: '1px solid #d4af37', color: '#d4af37', fontSize: '10px', cursor: 'pointer' }}>
+                        <Wrench size={10} /> RESTORE SYSTEM (${((100 - t.condition_pct) * 50).toLocaleString()})
                       </button>
                     )}
                   </div>
@@ -179,14 +173,14 @@ export default function MasterDashboard() {
         </div>
 
         {/* INTEL SIDEBAR */}
-        <div style={{ width: '350px', borderLeft: '1px solid #1a1a1a', padding: '30px', background: 'rgba(2,2,2,0.98)' }}>
+        <div style={{ width: '350px', borderLeft: '1px solid #1a1a1a', padding: '30px', background: 'rgba(2,2,2,1)' }}>
           <div style={{ fontSize: '10px', color: '#d4af37', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Radio size={14} className="pulse" /> LIVE_DISPATCH
           </div>
           {news.map((item, i) => (
-            <div key={i} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #111' }}>
-              <div style={{ fontSize: '11px', color: '#ccc' }}>{item.headline}</div>
-              <div style={{ fontSize: '8px', color: '#444', marginTop: '5px' }}>{new Date(item.created_at).toLocaleTimeString()}</div>
+            <div key={i} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #111', background: 'rgba(255,0,0,0.01)' }}>
+              <div style={{ fontSize: '11px', color: '#ccc', lineHeight: '1.4' }}>{item.headline}</div>
+              <div style={{ fontSize: '8px', color: '#444', marginTop: '8px' }}>{new Date(item.created_at).toLocaleTimeString()}</div>
             </div>
           ))}
         </div>
@@ -194,12 +188,12 @@ export default function MasterDashboard() {
 
       {/* COMMAND BAR */}
       <div style={{ position: 'fixed', bottom: '20px', left: '300px', right: '400px', zIndex: 100 }}>
-        <form onSubmit={executeCommand} style={{ display: 'flex', background: '#000', padding: '12px', border: '1px solid #d4af3733' }}>
+        <form onSubmit={executeCommand} style={{ display: 'flex', background: '#000', padding: '12px', border: '1px solid #d4af3733', borderRadius: '4px' }}>
           <Terminal size={14} color="#d4af37" style={{ marginRight: '15px' }} />
           <input 
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            placeholder="SYSTEM_CMD: /dispatch, /balance, /buy_truck"
+            placeholder="CMDS: /dispatch [msg], /balance [val], /contract [name]"
             style={{ flex: 1, background: 'none', border: 'none', color: '#fff', fontSize: '11px', outline: 'none' }}
           />
           <div style={{ fontSize: '9px', color: '#d4af37' }}>{status}</div>

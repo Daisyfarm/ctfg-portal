@@ -1,93 +1,55 @@
 "use client";
-export const dynamic = "force-dynamic"; // CRITICAL: Fixes Vercel Build "Prerender" errors
+export const dynamic = "force-dynamic";
 
 import React, { useEffect, useState } from 'react';
 import { sb } from "../db/supabase";
 import { 
-  Shield, Radio, LogOut, Terminal, ShoppingCart,
+  Shield, LogOut, Terminal, ShoppingCart,
   Navigation, LayoutDashboard, MapPin, Truck, 
-  Droplets, Star, ClipboardList, Activity
+  ClipboardList, Activity, AlertTriangle
 } from 'lucide-react';
-
-const TRUCK_MODELS = [
-  { id: 'scout', name: 'Lite-Scout', price: 50000, fuel: 100, desc: 'High efficiency, low maintenance.' },
-  { id: 'hauler', name: 'Iron-Hauler', price: 150000, fuel: 80, desc: 'The industry standard.' },
-  { id: 'titan', name: 'Goliath-Titan', price: 500000, fuel: 60, desc: 'High-Tier heavy transport.' }
-];
 
 export default function MasterDashboard() {
   const [session, setSession] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [news, setNews] = useState<any[]>([]);
   const [missions, setMissions] = useState<any[]>([]);
   const [trucks, setTrucks] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [view, setView] = useState('MAP'); 
   const [command, setCommand] = useState("");
-  const [status, setStatus] = useState("SYSTEM_CONNECTED");
-  const [selectedMission, setSelectedMission] = useState<any>(null);
+  const [status, setStatus] = useState("SYSTEM_READY");
 
   useEffect(() => {
     sb.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchAllData(session.user.id);
+      if (session) {
+        setSession(session);
+        fetchAllData(session.user.id);
+      }
     });
-    
-    // Auto-refresh every 10 seconds to check mission status
-    const interval = setInterval(() => {
-        if (session) fetchAllData(session.user.id);
-        checkPayday();
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [session, missions, trucks]);
+  }, []);
 
   const fetchAllData = async (uid: string) => {
     try {
-        const { data: prof } = await sb.from('profiles').select('*').eq('id', uid).single();
-        if (prof) setProfile(prof);
-        
-        const { data: intel } = await sb.from('tactical_news').select('*').order('created_at', { ascending: false }).limit(5);
-        if (intel) setNews(intel);
-        
-        const { data: jobs } = await sb.from('active_missions').select('*').neq('status', 'COMPLETED');
-        if (jobs) setMissions(jobs);
-        
-        const { data: fleet } = await sb.from('garage').select('*').order('truck_name', { ascending: true });
-        if (fleet) setTrucks(fleet);
+      // Fetch Profile
+      const { data: prof } = await sb.from('profiles').select('*').eq('id', uid).single();
+      if (prof) setProfile(prof);
+      
+      // Fetch Trucks
+      const { data: fleet } = await sb.from('garage').select('*').eq('owner_id', uid);
+      if (fleet) setTrucks(fleet);
+      
+      // Fetch Available Jobs
+      const { data: jobs } = await sb.from('active_missions').select('*').eq('status', 'AVAILABLE');
+      if (jobs) setMissions(jobs);
 
-        const { data: logs } = await sb.from('mission_history').select('*').order('completed_at', { ascending: false }).limit(10);
-        if (logs) setHistory(logs);
-    } catch (e) {
-        console.error("Data Fetch Error", e);
+      // Fetch History (Fixed the 403 target)
+      const { data: logs, error: logErr } = await sb.from('mission_history').select('*').eq('owner_id', uid).limit(10);
+      if (!logErr) setHistory(logs || []);
+      
+    } catch (err) {
+      console.error("Link Failure:", err);
+      setStatus("CONNECTION_ERROR");
     }
-  };
-
-  const checkPayday = async () => {
-    const activeJobs = missions.filter(m => m.status === 'ACTIVE');
-    for (const job of activeJobs) {
-      const elapsed = Date.now() - new Date(job.started_at).getTime();
-      if (elapsed >= 300000) { // 5 Minute Wait Logic
-        const truck = trucks.find(t => t.status === 'ON_JOB');
-        if (truck) {
-          await sb.rpc('complete_mission', { m_id: job.id, t_id: truck.id });
-          setStatus("MISSION_SUCCESS: FUNDS_CLEARED");
-        }
-      }
-    }
-  };
-
-  const handlePurchase = async (model: any) => {
-    if (profile.balance < model.price) return setStatus("INSUFFICIENT_CREDITS");
-    const { error } = await sb.rpc('buy_truck', { 
-        truck_name: `${model.name}_#${Math.floor(100 + Math.random() * 900)}`, 
-        truck_model: model.id, price: model.price, start_fuel: model.fuel
-    });
-    if (!error) { setStatus("ASSET_ACQUIRED"); fetchAllData(session.user.id); }
-  };
-
-  const deployTruck = async (truckId: string) => {
-    const { error } = await sb.rpc('accept_mission', { m_id: selectedMission.id, t_id: truckId });
-    if (!error) { setStatus("UNIT_DEPLOYED"); setSelectedMission(null); fetchAllData(session.user.id); }
   };
 
   const executeCommand = async (e: React.FormEvent) => {
@@ -97,162 +59,101 @@ export default function MasterDashboard() {
     
     if (action === "/contract") {
       await sb.from('active_missions').insert([{ 
-        title: args.join(" ") || "Standard Haul", payout: 25000, status: 'AVAILABLE'
+        title: args.join(" ") || "Classified Ops", payout: 50000, status: 'AVAILABLE'
       }]);
-      setStatus("NEW_CONTRACT_POSTED");
+      setStatus("CONTRACT_GENERATED");
     }
-    setCommand(""); 
-    fetchAllData(session.user.id);
+    setCommand("");
+    if (session) fetchAllData(session.user.id);
   };
 
   if (!session) return (
-    <div style={{background:'#000', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'#444', fontFamily:'monospace'}}>
-        INITIALIZING_SECURE_LINK...
+    <div style={{background:'#000', height:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'#d4af37', fontFamily:'monospace'}}>
+      <Activity className="pulse" style={{marginBottom:'20px'}} />
+      <div style={{letterSpacing:'5px'}}>ESTABLISHING_UPLINK...</div>
     </div>
   );
 
-  const xpProgress = ((profile?.xp || 0) % 1000) / 10;
-
   return (
-    <div style={{ height: '100vh', background: '#050505', color: 'white', fontFamily: 'monospace', position: 'relative', overflow: 'hidden' }}>
-      {/* Background Overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(0,0,0,0.93), rgba(0,0,0,0.93)), url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80")', backgroundSize:'cover', z_index: 1 }} />
+    <div style={{ height: '100vh', background: '#050505', color: 'white', fontFamily: 'monospace', display: 'flex', overflow: 'hidden' }}>
       
-      <div style={{ position: 'relative', zIndex: 2, display: 'flex', height: '100%' }}>
-        
-        {/* NAV SIDEBAR */}
-        <div style={{ width: '260px', borderRight: '1px solid #111', padding: '40px 20px', background: 'rgba(0,0,0,1)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ color: '#d4af37', fontSize: '11px', letterSpacing: '4px', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Shield size={18} /> CTFG_OS_v1.2
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: '#444', fontSize: '11px' }}>
-            <div onClick={() => setView('MAP')} style={{ color: view === 'MAP' ? '#fff' : '#444', cursor:'pointer' }}>TACTICAL_MAP</div>
-            <div onClick={() => setView('FIELD')} style={{ color: view === 'FIELD' ? '#fff' : '#444', cursor:'pointer' }}>CONTRACTS</div>
-            <div onClick={() => setView('GARAGE')} style={{ color: view === 'GARAGE' ? '#fff' : '#444', cursor:'pointer' }}>GARAGE</div>
-            <div onClick={() => setView('MARKET')} style={{ color: view === 'MARKET' ? '#d4af37' : '#444', cursor:'pointer' }}>FLEET_MARKET</div>
-            <div onClick={() => setView('LOGS')} style={{ color: view === 'LOGS' ? '#fff' : '#444', cursor:'pointer' }}>MISSION_LOGS</div>
-            
-            <div onClick={() => sb.auth.signOut()} style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #111', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <LogOut size={14} /> TERMINATE_SESSION
-            </div>
-          </div>
+      {/* SIDE NAVIGATION */}
+      <div style={{ width: '260px', borderRight: '1px solid #111', padding: '40px 20px', background: '#000' }}>
+        <div style={{ color: '#d4af37', fontSize: '11px', letterSpacing: '4px', marginBottom: '50px', display:'flex', alignItems:'center', gap:'10px' }}>
+          <Shield size={18} /> DAISY_HILL_TAC
         </div>
-
-        {/* MAIN PANEL */}
-        <div style={{ flex: 1, padding: '40px', display: 'flex', flexDirection: 'column' }}>
-          
-          {/* TOP STATUS BAR */}
-          <div style={{ marginBottom: '30px', padding: '20px', background: '#080808', borderLeft: '4px solid #d4af37', display:'flex', justifyContent:'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: '10px', color: '#d4af37', marginBottom: '5px' }}>{profile?.rank?.toUpperCase() || 'OPERATOR'} STATUS</div>
-              <div style={{ fontSize: '32px', color: '#22c55e', fontWeight: 'bold' }}>${profile?.balance?.toLocaleString()}</div>
-              <div style={{ width: '240px', height: '2px', background: '#111', marginTop: '12px' }}>
-                <div style={{ height: '100%', background: '#d4af37', width: `${xpProgress}%` }} />
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-                <div style={{ color: '#ff4444', fontSize: '10px', letterSpacing: '1px' }}>{status}</div>
-                <div style={{ color: '#222', fontSize: '8px', marginTop: '5px' }}>LATENCY: 24ms</div>
-            </div>
-          </div>
-
-          {/* DYNAMIC CONTENT AREA */}
-          <div style={{ flex: 1, background: 'rgba(5,5,5,0.95)', border: '1px solid #111', overflowY: 'auto', borderRadius: '2px' }}>
-            
-            {view === 'MAP' && (
-              <div style={{ height: '100%', width: '100%', position: 'relative', backgroundImage: 'radial-gradient(#111 1px, transparent 1px)', backgroundSize: '30px 30px' }}>
-                {trucks.filter(t => t.status === 'ON_JOB').map((t, i) => (
-                   <div key={t.id} style={{ position: 'absolute', top: `${35 + (i*8)}%`, left: `${40 + (i*12)}%` }}>
-                    <MapPin color="#d4af37" size={24} className="pulse" />
-                    <div style={{ fontSize: '8px', color: '#fff', background: '#000', padding: '2px', border: '1px solid #d4af37' }}>{t.truck_name}</div>
-                   </div>
-                ))}
-              </div>
-            )}
-
-            {view === 'FIELD' && (
-              <div style={{ padding: '30px' }}>
-                {!selectedMission ? (
-                  missions.filter(m => m.status === 'AVAILABLE').map((m) => (
-                    <div key={m.id} style={{ padding: '20px', border: '1px solid #111', background: '#090909', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontSize: '13px', color: '#eee' }}>{m.title}</div>
-                        <div style={{ fontSize: '10px', color: '#22c55e', marginTop: '5px' }}>PAYOUT: ${m.payout.toLocaleString()}</div>
-                      </div>
-                      <button onClick={() => setSelectedMission(m)} style={{ background: '#d4af37', color: '#000', border: 'none', padding: '8px 20px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>ASSIGN_UNIT</button>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ padding: '20px' }}>
-                    <div style={{ fontSize: '11px', color: '#d4af37', marginBottom: '25px', textAlign: 'center' }}>SELECT READY TRUCK FOR: {selectedMission.title}</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '15px' }}>
-                      {trucks.filter(t => t.status === 'AVAILABLE').map(t => (
-                        <div key={t.id} onClick={() => deployTruck(t.id)} style={{ padding: '20px', border: '1px solid #222', cursor: 'pointer', textAlign:'center', background:'#080808' }}>
-                          <Truck size={24} color="#d4af37" style={{margin:'0 auto 10px auto'}} />
-                          <div style={{ fontSize: '10px' }}>{t.truck_name}</div>
-                          <div style={{ fontSize: '8px', color: '#444', marginTop: '5px' }}>FUEL: {t.fuel_level}%</div>
-                        </div>
-                      ))}
-                    </div>
-                    <center><button onClick={() => setSelectedMission(null)} style={{ marginTop: '30px', background:'none', border:'none', color:'#444', cursor:'pointer', fontSize:'10px' }}>CANCEL_DEPLOYMENT</button></center>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {view === 'GARAGE' && (
-              <div style={{ padding: '30px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
-                {trucks.map((t) => (
-                  <div key={t.id} style={{ padding: '20px', border: '1px solid #1a1a1a', background: '#070707' }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom: '15px' }}>
-                        <Truck size={18} color={t.status === 'AVAILABLE' ? '#22c55e' : '#d4af37'} />
-                        <div style={{ fontSize: '8px', color: '#444' }}>{t.status}</div>
-                    </div>
-                    <div style={{ fontSize: '13px', marginBottom: '10px' }}>{t.truck_name}</div>
-                    <div style={{ fontSize: '9px', color: '#555' }}>HULL_INTEGRITY: {t.condition_pct}%</div>
-                    <div style={{ fontSize: '9px', color: '#555' }}>FUEL_RESERVE: {t.fuel_level}%</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {view === 'MARKET' && (
-              <div style={{ padding: '30px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
-                {TRUCK_MODELS.map((m) => (
-                  <div key={m.id} style={{ padding: '25px', border: '1px solid #1a1a1a', background: '#080808' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{m.name}</div>
-                    <div style={{ fontSize: '18px', color: '#22c55e', margin: '12px 0' }}>${m.price.toLocaleString()}</div>
-                    <div style={{ fontSize: '10px', color: '#444', marginBottom: '20px', lineHeight: '1.4' }}>{m.desc}</div>
-                    <button onClick={() => handlePurchase(m)} style={{ width: '100%', padding: '10px', background: '#d4af37', color: '#000', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>BUY_ASSET</button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {view === 'LOGS' && (
-              <div style={{ padding: '30px' }}>
-                {history.map((log) => (
-                  <div key={log.id} style={{ padding:'12px', borderBottom:'1px solid #111', display:'flex', justifyContent:'space-between', fontSize:'11px', color:'#666' }}>
-                    <span>{log.title} <span style={{fontSize:'9px', color:'#333'}}>— UNIT: {log.truck_name}</span></span>
-                    <span style={{color:'#22c55e'}}>+${log.payout.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', color: '#444', fontSize: '11px' }}>
+          <div onClick={() => setView('MAP')} style={{ color: view === 'MAP' ? '#fff' : '#444', cursor:'pointer' }}>RADAR_MAP</div>
+          <div onClick={() => setView('FIELD')} style={{ color: view === 'FIELD' ? '#fff' : '#444', cursor:'pointer' }}>ACTIVE_JOBS</div>
+          <div onClick={() => setView('GARAGE')} style={{ color: view === 'GARAGE' ? '#fff' : '#444', cursor:'pointer' }}>FLEET_GARAGE</div>
+          <div onClick={() => setView('MARKET')} style={{ color: view === 'MARKET' ? '#d4af37' : '#444', cursor:'pointer' }}>REQUISITION</div>
+          <div onClick={() => sb.auth.signOut()} style={{ marginTop: '40px', color: '#ff4444', cursor: 'pointer' }}><LogOut size={12} /> DISCONNECT</div>
         </div>
       </div>
 
-      {/* COMMAND TERMINAL */}
-      <form onSubmit={executeCommand} style={{ position: 'fixed', bottom: '20px', left: '300px', right: '350px', display: 'flex', background: '#000', padding: '12px', border: '1px solid #d4af3733', zIndex: 100 }}>
-        <Terminal size={14} color="#d4af37" style={{ marginRight: '15px' }} />
-        <input value={command} onChange={(e) => setCommand(e.target.value)} placeholder="ENTER_OPERATOR_CMD..." style={{ flex: 1, background: 'none', border: 'none', color: '#fff', fontSize: '11px', outline: 'none' }} />
-      </form>
+      {/* MAIN INTERFACE */}
+      <div style={{ flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div style={{ marginBottom: '30px', padding: '20px', background: '#0a0a0a', borderLeft: '4px solid #d4af37', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div>
+            <div style={{ fontSize: '10px', color: '#444' }}>IDENT: {profile?.farm_name || 'UNKNOWN_OPERATOR'}</div>
+            <div style={{ fontSize: '32px', color: '#22c55e', fontWeight: 'bold' }}>${profile?.balance?.toLocaleString()}</div>
+            <div style={{ fontSize: '9px', color: '#d4af37', marginTop: '5px' }}>RANK: {profile?.rank || 'RECRUIT'}</div>
+          </div>
+          <div style={{ textAlign: 'right', color: '#333', fontSize: '10px' }}>
+            STATUS: <span style={{color: status === 'CONNECTION_ERROR' ? '#ff4444' : '#22c55e'}}>{status}</span>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, background: '#070707', border: '1px solid #111', borderRadius: '4px', position: 'relative', overflowY: 'auto' }}>
+          {view === 'MAP' && (
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+              <div style={{ textAlign: 'center' }}>
+                <Navigation size={48} />
+                <div style={{ marginTop: '10px', fontSize: '10px' }}>GRID_COORDINATES_LOCKED</div>
+              </div>
+            </div>
+          )}
+
+          {view === 'FIELD' && (
+            <div style={{ padding: '30px' }}>
+              {missions.length === 0 && <div style={{color:'#222'}}>NO_ACTIVE_CONTRACTS_FOUND</div>}
+              {missions.map(m => (
+                <div key={m.id} style={{ padding: '20px', border: '1px solid #111', background: '#000', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                  <div>{m.title}</div>
+                  <div style={{color:'#22c55e'}}>${m.payout.toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {view === 'GARAGE' && (
+            <div style={{ padding: '30px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+              {trucks.map(t => (
+                <div key={t.id} style={{ padding: '20px', border: '1px solid #111', background: '#000' }}>
+                  <Truck size={16} color="#d4af37" />
+                  <div style={{ marginTop: '10px', fontSize: '12px' }}>{t.truck_name}</div>
+                  <div style={{ fontSize: '9px', color: '#444' }}>{t.status}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* TERMINAL INPUT */}
+        <form onSubmit={executeCommand} style={{ marginTop: '20px', display: 'flex', background: '#000', padding: '15px', border: '1px solid #111' }}>
+          <Terminal size={14} color="#d4af37" style={{ marginRight: '15px' }} />
+          <input 
+            value={command} 
+            onChange={(e) => setCommand(e.target.value)} 
+            placeholder="SYSTEM_COMMAND_LOG..." 
+            style={{ flex: 1, background: 'none', border: 'none', color: '#fff', fontSize: '11px', outline: 'none' }} 
+          />
+        </form>
+      </div>
 
       <style jsx>{`
-        .pulse { animation: pulse-red 2s infinite; }
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
       `}</style>
     </div>
   );

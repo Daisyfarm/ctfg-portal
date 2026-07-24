@@ -29,7 +29,7 @@ export default function DataPage() {
           <span style={{ color: '#1e3a8a', borderBottom: '2px solid #2563eb', paddingBottom: '2px', cursor: 'pointer' }}>Data</span>
           <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Market</span>
           <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Marketplace</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' », color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
+          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
           <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
           <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
         </div>

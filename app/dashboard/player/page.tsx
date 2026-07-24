@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-export function FSNPlayerDashboard() {
+export default function FSNPlayerDashboard() {
   const [activeTab, setActiveTab] = useState<'market' | 'yards' | 'contracts'>('market');
   const [currency, setCurrency] = useState<'USD' | 'GBP'>('USD');
 
@@ -181,5 +181,3 @@ export function FSNPlayerDashboard() {
     </div>
   );
 }
-
-export default FSNPlayerDashboard;

@@ -25,7 +25,7 @@ export default function DashboardPage() {
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 
                 {/* Page Header */}
-                <div style={{ display: 'flex', flexDirection: 'column', mdDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #1f2937', paddingBottom: '20px', marginBottom: '30px', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #1f2937', paddingBottom: '20px', marginBottom: '30px', gap: '15px' }}>
                     <div>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontFamily: 'monospace', fontWeight: 'bold', marginBottom: '10px' }}>
                             ● Live Server Sync Active

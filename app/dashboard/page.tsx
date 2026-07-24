@@ -21,7 +21,6 @@ export default function DashboardPage() {
     const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
     if (profile) setU(profile);
 
-    // Fetch quick counts
     const [{ count: cCount }, { count: aCount }, { count: ctCount }, { count: mCount }] = await Promise.all([
       sb.from('companies').select('*', { count: 'exact', head: true }),
       sb.from('auctions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -54,7 +53,10 @@ export default function DashboardPage() {
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
       {/* TOP BAR */}
       <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
+        {/* LOGO BRANDING SECTION: Replace text or insert <img src="/your-logo.png" style={{height:'30px'}} /> */}
+        <div onClick={()=>window.location.href='/dashboard'} style={{cursor:'pointer', display:'flex', alignItems:'center', gap:'10px'}}>
+          <span style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic'}}>DAISY HILL TACTICAL</span>
+        </div>
         <div style={{display:'flex', gap:'20px', alignItems:'center', fontSize:'11px'}}>
           <span>OPERATIVE: <b style={{color:'#22c55e'}}>{u.username}</b></span>
           <span>BALANCE: <b style={{color:'#fff'}}>${u.balance?.toLocaleString()}</b></span>
@@ -71,8 +73,9 @@ export default function DashboardPage() {
             <button style={sideBtn} onClick={()=>window.location.href='/company'}>Corporate Suite</button>
             <button style={sideBtn} onClick={()=>window.location.href='/contracts'}>Contracts</button>
             <button style={sideBtn} onClick={()=>window.location.href='/conquest'}>Conquest</button>
-            <button style={sideBtn} onClick={()=>window.location.href='/community'}>Community Hub</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/community'---}>Community Hub</button>
             <button style={sideBtn} onClick={()=>window.location.href='/contact'}>Contact Board</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/invoices'}>Corporate Invoices</button>
           </div>
           <div>
             <button style={{...sideBtn, color:'#ef4444'}} onClick={handleLogout}><LogOut size={16}/> Logout</button>

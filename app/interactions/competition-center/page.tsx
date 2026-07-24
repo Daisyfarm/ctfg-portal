@@ -1,112 +1,80 @@
-
-"use client";
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function CompetitionCenterPage() {
-  const [joined, setJoined] = useState<{ [key: string]: boolean }>({});
+    const competitions = [
+        { id: 'COMP-01', title: 'Spring Harvest Speedrun', prize: '$50,000.00', participants: 18, status: 'Active', deadline: '2d 14h' },
+        { id: 'COMP-02', title: 'Highest Corn Yield Challenge', prize: '$100,000.00', participants: 32, status: 'Upcoming', deadline: 'Starts in 5d' },
+        { id: 'COMP-03', title: 'Bale Stacking Invitational', prize: '$25,000.00', participants: 24, status: 'Completed', deadline: 'Ended' },
+    ];
 
-  const handleJoin = (id: string) => {
-    setJoined(prev => ({ ...prev, [id]: true }));
-  };
-
-  const competitions = [
-    {
-      id: 'comp-1',
-      title: 'Spring Harvest Speedrun Championship',
-      category: 'Harvesting',
-      reward: '$50,000.00',
-      server: 'Server 19',
-      participants: 12,
-      deadline: '2 Days Left',
-      description: 'Compete to harvest 100 hectares of wheat in the shortest amount of time using standard tier-3 equipment.'
-    },
-    {
-      id: 'comp-2',
-      title: 'Precision Plowing Derby',
-      category: 'Cultivation',
-      reward: '$25,000.00',
-      server: 'Server 8',
-      participants: 8,
-      deadline: '5 Days Left',
-      description: 'Straightest lines and highest score efficiency win the grand prize. All contestants must use tracked tractors.'
-    },
-    {
-      id: 'comp-3',
-      title: 'Forestry Logging Marathon',
-      category: 'Logging',
-      reward: '$35,000.00',
-      server: 'Server 14',
-      participants: 15,
-      deadline: 'Active Now',
-      description: 'Deliver the highest volume of Spruce logs to the central sawmill within the 3-hour window.'
-    }
-  ];
-
-  return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #cbd5e1', padding: '12px 30px' }}>
-        <div style={{ display: 'flex', gap: '25px', maxWidth: '1400px', margin: '0 auto', fontSize: '13px', fontWeight: 'bold', color: '#2563eb', flexWrap: 'wrap' }}>
-          <span style={{ cursor: 'pointer' }}>Myself ▾</span>
-          <span style={{ cursor: 'pointer' }}>Interactions ▾</span>
-          <span style={{ cursor: 'pointer' }}>Finances ▾</span>
-          <span style={{ cursor: 'pointer' }}>Data ▾</span>
-          <span style={{ cursor: 'pointer' }}>Market ▾</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 30px' }}>
-        
-        {/* Page Title & Description */}
-        <div style={{ marginBottom: '25px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'normal', color: '#332266', margin: '0 0 5px 0' }}>
-            Competition Center
-          </h1>
-          <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
-            Enter active community tournaments, showcase your farming skills, and win lucrative prize pools.
-          </p>
-        </div>
-
-        {/* Competitions List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {competitions.map((comp) => (
-            <div key={comp.id} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '25px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              
-              {/* Details */}
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  {comp.category} • {comp.server} • ⏳ {comp.deadline}
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+            {/* Navigation Header */}
+            <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                        <span className="text-xl font-bold tracking-wider text-emerald-400">FSN</span>
+                        <nav className="hidden md:flex space-x-6 text-sm text-slate-400">
+                            <span className="hover:text-white cursor-pointer">Dashboard</span>
+                            <span className="text-white font-medium cursor-pointer">Competition Center</span>
+                            <span className="hover:text-white cursor-pointer">Auction House</span>
+                        </nav>
+                    </div>
+                    <div className="text-sm text-slate-400">Cool Brook Farms</div>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 10px 0' }}>
-                  {comp.title}
-                </h3>
-                <p style={{ fontSize: '13px', color: '#334155', margin: '0 0 15px 0', lineHeight: '1.5' }}>
-                  {comp.description}
-                </p>
-                <div style={{ display: 'flex', gap: '25px', fontSize: '13px', color: '#64748b' }}>
-                  <div>Prize Pool: <strong style={{ color: '#16a34a' }}>{comp.reward}</strong></div>
-                  <div>Participants: <strong>{comp.participants} Registered</strong></div>
+            </header>
+
+            {/* Main Content */}
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+                
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white tracking-tight">Competition Center</h1>
+                        <p className="text-xs text-slate-400 mt-1">Compete in network-wide agricultural challenges, harvest speedruns, and seasonal contests.</p>
+                    </div>
+                    <button className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg shadow-lg shadow-emerald-900/25 transition text-sm">
+                        View Leaderboards
+                    </button>
                 </div>
-              </div>
 
-              {/* Action Button */}
-              <div>
-                <button 
-                  onClick={() => handleJoin(comp.id)}
-                  style={{ width: '100%', background: joined[comp.id] ? '#16a34a' : '#0284c7', color: '#fff', border: 'none', padding: '12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', transition: 'background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                >
-                  {joined[comp.id] ? 'COMPETITION JOINED' : 'JOIN COMPETITION'}
-                </button>
-              </div>
+                {/* Competition Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {competitions.map((comp) => (
+                        <div key={comp.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-xl space-y-4">
+                            <div>
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-xs font-mono text-emerald-400">{comp.id}</span>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold ${comp.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : comp.status === 'Upcoming' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-400'}`}>
+                                        {comp.status}
+                                    </span>
+                                </div>
+                                <h3 className="text-md font-bold text-white">{comp.title}</h3>
+                            </div>
 
-            </div>
-          ))}
+                            <div className="space-y-2 border-t border-slate-800 pt-4">
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Prize Pool:</span>
+                                    <span className="font-mono text-emerald-400 font-semibold">{comp.prize}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Participants:</span>
+                                    <span className="text-white font-semibold">{comp.participants} farms</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Timeline:</span>
+                                    <span className="text-slate-300 font-mono">{comp.deadline}</span>
+                                </div>
+                            </div>
+
+                            <button className={`w-full py-2.5 px-4 font-semibold rounded-lg text-sm transition-all shadow-lg ${comp.status === 'Completed' ? 'bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'}`}>
+                                {comp.status === 'Completed' ? 'View Results' : 'Join Competition'}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+            </main>
         </div>
-
-      </div>
-    </div>
-  );
+    );
 }

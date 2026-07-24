@@ -1,173 +1,94 @@
-"use client";
-import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { Tractor, ShieldCheck, Lock, User, ArrowRight } from 'lucide-react';
+// app/page.tsx
+import React from 'react';
 
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
-
-export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    if (isLogin) {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert("Authentication failed: " + error.message);
-        setLoading(false);
-      } else {
-        await fetch(HK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🔐 **OPERATOR LOGGED IN**\n**Email:** ${email}\n**Timestamp:** ${new Date().toISOString()}`
-          })
-        });
-        window.location.href = '/dashboard';
-      }
-    } else {
-      const { data, error } = await sb.auth.signUp({ email, password });
-      if (error) {
-        alert("Registration failed: " + error.message);
-        setLoading(false);
-      } else if (data.user) {
-        // Create profile row
-        await sb.from('profiles').insert([{
-          id: data.user.id,
-          username: username || email.split('@')[0],
-          balance: 500000, // Starting capital
-          role: 'Operator'
-        }]);
-
-        await fetch(HK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🌾 **NEW OPERATOR REGISTERED**\n**Username:** ${username || email.split('@')[0]}\n**Email:** ${email}`
-          })
-        });
-
-        alert("Registration successful! Accessing terminal dashboard...");
-        window.location.href = '/dashboard';
-      }
-    }
-  };
-
+export default function DashboardPage() {
   return (
-    <div style={{
-      background: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920")',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'Arial, sans-serif',
-      position: 'relative'
-    }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)' }}></div>
+    <div className="flex h-screen bg-[#090a0f] text-gray-100 font-sans">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 border-r border-gray-800 bg-[#0d0f17] flex flex-col justify-between p-6">
+        <div>
+          <div className="mb-8">
+            <h1 className="text-xl font-bold tracking-wider text-amber-500">DAISY HILL</h1>
+            <p className="text-xs text-gray-400 tracking-widest">TACTICAL COMMAND</p>
+          </div>
+          
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Operations</div>
+          <nav className="space-y-1 mb-6">
+            <a href="#" className="flex items-center px-3 py-2 rounded bg-gray-800 text-white font-medium text-sm">Dashboard</a>
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">War Theatre</a>
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Sectors</a>
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Fleet Registry</a>
+          </nav>
 
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-        background: 'rgba(20, 20, 20, 0.95)',
-        border: '1px solid #4a7ab5',
-        borderRadius: '6px',
-        padding: '40px',
-        width: '100%',
-        maxWidth: '440px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <Tractor size={48} color="#22c55e" style={{ marginBottom: '10px' }} />
-          <h1 style={{ color: '#fff', fontSize: '24px', textTransform: 'uppercase', margin: 0, fontWeight: '900', fontStyle: 'italic' }}>
-            Iron Daisy Agri
-          </h1>
-          <p style={{ color: '#4a7ab5', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginTop: '5px' }}>
-            CORPORATE AGRICULTURAL & LOGISTICS TERMINAL
-          </p>
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Legal & Finance</div>
+          <nav className="space-y-1">
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Board Vault</a>
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Asset Auction</a>
+            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Maintenance</a>
+          </nav>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {!isLogin && (
-            <div>
-              <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>OPERATOR CALLSIGN / USERNAME</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Miller_01"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
-              />
+        <div className="text-xs text-gray-600">
+          DAISY HILL TACTICAL | SECURE TERMINAL v2.0.26
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-y-auto">
+        {/* Top Header Bar */}
+        <header className="border-b border-gray-800 p-6 flex justify-between items-center bg-[#0d0f17]">
+          <div>
+            <h2 className="text-2xl font-bold tracking-wide">COMMAND DASHBOARD</h2>
+            <p className="text-xs text-gray-400">SATELLITE UPLINK: MONTANA / DAISY HILL DIVISION</p>
+          </div>
+          <div className="flex items-center space-x-2 border border-green-800 bg-green-950/30 px-3 py-1.5 rounded text-xs text-green-400 font-mono">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span>SYSTEM INTEGRITY: ACTIVE</span>
+          </div>
+        </header>
+
+        {/* Dashboard Body */}
+        <div className="p-8 space-y-6">
+          {/* Live Dispatch Alert Banner */}
+          <div className="border border-red-900/50 bg-red-950/20 p-4 rounded text-sm text-red-300 flex items-center space-x-3">
+            <span className="font-bold uppercase tracking-wider text-red-400">Live Dispatch:</span>
+            <span>"Standby" — Sector 4-G Plowing Ops Protected.</span>
+          </div>
+
+          {/* Operator Card */}
+          <div className="border border-gray-800 bg-[#121520] p-6 rounded-lg relative overflow-hidden">
+            <div className="text-xs text-gray-400 uppercase tracking-widest mb-1">Chief Operator / Founder</div>
+            <div className="text-3xl font-extrabold text-white mb-2">Samuel_Founder</div>
+            <div className="text-3xl font-mono font-bold text-green-400 mb-6">$9,459,000</div>
+            <div className="flex space-x-6 text-xs font-mono">
+              <div>
+                <span className="text-gray-500 block">EID STATUS</span>
+                <span className="text-green-400 font-bold">VERIFIED</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">RANK</span>
+                <span className="text-amber-400 font-bold">EXECUTIVE</span>
+              </div>
             </div>
-          )}
-
-          <div>
-            <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>SECURE EMAIL</label>
-            <input
-              type="email"
-              required
-              placeholder="operator@irondaisy.agri"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
-            />
           </div>
 
-          <div>
-            <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>PASSWORD CLEARANCE</label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
-            />
+          {/* Action Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
+              REQUEST DISPATCH
+            </button>
+            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
+              LOG FUEL
+            </button>
+            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
+              VIEW SATELLITE
+            </button>
+            <button className="border border-amber-600/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 p-4 rounded font-medium text-sm transition text-center">
+              STAFF PANEL
+            </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: '10px',
-              padding: '14px',
-              background: '#22c55e',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              fontSize: '14px',
-              textTransform: 'uppercase'
-            }}
-          >
-            {loading ? 'Processing...' : (isLogin ? 'Access Terminal' : 'Initialize Operative Account')}
-            <ArrowRight size={16} />
-          </button>
-        </form>
-
-        <div style={{ textAlign: 'center', marginTop: '25px', borderTop: '1px solid #333', paddingTop: '15px' }}>
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            style={{ background: 'transparent', border: 'none', color: '#4a7ab5', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
-          >
-            {isLogin ? "Need a new operator account? Register here" : "Already have clearance? Log in"}
-          </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

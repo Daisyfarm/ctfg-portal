@@ -1,175 +1,111 @@
 "use client";
-import React, { useState } from 'react';
-import { Shield, Radio, DollarSign, User, Send, FileText, ExternalLink, Calendar, HelpCircle, Award } from 'lucide-react';
+import React from 'react';
 
-export default function FSNPortal() {
-  const [activeTab, setActiveTab] = useState('Myself');
-
+export default function DashboardPage() {
   return (
-    <div style={{ 
-      background: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop") no-repeat center center fixed',
-      backgroundSize: 'cover',
-      minHeight: '100vh', 
-      color: '#fff', 
-      fontFamily: 'Arial, sans-serif' 
-    }}>
-      {/* Top Utility / Navigation Bar */}
-      <div style={{ background: '#111', borderBottom: '1px solid #333', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-          {/* Logo Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '18px', fontStyle: 'italic', letterSpacing: '-0.5px' }}>
-            <span style={{ color: '#fff' }}>FSN</span>
-            <span style={{ color: '#22c55e', background: '#111', padding: '0 4px', border: '1px solid #22c55e', borderRadius: '3px', fontSize: '12px' }}>FARM</span>
-            <span style={{ fontSize: '11px', color: '#888', fontStyle: 'normal', fontWeight: 'normal' }}>FARM SIM NETWORK</span>
-          </div>
-
-          {/* User Quick Info */}
-          <div style={{ color: '#aaa' }}>
-            <strong style={{ color: '#fff' }}>Samuel_Founder</strong> (#001) &bull; <span style={{ color: '#f59e0b' }}>FSN Command Farm</span> <span style={{ color: '#22c55e' }}>$9,459,000 (IG)</span>
-          </div>
-        </div>
-
-        {/* Top Right Icons & Date */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#888', fontSize: '12px' }}>
-          <div style={{ display: 'flex', gap: '5px' }}>
-            <span title="Gold Coins">🪙 3</span>
-            <span title="Packages">📦 0</span>
-            <span title="Crates">🧰 0</span>
-            <span title="Badges">🎖️ 0</span>
-            <span title="Reputation">💪 0</span>
-          </div>
-          <span>2026-07-24 13:23:27</span>
-        </div>
-      </div>
-
-      {/* Sub-Navigation Menu Bar */}
-      <div style={{ background: '#181818', borderBottom: '2px solid #333', padding: '8px 20px', display: 'flex', gap: '25px', fontSize: '14px', fontWeight: 'bold' }}>
-        {['Myself', 'Interactions', 'Finances', 'Data', 'Market', 'Wiki', 'Settings'].map((tab) => (
-          <button 
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: activeTab === tab ? '#22c55e' : '#bbb', 
-              cursor: 'pointer', 
-              padding: '4px 0',
-              borderBottom: activeTab === tab ? '2px solid #22c55e' : 'none'
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Main Content Grid (3-Column Layout) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 320px', gap: '20px', padding: '20px', maxWidth: '1440px', margin: '0 auto' }}>
+    <div style={{ background: '#111827', minHeight: 'calc(100vh - 90px)', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         
-        {/* Left Sidebar: Level & Quick Links */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>FSN LEVEL</span>
-              <span style={{ background: '#f59e0b', color: '#000', fontSize: '11px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '4px' }}>REWARDS</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ background: '#ef4444', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>2</span>
-              <span style={{ fontSize: '12px', color: '#aaa' }}>XP 3750/4500</span>
-            </div>
-            <div style={{ background: '#333', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
-              <div style={{ background: '#22c55e', width: '83%', height: '100%' }}></div>
-            </div>
-          </div>
-
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '15px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#aaa', marginBottom: '10px' }}>FSN v2.0.26 ALPHA</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
-              <a href="#dropbox" style={{ color: '#60a5fa', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><ExternalLink size={14} /> Dropbox Integration</a>
-              <a href="#donator" style={{ color: '#f59e0b', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><Award size={14} /> Donator Club</a>
-              <a href="#calendar" style={{ color: '#22c55e', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} /> Server Calendar</a>
-            </div>
-          </div>
-
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '15px' }}>
-            <h3 style={{ fontSize: '14px', textTransform: 'uppercase', margin: '0 0 10px 0', color: '#ef4444' }}>Alerts</h3>
-            <p style={{ fontSize: '13px', color: '#ccc', margin: 0 }}>System active. Sector 4-G harvest operations protected under network protocol.</p>
-          </div>
-        </div>
-
-        {/* Center Section: Global Market & Community Goals */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Global Market Banner Carousel Box */}
-          <div style={{ background: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)', border: '1px solid #d97706', borderRadius: '8px', padding: '30px', textAlign: 'center', position: 'relative', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
-            <h2 style={{ fontSize: '28px', fontWeight: 900, margin: '0 0 10px 0', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Global Market</h2>
-            <p style={{ fontSize: '16px', margin: '0 0 15px 0', fontWeight: 'bold' }}>PRE-1 Released! Click to visit!</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '15px' }}>
-              <span style={{ width: '10px', height: '10px', background: '#fff', borderRadius: '50%' }}></span>
-              <span style={{ width: '10px', height: '10px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%' }}></span>
-              <span style={{ width: '10px', height: '10px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%' }}></span>
-              <span style={{ width: '10px', height: '10px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%' }}></span>
-            </div>
-          </div>
-
-          {/* Donations Progress Tracker */}
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '20px' }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '10px' }}>Operational Funding Progress</div>
-            <div style={{ background: '#333', borderRadius: '4px', height: '16px', overflow: 'hidden', position: 'relative', marginBottom: '15px' }}>
-              <div style={{ background: '#2563eb', width: '15%', height: '100%', display: 'flex', alignItems: 'center', paddingLeft: '8px', fontSize: '11px', fontWeight: 'bold' }}>15%</div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#aaa' }}>
-                <span>🔒</span> FSN Certified Tier
+        {/* Top Grid: Level, Global Market, Sync */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '20px', marginBottom: '20px', alignItems: 'stretch' }}>
+          
+          {/* FSN Level Card */}
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>FSN LEVEL</span>
+                <button style={{ background: '#d97706', color: '#fff', border: 'none', padding: '4px 10px', fontSize: '10px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>REWARDS</button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#aaa' }}>
-                <span>🔒</span> Supervisor Program Access
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#aaa' }}>
-                <span>🔒</span> Feature Request Priority Queue
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ background: '#dc2626', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold' }}>2</span>
+                <span style={{ fontSize: '12px', color: '#9ca3af' }}>XP 3750/4500</span>
               </div>
             </div>
+            <div style={{ background: '#374151', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ background: '#16a34a', width: '83%', height: '100%' }}></div>
+            </div>
           </div>
-        </div>
 
-        {/* Right Sidebar: Sync Button, Swear Jar, Auction */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Global Market Banner */}
+          <div style={{ background: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)', border: '1px solid #d97706', borderRadius: '8px', padding: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', cursor: 'pointer' }}>
+            <h2 style={{ fontSize: '26px', fontWeight: 'bold', color: '#fff', margin: '0 0 8px 0' }}>Global Market</h2>
+            <p style={{ fontSize: '13px', color: '#fef3c7', margin: '0' }}>PRE-1 Released! Click to visit!</p>
+          </div>
+
           {/* Sync Button Card */}
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '15px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0 0 10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              Sync Button <HelpCircle size={14} color="#60a5fa" />
-            </h3>
-            <label style={{ fontSize: '12px', color: '#888', display: 'block', marginBottom: '5px' }}>Server?</label>
-            <select style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #444', padding: '8px', borderRadius: '4px', marginBottom: '12px', fontSize: '13px' }}>
-              <option>#1 - Midwest Horizon</option>
-              <option>#2 - Pacific Northwest</option>
-            </select>
-            <button style={{ width: '100%', background: '#ef4444', color: '#fff', border: 'none', padding: '10px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'center' }}>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>Sync Button</div>
+              <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '10px' }}>Server?</div>
+              <select style={{ width: '100%', padding: '8px', background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: '4px', fontSize: '12px', marginBottom: '12px' }}>
+                <option>#1 - Midwest Horizon</option>
+              </select>
+            </div>
+            <button style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', width: '100%' }}>
               SYNC INCOMING
             </button>
           </div>
 
-          {/* Swear Jar & Support Widgets */}
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '15px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '24px' }}>🫙</div>
-              <div style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold' }}>FSN Swear Jar</div>
-              <div style={{ fontSize: '13px', color: '#22c55e', fontWeight: 'bold', margin: '4px 0' }}>$4,520.00</div>
-              <button style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '4px 10px', fontSize: '11px', borderRadius: '3px', cursor: 'pointer' }}>Pay $1000</button>
+        </div>
+
+        {/* Bottom Grid: Alpha/Alerts, Operational Funding, Quick Actions */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '20px', alignItems: 'start' }}>
+          
+          {/* Left Column: Alpha & Alerts */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#9ca3af', marginBottom: '10px' }}>FSN v2.0.26 ALPHA</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                <a href="#" style={{ color: '#60a5fa', textDecoration: 'none' }}>🔗 Dropbox Integration</a>
+                <a href="#" style={{ color: '#fbbf24', textDecoration: 'none' }}>⭐ Donator Club</a>
+                <a href="#" style={{ color: '#4ade80', textDecoration: 'none' }}>📅 Server Calendar</a>
+              </div>
             </div>
-            <div>
-              <div style={{ fontSize: '24px' }}>🎟️</div>
-              <div style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', marginTop: '6px' }}>DC Raffle</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px' }}>❓</div>
-              <div style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', marginTop: '6px' }}>Support Ticket</div>
+
+            <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ef4444', marginBottom: '8px' }}>ALERTS</div>
+              <p style={{ fontSize: '12px', color: '#9ca3af', margin: '0', lineHeight: '1.4' }}>
+                System active. Sector 4-G harvest operations protected under network protocol.
+              </p>
             </div>
           </div>
 
-          {/* FSN Live Auction Widget */}
-          <div style={{ background: 'rgba(20, 20, 20, 0.9)', border: '1px solid #333', borderRadius: '6px', padding: '20px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer' }}>
-            <Radio size={20} color="#ef4444" />
-            <span style={{ fontWeight: 'bold', fontSize: '15px', letterSpacing: '0.5px' }}>FSN LIVE <span style={{ color: '#ef4444' }}>Auction</span></span>
+          {/* Center Column: Operational Funding */}
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff', marginBottom: '10px' }}>Operational Funding Progress</div>
+            <div style={{ background: '#374151', height: '10px', borderRadius: '5px', overflow: 'hidden', marginBottom: '15px' }}>
+              <div style={{ background: '#2563eb', width: '15%', height: '100%' }}></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: '#9ca3af' }}>
+              <div>🔒 FSN Certified Tier</div>
+              <div>🔒 Supervisor Program Access</div>
+              <div>🔒 Feature Request Priority Queue</div>
+            </div>
           </div>
+
+          {/* Right Column: Widgets & Live Auction */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '15px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center' }}>
+              <div>
+                <div style={{ fontSize: '10px', color: '#9ca3af' }}>FSN Swear Jar</div>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#4ade80', margin: '4px 0' }}>$4,520.00</div>
+                <button style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '2px 6px', fontSize: '10px', fontWeight: 'bold', borderRadius: '3px', cursor: 'pointer' }}>Pay $1000</button>
+              </div>
+              <div>
+                <div style={{ fontSize: '14px' }}>🎟️</div>
+                <div style={{ fontSize: '11px', color: '#fbbf24', marginTop: '4px' }}>DC Raffle</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '14px' }}>❓</div>
+                <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px' }}>Support Ticket</div>
+              </div>
+            </div>
+
+            <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '15px', textAlign: 'center', cursor: 'pointer' }}>
+              <span style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '13px' }}>((📶)) FSN LIVE Auction</span>
+            </div>
+          </div>
+
         </div>
 
       </div>

@@ -1,109 +1,156 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Wrench, ArrowLeft, Cloud, LogOut, Briefcase, Map, TrendingUp, Tractor, ShieldAlert, CheckCircle } from 'lucide-react';
+import { Wrench, Toolcase, Settings, Truck, PlusCircle, CheckCircle } from 'lucide-react';
 
 const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function ServiceCenter() {
+export default function ServicePage() {
   const [u, setU] = useState<any>(null);
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [myFleet, setMyFleet] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [ld, setLd] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ equipment: 'John Deere Tractor Repair', service_type: 'Mechanical Maintenance', cost: '', description: '' });
 
   const load = async () => {
     const { data: { user } } = await sb.auth.getUser();
     if (user) {
-        const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-        setU(profile);
-        const { data: fleet } = await sb.from('fleet').select('*').eq('owner_id', user.id).lt('condition', 100);
-        setMyFleet(fleet || []);
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+      setU(profile);
     }
-    const { data: ticketData } = await sb.from('service_tickets').select('*, profiles!service_tickets_owner_id_fkey(username), fleet(machinery_name, condition)').eq('status', 'OPEN');
-    setTickets(ticketData || []);
+
+    const { data: serviceData } = await sb
+      .from('services')
+      .select('*, mechanic:profiles!services_mechanic_id_fkey(username)')
+      .order('created_at', { ascending: false });
+
+    if (!serviceData) {
+      const { data: fallbackService } = await sb.from('services').select('*').order('created_at', { ascending: false });
+      setServices(fallbackService || []);
+    } else {
+      setServices(serviceData);
+    }
+
     setLd(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const requestRepair = async (item: any) => {
-    await sb.from('service_tickets').insert([{ machinery_id: item.id, owner_id: u.id, issue_description: 'Engine overhaul required.', repair_cost: 5000 }]);
-    await fetch(HK, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ 
-        content: `🔧 **WORKSHOP REQUEST**\n**${u.username}** has sent a broken **${item.machinery_name}** to the shop floor! CMS Mechanics needed.` 
-    })});
-    alert("Vehicle sent to Shop Floor."); load();
-  };
+  const createService = async (e: any) => {
+    e.preventDefault();
+    if (!u) return;
 
-  const completeRepair = async (t: any) => {
-    const { error } = await sb.rpc('complete_repair', { 
-        ticket_id: t.id, m_id: u.id, o_id: t.owner_id, cost: t.repair_cost, mach_id: t.machinery_id 
-    });
-    if (error) alert(error.message);
-    else {
-        await fetch(HK, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ 
-            content: `✅ **REPAIR COMPLETE**\n**${u.username}** has finished the repair on **${t.fleet.machinery_name}**. The unit is back at 100% condition!` 
-        })});
-        alert("Repair logged and paid."); load();
+    const costVal = parseFloat(form.cost || '0');
+
+    const { error } = await sb.from('services').insert([{
+      mechanic_id: u.id,
+      equipment: form.equipment,
+      service_type: form.service_type,
+      cost: costVal,
+      description: form.description,
+      status: 'completed'
+    }]);
+
+    if (!error) {
+      await fetch(HK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🛠️ **EQUIPMENT SERVICE LOGGED**\n**Technician:** ${u.username}\n**Equipment:** ${form.equipment} (${form.service_type})\n**Service Cost:** $${costVal.toLocaleString()}`
+        })
+      });
+
+      alert("Maintenance record successfully logged to service bay.");
+      setShowForm(false);
+      setForm({ equipment: 'John Deere Tractor Repair', service_type: 'Mechanical Maintenance', cost: '', description: '' });
+      load();
+    } else {
+      alert("Error logging service: " + error.message);
     }
   };
 
-  if (ld || !u) return <div style={{background:'#111',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Connecting to Workshop...</div>;
+  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Accessing Service & Repair Terminal...</div>;
 
   const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
 
   return (
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
-      <div style={{ background:'#222', padding:'12px 25px', borderBottom:'2px solid #f59e0b', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>CTFG NETWORK</span>
-        <div style={{background:'#f59e0b', color:'#000', padding:'5px 15px', fontSize:'11px', fontWeight:'bold', borderRadius:'3px'}}>MAINTENANCE HUB</div>
+      {/* TOP BAR */}
+      <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
+        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
+        <span style={{color:'#fff', fontSize:'11px'}}>OPERATOR BALANCE: ${u.balance?.toLocaleString()}</span>
       </div>
 
       <div style={{ display:'flex', flex:1 }}>
+        {/* SIDEBAR */}
         <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
-          <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}><Tractor size={16}/> Dashboard</button>
-          <button style={{...sideBtn, background:'#333', color:'#fff'}}><Wrench size={16} color="#f59e0b"/> CMS Workshop</button>
+          <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
+          <button style={sideBtn} onClick={()=>window.location.href='/accounting'}>Accounting</button>
+          <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/service'}><Wrench size={16}/> Equipment Service</button>
           <button style={sideBtn} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}>Logout</button>
         </div>
 
-        <div style={{ flex:1, background:'rgba(20,20,20,0.8)', padding:'40px', overflowY:'auto' }}>
-          <div style={{ maxWidth:'1000px', margin:'0 auto' }}>
-            <h1 style={{fontSize:'32px', textTransform:'uppercase', margin:0}}>Shop Floor</h1>
-            <p style={{fontSize:'12px', color:'#f59e0b', fontWeight:'bold', margin:'10px 0 30px'}}>CENTRALIZED MAINTENANCE FOR ALL FS25 ASSETS VIA CAR MECHANIC SIMULATOR.</p>
+        {/* MAIN CONTENT */}
+        <div style={{ flex:1, background:'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize:'cover', position:'relative', overflowY:'auto' }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.7)' }}></div>
+          <div style={{ position:'relative', zIndex:1, padding:'40px', maxWidth:'1100px', margin:'0 auto' }}>
+            
+            <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Equipment Service & Repair</h1>
+            <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 30px'}}>
+              TRACK TRACTOR MAINTENANCE, COMBINE REPAIRS, HYDRAULIC OVERHAULS, AND FLEET SERVICE LOGS.
+            </p>
 
-            <div style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr', gap:'30px' }}>
-              
-              {/* OPEN TICKETS (The Job Board for Mechanics) */}
-              <div>
-                <h2 style={{fontSize:'18px', borderBottom:'1px solid #333', paddingBottom:'10px', marginBottom:'20px'}}>Active Work Orders</h2>
-                {tickets.length === 0 ? <p style={{color:'#555'}}>No vehicles currently in the shop.</p> : tickets.map(t => (
-                  <div key={t.id} style={{ background:'#222', padding:'20px', borderRadius:'4px', marginBottom:'15px', borderLeft:'5px solid #f59e0b' }}>
-                    <div style={{display:'flex', justifyContent:'space-between'}}>
-                        <h4 style={{margin:0, fontSize:'18px'}}>{t.fleet?.machinery_name}</h4>
-                        <span style={{color:'#22c55e', fontWeight:'bold'}}>${t.repair_cost.toLocaleString()}</span>
+            <button onClick={()=>setShowForm(!showForm)} style={{ background:'#4a7ab5', border:'none', color:'#fff', padding:'10px 25px', fontWeight:'bold', cursor:'pointer', marginBottom:'30px', borderRadius:'2px' }}>
+              {showForm ? 'CANCEL RECORD' : 'LOG NEW SERVICE RECORD'}
+            </button>
+
+            {showForm && (
+              <form onSubmit={createService} style={{ background:'rgba(25,25,25,0.95)', padding:'30px', border:'1px solid #4a7ab5', borderRadius:'4px', marginBottom:'30px', display:'flex', flexDirection:'column', gap:'15px' }}>
+                <h3 style={{marginTop:0}}>Service Bay Terminal</h3>
+                <input placeholder="Equipment Name / ID (e.g. John Deere S780 Combine)" required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.equipment} onChange={e=>setForm({...form, equipment: e.target.value})} />
+                <select style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.service_type} onChange={e=>setForm({...form, service_type: e.target.value})}>
+                  <option value="Mechanical Maintenance">Mechanical Maintenance & Engine Repair</option>
+                  <option value="Hydraulic Overhaul">Hydraulic System Overhaul</option>
+                  <option value="Tire & Track Replacement">Tire & Track Replacement</option>
+                  <option value="Electrical Diagnostics">Electrical & Sensor Diagnostics</option>
+                </select>
+                <input type="number" placeholder="Service Cost ($)" required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.cost} onChange={e=>setForm({...form, cost: e.target.value})} />
+                <textarea placeholder="Detailed breakdown of repairs, parts replaced, and maintenance notes..." required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333', minHeight:'80px'}} value={form.description} onChange={e=>setForm({...form, description: e.target.value})} />
+                <button type="submit" style={{padding:'15px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>COMMIT SERVICE RECORD</button>
+              </form>
+            )}
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(320px, 1fr))', gap:'20px' }}>
+              {services.length === 0 ? (
+                <div style={{ background:'rgba(35,35,35,0.9)', padding:'30px', textAlign:'center', borderRadius:'4px', color:'#777', gridColumn:'1 / -1' }}>
+                  <Wrench size={32} style={{marginBottom:'10px', opacity:0.5}} />
+                  <p style={{margin:0}}>No equipment service records logged in the database.</p>
+                </div>
+              ) : (
+                services.map(s => (
+                  <div key={s.id} style={{ background:'rgba(35,35,35,0.95)', padding:'25px', borderLeft:'6px solid #4a7ab5', borderRadius:'4px', display:'flex', flexDirection:'column', gap:'12px' }}>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                      <h3 style={{margin:0, fontSize:'18px'}}>{s.equipment}</h3>
+                      <span style={{fontSize:'10px', background:'#222', padding:'3px 8px', borderRadius:'3px', color:'#22c55e', fontWeight:'bold'}}>{s.service_type?.toUpperCase()}</span>
                     </div>
-                    <p style={{fontSize:'12px', color:'#888', margin:'5px 0'}}>OWNER: {t.profiles?.username}</p>
-                    <p style={{fontSize:'12px', color:'#ff4d4d'}}>CONDITION: {t.fleet?.condition}%</p>
-                    <button onClick={()=>completeRepair(t)} style={{ width:'100%', padding:'10px', background:'#f59e0b', color:'#000', border:'none', fontWeight:'bold', marginTop:'15px', cursor:'pointer', fontSize:'11px'}}>COMPLETE CMS REPAIR & BILL OWNER</button>
-                  </div>
-                ))}
-              </div>
 
-              {/* REQUEST SERVICE (For the Farmer) */}
-              <div>
-                <h2 style={{fontSize:'18px', borderBottom:'1px solid #333', paddingBottom:'10px', marginBottom:'20px'}}>Your Damaged Fleet</h2>
-                {myFleet.length === 0 ? <p style={{color:'#555'}}>All your equipment is at 100%.</p> : myFleet.map(item => (
-                  <div key={item.id} style={{ background:'#1a1a1a', padding:'15px', borderRadius:'4px', marginBottom:'10px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <div>
-                        <p style={{margin:0, fontWeight:'bold'}}>{item.machinery_name}</p>
-                        <p style={{margin:0, fontSize:'11px', color:'#ff4d4d'}}>{item.condition}% Condition</p>
+                    <p style={{margin:0, fontSize:'13px', color:'#ccc'}}>{s.description}</p>
+
+                    <div style={{display:'flex', justifyContent:'space-between', fontSize:'13px'}}>
+                      <span style={{color:'#fff'}}>Cost: <b style={{color:'#22c55e'}}>${s.cost?.toLocaleString()}</b></span>
+                      <span style={{color:'#aaa', fontSize:'12px'}}>Mechanic: <b>{s.mechanic?.username || 'Authorized Operative'}</b></span>
                     </div>
-                    <button onClick={()=>requestRepair(item)} style={{ background:'#4a7ab5', color:'#fff', border:'none', padding:'8px 12px', fontSize:'10px', fontWeight:'bold', cursor:'pointer'}}>SEND TO SHOP</button>
-                  </div>
-                ))}
-              </div>
 
+                    <div style={{borderTop:'1px solid #444', paddingTop:'10px', marginTop:'5px', display:'flex', justifyContent:'space-between', fontSize:'11px', color:'#888'}}>
+                      <span>Serviced: {new Date(s.created_at || Date.now()).toLocaleDateString()}</span>
+                      <span style={{color:'#22c55e', fontWeight:'bold'}}>{s.status?.toUpperCase()}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
+
           </div>
         </div>
       </div>

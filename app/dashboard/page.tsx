@@ -1,121 +1,133 @@
 "use client";
-export const dynamic = "force-dynamic";
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { DollarSign, Shield, Tractor, TrendingUp, Building2, Users, FileText, Gavel, Sword, Mail, LogOut, ArrowUpRight } from 'lucide-react';
 
-import React, { useEffect, useState } from 'react';
-import { sb } from "../db/supabase";
-import { 
-  Shield, LogOut, Terminal, Truck, Navigation, 
-  Activity, List, LayoutDashboard, MapPin
-} from 'lucide-react';
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function MasterDashboard() {
-  const [session, setSession] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [trucks, setTrucks] = useState<any[]>([]);
-  const [missions, setMissions] = useState<any[]>([]);
-  const [view, setView] = useState('MAP');
-  const [status, setStatus] = useState("SYSTEM_BOOT");
+export default function DashboardPage() {
+  const [u, setU] = useState<any>(null);
+  const [ld, setLd] = useState(true);
+  const [stats, setStats] = useState({ companiesCount: 0, auctionsCount: 0, contractsCount: 0, membersCount: 0 });
 
-  useEffect(() => {
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setSession(session);
-        loadUserAssets(session.user.id);
-      }
-    });
-  }, []);
-
-  const loadUserAssets = async (uid: string) => {
-    setStatus("SYNCING_DATA...");
-    try {
-      // Parallel fetch for speed
-      const [pRes, tRes, mRes] = await Promise.all([
-        sb.from('profiles').select('*').eq('id', uid).single(),
-        sb.from('garage').select('*').eq('owner_id', uid),
-        sb.from('active_missions').select('*').eq('status', 'AVAILABLE').limit(5)
-      ]);
-
-      if (pRes.data) setProfile(pRes.data);
-      if (tRes.data) setTrucks(tRes.data);
-      if (mRes.data) setMissions(mRes.data);
-      
-      setStatus("LINK_STABLE");
-    } catch (err) {
-      setStatus("UPLINK_CRITICAL_FAILURE");
+  const load = async () => {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      window.location.href = '/';
+      return;
     }
+
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    if (profile) setU(profile);
+
+    // Fetch quick counts
+    const [{ count: cCount }, { count: aCount }, { count: ctCount }, { count: mCount }] = await Promise.all([
+      sb.from('companies').select('*', { count: 'exact', head: true }),
+      sb.from('auctions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      sb.from('contracts').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+      sb.from('profiles').select('*', { count: 'exact', head: true }),
+    ]);
+
+    setStats({
+      companiesCount: cCount || 0,
+      auctionsCount: aCount || 0,
+      contractsCount: ctCount || 0,
+      membersCount: mCount || 0,
+    });
+
+    setLd(false);
   };
 
-  if (!session) return (
-    <div style={{background:'#000', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'#d4af37', fontFamily:'monospace'}}>
-      <Activity className="pulse" /> <span style={{marginLeft:'15px'}}>HANDSHAKE_IN_PROGRESS...</span>
-    </div>
-  );
+  useEffect(() => { load(); }, []);
+
+  const handleLogout = async () => {
+    await sb.auth.signOut();
+    window.location.href = '/';
+  };
+
+  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Synchronizing Command Feed...</div>;
+
+  const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
 
   return (
-    <div style={{ height: '100vh', background: '#050505', color: 'white', fontFamily: 'monospace', display: 'flex' }}>
-      
-      {/* SIDEBAR */}
-      <div style={{ width: '250px', borderRight: '1px solid #111', padding: '30px', background: '#000' }}>
-        <div style={{ color: '#d4af37', fontSize: '11px', letterSpacing: '3px', marginBottom: '40px', display:'flex', alignItems:'center', gap:'10px' }}>
-          <Shield size={16} /> DAISY_HILL_TAC
-        </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:'20px', fontSize:'11px', color:'#444' }}>
-          <div onClick={() => setView('MAP')} style={{ color: view === 'MAP' ? '#fff' : '#444', cursor:'pointer' }}>TACTICAL_MAP</div>
-          <div onClick={() => setView('FLEET')} style={{ color: view === 'FLEET' ? '#fff' : '#444', cursor:'pointer' }}>FLEET_STATUS</div>
-          <div onClick={() => setView('JOBS')} style={{ color: view === 'JOBS' ? '#fff' : '#444', cursor:'pointer' }}>CONTRACTS</div>
-          <div onClick={() => sb.auth.signOut()} style={{ marginTop:'40px', color:'#ff4444', cursor:'pointer' }}>TERMINATE_UPLINK</div>
+    <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
+      {/* TOP BAR */}
+      <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
+        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
+        <div style={{display:'flex', gap:'20px', alignItems:'center', fontSize:'11px'}}>
+          <span>OPERATIVE: <b style={{color:'#22c55e'}}>{u.username}</b></span>
+          <span>BALANCE: <b style={{color:'#fff'}}>${u.balance?.toLocaleString()}</b></span>
         </div>
       </div>
 
-      {/* MAIN VIEW */}
-      <div style={{ flex: 1, padding: '40px', display:'flex', flexDirection:'column' }}>
-        <div style={{ background: '#0a0a0a', padding: '20px', borderLeft: '3px solid #d4af37', marginBottom: '30px', display:'flex', justifyContent:'space-between' }}>
+      <div style={{ display:'flex', flex:1 }}>
+        {/* SIDEBAR */}
+        <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
           <div>
-            <div style={{fontSize:'10px', color:'#444'}}>OPERATOR_ID: {profile?.farm_name || 'SAMUEL'}</div>
-            <div style={{fontSize:'28px', color:'#22c55e', fontWeight:'bold'}}>${profile?.balance?.toLocaleString()}</div>
+            <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/accounting'}>Accounting</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/auctions'}>Live Auctions</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/company'}>Corporate Suite</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/contracts'}>Contracts</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/conquest'}>Conquest</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/community'}>Community Hub</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/contact'}>Contact Board</button>
           </div>
-          <div style={{textAlign:'right'}}>
-            <div style={{fontSize:'9px', color: status.includes('CRITICAL') ? '#ff4444' : '#d4af37'}}>{status}</div>
-            <div style={{fontSize:'12px', marginTop:'5px', color:'#333'}}>{profile?.rank?.toUpperCase()}</div>
+          <div>
+            <button style={{...sideBtn, color:'#ef4444'}} onClick={handleLogout}><LogOut size={16}/> Logout</button>
           </div>
         </div>
 
-        <div style={{ flex:1, border:'1px solid #111', background:'#070707', borderRadius:'2px', overflowY:'auto' }}>
-          {view === 'MAP' && (
-            <div style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#111' }}>
-              <Navigation size={60} />
-            </div>
-          )}
+        {/* MAIN CONTENT */}
+        <div style={{ flex:1, background:'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize:'cover', position:'relative', overflowY:'auto' }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.7)' }}></div>
+          <div style={{ position:'relative', zIndex:1, padding:'40px', maxWidth:'1100px', margin:'0 auto' }}>
+            
+            <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Operator Command Center</h1>
+            <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 35px'}}>
+              WELCOME BACK, {u.username?.toUpperCase()}. MONITOR YOUR ASSETS, EXECUTE TRANSACTIONS, AND OVERSEE NETWORK OPERATIONS.
+            </p>
 
-          {view === 'JOBS' && (
-            <div style={{ padding:'30px' }}>
-              {missions.map(m => (
-                <div key={m.id} style={{ padding:'15px', border:'1px solid #111', background:'#000', marginBottom:'10px', display:'flex', justifyContent:'space-between' }}>
-                  <span>{m.title}</span>
-                  <span style={{color:'#22c55e'}}>${m.payout.toLocaleString()}</span>
-                </div>
-              ))}
+            {/* STATS GRID */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'20px', marginBottom:'40px' }}>
+              <div onClick={()=>window.location.href='/company'} style={{ background:'rgba(30,30,30,0.9)', padding:'25px', borderLeft:'5px solid #22c55e', borderRadius:'4px', cursor:'pointer' }}>
+                <span style={{fontSize:'11px', color:'#888', fontWeight:'bold', display:'block', marginBottom:'5px'}}>REGISTERED COMPANIES</span>
+                <span style={{fontSize:'28px', fontWeight:'bold', color:'#fff'}}>{stats.companiesCount}</span>
+              </div>
+              <div onClick={()=>window.location.href='/auctions'} style={{ background:'rgba(30,30,30,0.9)', padding:'25px', borderLeft:'5px solid #4a7ab5', borderRadius:'4px', cursor:'pointer' }}>
+                <span style={{fontSize:'11px', color:'#888', fontWeight:'bold', display:'block', marginBottom:'5px'}}>ACTIVE AUCTIONS</span>
+                <span style={{fontSize:'28px', fontWeight:'bold', color:'#fff'}}>{stats.auctionsCount}</span>
+              </div>
+              <div onClick={()=>window.location.href='/contracts'} style={{ background:'rgba(30,30,30,0.9)', padding:'25px', borderLeft:'5px solid #f59e0b', borderRadius:'4px', cursor:'pointer' }}>
+                <span style={{fontSize:'11px', color:'#888', fontWeight:'bold', display:'block', marginBottom:'5px'}}>OPEN CONTRACTS</span>
+                <span style={{fontSize:'28px', fontWeight:'bold', color:'#fff'}}>{stats.contractsCount}</span>
+              </div>
+              <div onClick={()=>window.location.href='/community'} style={{ background:'rgba(30,30,30,0.9)', padding:'25px', borderLeft:'5px solid #ec4899', borderRadius:'4px', cursor:'pointer' }}>
+                <span style={{fontSize:'11px', color:'#888', fontWeight:'bold', display:'block', marginBottom:'5px'}}>NETWORK MEMBERS</span>
+                <span style={{fontSize:'28px', fontWeight:'bold', color:'#fff'}}>{stats.membersCount}</span>
+              </div>
             </div>
-          )}
 
-          {view === 'FLEET' && (
-            <div style={{ padding:'30px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:'20px' }}>
-              {trucks.map(t => (
-                <div key={t.id} style={{ padding:'20px', border:'1px solid #111', background:'#000' }}>
-                  <Truck size={16} color="#d4af37" />
-                  <div style={{marginTop:'10px'}}>{t.truck_name}</div>
-                  <div style={{fontSize:'9px', color:'#444'}}>{t.status}</div>
-                </div>
-              ))}
+            {/* QUICK ACTIONS BANNER */}
+            <div style={{ background:'rgba(25,25,25,0.95)', padding:'30px', border:'1px solid #4a7ab5', borderRadius:'6px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div>
+                <h3 style={{margin:'0 0 5px 0', fontSize:'20px'}}>Ready to expand your agricultural footprint?</h3>
+                <p style={{margin:0, fontSize:'13px', color:'#aaa'}}>Check available territories for regional conquest or list surplus goods on the auction block.</p>
+              </div>
+              <div style={{display:'flex', gap:'15px'}}>
+                <button onClick={()=>window.location.href='/conquest'} style={{padding:'12px 20px', background:'#4a7ab5', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', borderRadius:'4px'}}>
+                  Conquest Map
+                </button>
+                <button onClick={()=>window.location.href='/auctions'} style={{padding:'12px 20px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', borderRadius:'4px'}}>
+                  Auctions
+                </button>
+              </div>
             </div>
-          )}
+
+          </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-      `}</style>
     </div>
   );
 }

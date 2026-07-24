@@ -17,42 +17,52 @@ export default function HomePortal() {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-            {/* Top Navigation */}
-            <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <span className="text-xl font-bold tracking-wider text-emerald-400">FSN</span>
-                        <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">Network v2.4</span>
+        <div style={{ minHeight: 'calc(100vh - 90px)', background: '#030712', color: '#f3f4f6', padding: '40px 20px', fontFamily: 'Arial, sans-serif' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                
+                {/* Hero Section */}
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', fontFamily: 'monospace', marginBottom: '10px' }}>
+                        Network v2.4 • Cool Brook Farms
                     </div>
-                    <div className="text-sm font-medium text-slate-300">Cool Brook Farms</div>
-                </div>
-            </header>
-
-            {/* Hero Section */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
-                <div className="text-center max-w-2xl mx-auto space-y-3">
-                    <h1 className="text-4xl font-extrabold text-white tracking-tight">Farm Sim Network Hub</h1>
-                    <p className="text-sm text-slate-400">Select a module below to manage your agricultural empire, coordinate multiplayer operations, and track live telemetry.</p>
+                    <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 10px 0' }}>Farm Sim Network Hub</h1>
+                    <p style={{ fontSize: '14px', color: '#9ca3af', margin: 0 }}>Select a module below to manage your agricultural empire, coordinate multiplayer operations, and track live telemetry.</p>
                 </div>
 
                 {/* Module Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
                     {modules.map((mod) => (
-                        <Link key={mod.path} href={mod.path} className="group bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between shadow-xl hover:border-emerald-500/50 hover:bg-slate-850 transition-all">
-                            <div className="space-y-3">
-                                <div className="text-3xl">{mod.icon}</div>
-                                <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">{mod.name}</h3>
-                                <p className="text-xs text-slate-400 leading-relaxed">{mod.desc}</p>
+                        <Link 
+                            key={mod.path} 
+                            href={mod.path} 
+                            style={{ 
+                                background: '#111827', 
+                                border: '1px solid #1f2937', 
+                                borderRadius: '12px', 
+                                padding: '24px', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                justifyContent: 'space-between', 
+                                textDecoration: 'none', 
+                                color: 'inherit',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                transition: 'border-color 0.2s'
+                            }}
+                        >
+                            <div>
+                                <div style={{ fontSize: '28px', marginBottom: '12px' }}>{mod.icon}</div>
+                                <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>{mod.name}</h3>
+                                <p style={{ fontSize: '13px', color: '#9ca3af', margin: 0, lineHeight: '1.5' }}>{mod.desc}</p>
                             </div>
-                            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-emerald-400 font-medium">
+                            <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #1f2937', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: '#34d399', fontWeight: 'bold' }}>
                                 <span>Launch Module</span>
-                                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                                <span>→</span>
                             </div>
                         </Link>
                     ))}
                 </div>
-            </main>
+
+            </div>
         </div>
     );
 }

@@ -1,28 +1,35 @@
 "use client";
 import React from 'react';
-import { Shield, Radio, DollarSign, User, Send, FileText, MapPin, Contact } from 'lucide-react';
+import { Shield, Radio, DollarSign, User, Send, FileText } from 'lucide-react';
 
 export default function CommandDashboard() {
   return (
-    <div style={{ background: '#111', minHeight: '100vh', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '40px' }}>
+    <div style={{ 
+      background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop") no-repeat center center fixed',
+      backgroundSize: 'cover',
+      minHeight: '100vh', 
+      color: '#fff', 
+      fontFamily: 'Arial, sans-serif', 
+      padding: '40px' 
+    }}>
       {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #4a7ab5', paddingBottom: '20px', marginBottom: '30px' }}>
+      <div style={{ background: 'rgba(26, 26, 26, 0.85)', backdropFilter: 'blur(5px)', border: '1px solid #333', padding: '20px', borderRadius: '8px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0, fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Shield color="#4a7ab5" /> COMMAND DASHBOARD
+          <h1 style={{ fontSize: '26px', textTransform: 'uppercase', margin: 0, fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b' }}>
+            <Shield color="#f59e0b" /> FSN FARM SIMULATOR NETWORK
           </h1>
-          <p style={{ fontSize: '12px', color: '#4a7ab5', margin: '5px 0 0' }}>SATELLITE UPLINK: MONTANA / IDAHO DIVISION | SYSTEM INTEGRITY: ACTIVE</p>
+          <p style={{ fontSize: '12px', color: '#aaa', margin: '5px 0 0' }}>COMMUNITY MULTIPLAYER PORTAL | SYSTEM INTEGRITY: ACTIVE</p>
         </div>
         <button 
           onClick={() => window.location.href = '/contact'}
-          style={{ background: '#222', color: '#fff', border: '1px solid #4a7ab5', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px' }}
+          style={{ background: '#22c55e', color: '#000', border: 'none', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px' }}
         >
           Secure Contact
         </button>
       </div>
 
       {/* Live Dispatch Alert */}
-      <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px', marginBottom: '30px', borderLeft: '4px solid #f59e0b' }}>
+      <div style={{ background: 'rgba(26, 26, 26, 0.85)', backdropFilter: 'blur(5px)', border: '1px solid #333', padding: '20px', borderRadius: '8px', marginBottom: '30px', borderLeft: '4px solid #f59e0b' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b', fontSize: '14px', fontWeight: 'bold' }}>
           <Radio size={18} /> LIVE DISPATCH BROADCAST
         </div>
@@ -31,44 +38,44 @@ export default function CommandDashboard() {
 
       {/* User Stats Card */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px' }}>
+        <div style={{ background: 'rgba(26, 26, 26, 0.85)', backdropFilter: 'blur(5px)', border: '1px solid #333', padding: '20px', borderRadius: '8px' }}>
           <div style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Chief Operator / Founder</div>
           <div style={{ fontSize: '20px', fontWeight: 'bold', marginTop: '5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <User size={20} color="#4a7ab5" /> Samuel_Founder
+            <User size={20} color="#22c55e" /> Samuel_Founder
           </div>
           <div style={{ fontSize: '13px', color: '#aaa', marginTop: '5px' }}>Rank: <strong style={{ color: '#fff' }}>Executive</strong></div>
           <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '8px' }}>EID Status: Verified</div>
         </div>
 
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px' }}>
+        <div style={{ background: 'rgba(26, 26, 26, 0.85)', backdropFilter: 'blur(5px)', border: '1px solid #333', padding: '20px', borderRadius: '8px' }}>
           <div style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Treasury Reserves</div>
           <div style={{ fontSize: '24px', fontWeight: 'bold', marginTop: '5px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <DollarSign size={24} /> 9,459,000
           </div>
-          <div style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>Daisy Hill Farming Network Fund</div>
+          <div style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>FSN Operational Reserve Fund</div>
         </div>
       </div>
 
       {/* Action Buttons Grid */}
-      <h2 style={{ fontSize: '18px', textTransform: 'uppercase', marginBottom: '15px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>Terminal Access</h2>
+      <h2 style={{ fontSize: '18px', textTransform: 'uppercase', marginBottom: '15px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#f59e0b' }}>Terminal Access</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
-        <button onClick={() => window.location.href = '/dispatch'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
-          <Send size={18} color="#4a7ab5" /> Request Dispatch
+        <button onClick={() => window.location.href = '/dispatch'} style={{ background: 'rgba(26, 26, 26, 0.85)', color: '#fff', border: '1px solid #22c55e', padding: '15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+          <Send size={18} color="#22c55e" /> Request Dispatch
         </button>
-        <button onClick={() => window.location.href = '/contracts'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+        <button onClick={() => window.location.href = '/contracts'} style={{ background: 'rgba(26, 26, 26, 0.85)', color: '#fff', border: '1px solid #22c55e', padding: '15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
           <FileText size={18} color="#f59e0b" /> View Contracts
         </button>
-        <button onClick={() => window.location.href = '/directory'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+        <button onClick={() => window.location.href = '/directory'} style={{ background: 'rgba(26, 26, 26, 0.85)', color: '#fff', border: '1px solid #22c55e', padding: '15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
           <Shield size={18} color="#22c55e" /> Personnel Directory
         </button>
-        <button onClick={() => window.location.href = '/contact'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #f59e0b', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+        <button onClick={() => window.location.href = '/contact'} style={{ background: 'rgba(26, 26, 26, 0.85)', color: '#fff', border: '1px solid #f59e0b', padding: '15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
           Contact Board
         </button>
       </div>
 
       {/* Footer Terminal ID */}
-      <div style={{ marginTop: '50px', borderTop: '1px solid #333', paddingTop: '20px', textAlign: 'center', fontSize: '11px', color: '#666' }}>
-        DAISY HILL FARMING NETWORK | SECURE TERMINAL V2.0.26
+      <div style={{ marginTop: '50px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', textAlign: 'center', fontSize: '11px', color: '#aaa' }}>
+        FSN (FARM SIMULATOR NETWORK) | SECURE TERMINAL V2.0.26
       </div>
     </div>
   );

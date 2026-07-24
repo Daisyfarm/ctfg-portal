@@ -12,15 +12,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div style={{ background: '#111827', minHeight: 'calc(100vh - 90px)', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
+    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         
-        {/* Header */}
+        {/* Page Header */}
         <div style={{ marginBottom: '25px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff', margin: '0 0 5px 0' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#332266', margin: '0 0 5px 0' }}>
             Account & Server Settings
           </h1>
-          <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0' }}>
+          <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
             Manage your farmer profile configuration, notification preferences, and integration parameters.
           </p>
         </div>
@@ -29,25 +29,25 @@ export default function SettingsPage() {
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px' }}>
           
           {/* Farm Identity Section */}
-          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '22px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', marginBottom: '15px' }}>Farm Identity</h3>
+          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '22px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '15px' }}>Farm Identity</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '12px', color: '#9ca3af' }}>Farm Name</label>
+              <label style={{ fontSize: '12px', color: '#64748b' }}>Farm Name</label>
               <input 
                 type="text" 
                 value={farmName} 
                 onChange={(e) => setFarmName(e.target.value)}
-                style={{ padding: '10px', background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: '4px', fontSize: '13px' }}
+                style={{ padding: '10px', background: '#fff', color: '#000', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px' }}
                 required
               />
             </div>
           </div>
 
           {/* Preferences Section */}
-          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '22px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#fff', marginBottom: '15px' }}>Preferences</h3>
+          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '22px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '15px' }}>Preferences</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer', color: '#d1d5db' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer', color: '#334155' }}>
                 <input 
                   type="checkbox" 
                   checked={emailAlerts} 
@@ -56,7 +56,7 @@ export default function SettingsPage() {
                 />
                 Enable Email Alerts for Contract Expirations & Loan Due Dates
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer', color: '#d1d5db' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer', color: '#334155' }}>
                 <input 
                   type="checkbox" 
                   checked={autoSync} 

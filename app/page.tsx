@@ -1,7 +1,40 @@
 // app/page.tsx
 import React from 'react';
+import { supabase } from '@/db/supabase';
 
-export default function DashboardPage() {
+async function getOperatorData() {
+  const { data, error } = await supabase
+    .from('operators')
+    .select('*')
+    .eq('username', 'Samuel_Founder')
+    .single();
+  
+  if (error || !data) {
+    return {
+      username: 'Samuel_Founder',
+      balance: 9459000,
+      eid_status: 'VERIFIED',
+      rank: 'EXECUTIVE'
+    };
+  }
+  return data;
+}
+
+async function getLatestDispatch() {
+  const { data } = await supabase
+    .from('dispatches')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+    
+  return data ? data.message : '"Standby" — Sector 4-G Plowing Ops Protected.';
+}
+
+export default async function DashboardPage() {
+  const operator = await getOperatorData();
+  const latestDispatch = await getLatestDispatch();
+
   return (
     <div className="flex h-screen bg-[#090a0f] text-gray-100 font-sans">
       {/* Sidebar Navigation */}
@@ -52,22 +85,24 @@ export default function DashboardPage() {
           {/* Live Dispatch Alert Banner */}
           <div className="border border-red-900/50 bg-red-950/20 p-4 rounded text-sm text-red-300 flex items-center space-x-3">
             <span className="font-bold uppercase tracking-wider text-red-400">Live Dispatch:</span>
-            <span>"Standby" — Sector 4-G Plowing Ops Protected.</span>
+            <span>{latestDispatch}</span>
           </div>
 
           {/* Operator Card */}
           <div className="border border-gray-800 bg-[#121520] p-6 rounded-lg relative overflow-hidden">
             <div className="text-xs text-gray-400 uppercase tracking-widest mb-1">Chief Operator / Founder</div>
-            <div className="text-3xl font-extrabold text-white mb-2">Samuel_Founder</div>
-            <div className="text-3xl font-mono font-bold text-green-400 mb-6">$9,459,000</div>
+            <div className="text-3xl font-extrabold text-white mb-2">{operator.username}</div>
+            <div className="text-3xl font-mono font-bold text-green-400 mb-6">
+              ${Number(operator.balance).toLocaleString()}
+            </div>
             <div className="flex space-x-6 text-xs font-mono">
               <div>
                 <span className="text-gray-500 block">EID STATUS</span>
-                <span className="text-green-400 font-bold">VERIFIED</span>
+                <span className="text-green-400 font-bold">{operator.eid_status}</span>
               </div>
               <div>
                 <span className="text-gray-500 block">RANK</span>
-                <span className="text-amber-400 font-bold">EXECUTIVE</span>
+                <span className="text-amber-400 font-bold">{operator.rank}</span>
               </div>
             </div>
           </div>

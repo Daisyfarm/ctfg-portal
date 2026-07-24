@@ -1,94 +1,109 @@
-// app/dispatch/page.tsx
-import React from 'react';
-import { supabase } from '@/db/supabase';
+"use client";
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { ArrowLeft, Send } from 'lucide-react';
 
-async function getDispatches() {
-  const { data, error } = await supabase
-    .from('dispatches')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error || !data || data.length === 0) {
-    return [
-      { id: 1, message: '"Standby" — Sector 4-G Plowing Ops Protected.', status: 'ACTIVE', time: '10:00 AM' },
-      { id: 2, message: 'Heavy Transport En Route to Sector 2.', status: 'COMPLETED', time: '08:30 AM' },
-      { id: 3, message: 'Fuel Refill Authorized at Main Depot.', status: 'ARCHIVED', time: 'Yesterday' },
-    ];
-  }
-  return data;
-}
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default async function DispatchPage() {
-  const dispatches = await getDispatches();
+export default function DispatchPage() {
+  const [u, setU] = useState<any>(null);
+  const [ld, setLd] = useState(true);
+  const [form, setForm] = useState({ sector: '', description: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+        setU(profile);
+      }
+      setLd(false);
+    }
+    load();
+  }, []);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const senderName = u ? u.username : 'Anonymous Dispatcher';
+      await fetch(HK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🚨 **NEW FIELD DISPATCH REQUEST**\n**Operative:** ${senderName}\n**Sector:** ${form.sector}\n**Details:** ${form.description}\n*Transmitted via Daisy Hill Farming Network.*`
+        })
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      alert("Error sending dispatch: " + (err.message || "Unknown error"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (ld) return <div style={{background:'#111',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Accessing Dispatch Terminal...</div>;
 
   return (
-    <div className="flex h-screen bg-[#090a0f] text-gray-100 font-sans">
-      {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-gray-800 bg-[#0d0f17] flex flex-col justify-between p-6">
+    <div style={{ background: '#111', minHeight: '100vh', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #4a7ab5', paddingBottom: '20px', marginBottom: '30px' }}>
         <div>
-          <div className="mb-8">
-            <h1 className="text-xl font-bold tracking-wider text-amber-500">DAISY HILL</h1>
-            <p className="text-xs text-gray-400 tracking-widest">TACTICAL COMMAND</p>
-          </div>
-          
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Operations</div>
-          <nav className="space-y-1 mb-6">
-            <a href="/" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Dashboard</a>
-            <a href="/dispatch" className="flex items-center px-3 py-2 rounded bg-gray-800 text-white font-medium text-sm">Dispatch Logs</a>
-            <a href="/fleet" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Fleet Registry</a>
-            <a href="/land" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Land Sectors</a>
-          </nav>
-
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Legal & Finance</div>
-          <nav className="space-y-1">
-            <a href="/contracts" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Contracts</a>
-            <a href="/invoices" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Invoices</a>
-          </nav>
+          <h1 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0, fontWeight: 900 }}>Field Dispatch Request</h1>
+          <p style={{ fontSize: '12px', color: '#4a7ab5', margin: '5px 0 0' }}>DAISY HILL FARMING NETWORK | OPERATIONS COMMAND</p>
         </div>
+        <button 
+          onClick={() => window.location.href = '/dashboard'}
+          style={{ background: '#222', color: '#fff', border: '1px solid #4a7ab5', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <ArrowLeft size={16} /> Return to Dashboard
+        </button>
+      </div>
 
-        <div className="text-xs text-gray-600">
-          DAISY HILL TACTICAL | SECURE TERMINAL v2.0.26
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto">
-        <header className="border-b border-gray-800 p-6 flex justify-between items-center bg-[#0d0f17]">
-          <div>
-            <h2 className="text-2xl font-bold tracking-wide">DISPATCH OPERATIONS</h2>
-            <p className="text-xs text-gray-400">REAL-TIME COMMUNICATIONS & DIRECTIVES</p>
+      <div style={{ maxWidth: '600px', margin: '0 auto', background: '#1a1a1a', border: '1px solid #333', padding: '30px', borderRadius: '6px' }}>
+        {submitted ? (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <h3 style={{ color: '#22c55e', fontSize: '22px' }}>DISPATCH TRANSMITTED</h3>
+            <p style={{ color: '#aaa', fontSize: '14px', marginTop: '10px' }}>Your field request has been successfully broadcast to command.</p>
+            <button onClick={() => window.location.href = '/dashboard'} style={{ marginTop: '20px', padding: '10px 20px', background: '#4a7ab5', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>
+              Back to Dashboard
+            </button>
           </div>
-          <div className="flex items-center space-x-2 border border-green-800 bg-green-950/30 px-3 py-1.5 rounded text-xs text-green-400 font-mono">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span>SYSTEM INTEGRITY: ACTIVE</span>
-          </div>
-        </header>
-
-        <div className="p-8 space-y-6">
-          <div className="border border-gray-800 bg-[#121520] rounded-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-800 font-bold text-sm tracking-wider uppercase text-gray-400">
-              Active & Past Directives
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Sector / Location *</label>
+              <input 
+                type="text" 
+                required 
+                placeholder="e.g. Sector 4-G / Drowned Foothills" 
+                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px' }}
+                value={form.sector}
+                onChange={e => setForm({ ...form, sector: e.target.value })}
+              />
             </div>
-            <div className="divide-y divide-gray-800">
-              {dispatches.map((item: any, idx: number) => (
-                <div key={idx} className="p-4 flex justify-between items-center hover:bg-[#151925] transition">
-                  <div className="space-y-1">
-                    <div className="text-sm text-white font-medium">{item.message}</div>
-                    <div className="text-xs text-gray-500 font-mono">LOGGED: {item.time || 'RECENT'}</div>
-                  </div>
-                  <div>
-                    <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold ${
-                      item.status === 'ACTIVE' ? 'bg-red-950/40 text-red-400 border border-red-900' : 'bg-gray-900 text-gray-400'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Dispatch Details / Requirements *</label>
+              <textarea 
+                required 
+                placeholder="Describe machinery needed, recovery status, or supplies..." 
+                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', minHeight: '120px' }}
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+              />
             </div>
-          </div>
-        </div>
-      </main>
+            <button 
+              type="submit" 
+              disabled={submitting}
+              style={{ padding: '15px', background: '#22c55e', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <Send size={16} /> {submitting ? 'BROADCASTING...' : 'TRANSMIT DISPATCH'}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

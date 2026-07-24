@@ -1,127 +1,80 @@
-"use client";
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function PermitCenterPage() {
-  const [licenses, setLicenses] = useState<{ [key: string]: boolean }>({
-    cdl: true
-  });
+    const permits = [
+        { id: 'PRM-01', title: 'Heavy Transport Overweight Permit', fee: '$2,500.00', server: 'Midwest Horizon - 1', status: 'Approved', validity: '30 Days' },
+        { id: 'PRM-02', title: 'Livestock Expansion Zoning License', fee: '$15,000.00', server: 'Bjornholm - 19', status: 'Pending Review', validity: '1 Year' },
+        { id: 'PRM-03', title: 'Commercial Grain Silo Construction', fee: '$8,200.00', server: 'Central Austria - 20', status: 'Available', validity: '90 Days' },
+    ];
 
-  const handlePurchase = (id: string) => {
-    setLicenses(prev => ({ ...prev, [id]: true }));
-  };
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+            {/* Navigation Header */}
+            <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                        <span className="text-xl font-bold tracking-wider text-emerald-400">FSN</span>
+                        <nav className="hidden md:flex space-x-6 text-sm text-slate-400">
+                            <span className="hover:text-white cursor-pointer">Dashboard</span>
+                            <span className="hover:text-white cursor-pointer">Lotto Center</span>
+                            <span className="text-white font-medium cursor-pointer">Permit Center</span>
+                        </nav>
+                    </div>
+                    <div className="text-sm text-slate-400">Cool Brook Farms</div>
+                </div>
+            </header>
 
-  return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #cbd5e1', padding: '12px 30px' }}>
-        <div style={{ display: 'flex', gap: '25px', maxWidth: '1400px', margin: '0 auto', fontSize: '13px', fontWeight: 'bold', color: '#2563eb', flexWrap: 'wrap' }}>
-          <span style={{ cursor: 'pointer' }}>Myself ▾</span>
-          <span style={{ cursor: 'pointer' }}>Interactions ▾</span>
-          <span style={{ cursor: 'pointer' }}>Finances ▾</span>
-          <span style={{ cursor: 'pointer' }}>Data ▾</span>
-          <span style={{ cursor: 'pointer' }}>Market ▾</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
+            {/* Main Content */}
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+                
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white tracking-tight">Municipal Permit Center</h1>
+                        <p className="text-xs text-slate-400 mt-1">Acquire operational licenses, transport clearance certificates, and construction zoning permits.</p>
+                    </div>
+                    <button className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg shadow-lg shadow-emerald-900/25 transition text-sm">
+                        Apply for Permit
+                    </button>
+                </div>
+
+                {/* Permit Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {permits.map((p) => (
+                        <div key={p.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-xl space-y-4">
+                            <div>
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-xs font-mono text-emerald-400">{p.id}</span>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold ${p.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : p.status === 'Pending Review' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-400'}`}>
+                                        {p.status}
+                                    </span>
+                                </div>
+                                <h3 className="text-md font-bold text-white">{p.title}</h3>
+                            </div>
+
+                            <div className="space-y-2 border-t border-slate-800 pt-4">
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Permit Fee:</span>
+                                    <span className="font-mono text-emerald-400 font-semibold">{p.fee}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Server Scope:</span>
+                                    <span className="text-white font-semibold">{p.server}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Validity Period:</span>
+                                    <span className="text-slate-300 font-mono">{p.validity}</span>
+                                </div>
+                            </div>
+
+                            <button className={`w-full py-2.5 px-4 font-semibold rounded-lg text-sm transition-all shadow-lg ${p.status === 'Approved' ? 'bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'}`}>
+                                {p.status === 'Approved' ? 'Active Permit' : 'Submit Application'}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+            </main>
         </div>
-      </div>
-
-      <div style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 30px' }}>
-        
-        {/* Page Title & Description */}
-        <div style={{ marginBottom: '25px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'normal', color: '#332266', margin: '0 0 5px 0' }}>
-            Permit Center
-          </h1>
-          <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
-            Purchase, renew, and manage skilled trade licenses, herbicide applicator permits, and operational certificates.
-          </p>
-        </div>
-
-        {/* Permits List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* Applicator License */}
-          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '25px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Skilled Trade • Valid for 15 Days
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 8px 0' }}>
-                Herbicide Applicator License
-              </h3>
-              <p style={{ fontSize: '13px', color: '#334155', margin: '0 0 15px 0', lineHeight: '1.5' }}>
-                Required for any farmer or contractor wishing to spray herbicide. Operating without a license incurs heavy fines.
-              </p>
-              <div style={{ fontSize: '13px', color: '#64748b' }}>
-                Fee: <strong style={{ color: '#16a34a' }}>$5,000.00</strong>
-              </div>
-            </div>
-            <div>
-              <button 
-                onClick={() => handlePurchase('applicator')}
-                style={{ width: '100%', background: licenses['applicator'] ? '#16a34a' : '#ef4444', color: '#fff', border: 'none', padding: '12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', transition: 'background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-              >
-                {licenses['applicator'] ? 'LICENSE ACTIVE' : 'BUY LICENSE ($5,000)'}
-              </button>
-            </div>
-          </div>
-
-          {/* CDL License */}
-          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '25px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Skilled Trade • Expires: 2020-04-08
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 8px 0' }}>
-                Commercial Driver&apos;s License (CDL)
-              </h3>
-              <p style={{ fontSize: '13px', color: '#334155', margin: '0 0 15px 0', lineHeight: '1.5' }}>
-                Required by anyone wishing to operate semi-trucks and heavy transport vehicles across server routes.
-              </p>
-              <div style={{ fontSize: '13px', color: '#64748b' }}>
-                Renewal Fee: <strong style={{ color: '#16a34a' }}>$2,000.00</strong>
-              </div>
-            </div>
-            <div>
-              <button 
-                onClick={() => handlePurchase('cdl')}
-                style={{ width: '100%', background: '#0284c7', color: '#fff', border: 'none', padding: '12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', transition: 'background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-              >
-                EXTEND PERMIT ($2,000)
-              </button>
-            </div>
-          </div>
-
-          {/* Horse Training License */}
-          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '25px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Animals • Valid for 15 Days
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 8px 0' }}>
-                Horse Training License
-              </h3>
-              <p style={{ fontSize: '13px', color: '#334155', margin: '0 0 15px 0', lineHeight: '1.5' }}>
-                Required for any contractor looking to help train horses owned by farms.
-              </p>
-              <div style={{ fontSize: '13px', color: '#64748b' }}>
-                Fee: <strong style={{ color: '#16a34a' }}>$5,000.00</strong>
-              </div>
-            </div>
-            <div>
-              <button 
-                onClick={() => handlePurchase('horse')}
-                style={{ width: '100%', background: licenses['horse'] ? '#16a34a' : '#ef4444', color: '#fff', border: 'none', padding: '12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', transition: 'background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-              >
-                {licenses['horse'] ? 'LICENSE ACTIVE' : 'BUY LICENSE ($5,000)'}
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }

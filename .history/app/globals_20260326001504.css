@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Keep your custom background here */
+:root {
+  background: #05070a;
+  color: white;
+}

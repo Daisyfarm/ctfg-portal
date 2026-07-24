@@ -1,0 +1,84 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../app/generated/prisma"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public"]
+}
+
+model UserProfile {
+  id        String          @id @default(uuid())
+  userId    String          @unique // Links to Supabase auth.users
+  username  String          @unique
+  coins     Int             @default(1000) // Starting currency
+  level     Int             @default(1)
+  exp       Int             @default(0)
+  plots     Plot[]
+  inventory InventoryItem[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@schema("public")
+}
+
+model CropType {
+  id            String   @id @default(uuid())
+  name          String   @unique // e.g., "Golden Wheat", "Mystic Tomato"
+  seedPrice     Int      // Cost to buy seeds
+  sellPrice     Int      // Profit when harvested
+  growthTimeSec Int      // Time in seconds to mature
+  expReward     Int      // EXP gained upon harvesting
+  plots         Plot[]
+
+  @@schema("public")
+}
+
+model Plot {
+  id            String      @id @default(uuid())
+  userProfileId String
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  plotNumber    Int         // Position of the plot on the farm grid (e.g., 1 to 12)
+  cropTypeId    String?
+  cropType      CropType?   @relation(fields: [cropTypeId], references: [id])
+  plantedAt     DateTime?   // Timestamp of when the seed was planted
+  isReady       Boolean     @default(false)
+  harvestableAt DateTime?   // Exact time the crop can be harvested
+
+  @@unique([userProfileId, plotNumber])
+  @@schema("public")
+}
+
+model Item {
+  id          String          @id @default(uuid())
+  name        String          @unique // e.g., "Super Fertilizer", "Tractor Upgrade"
+  description String
+  type        ItemType        // SEED, TOOL, CONSUMABLE, SPECIAL
+  price       Int
+  inventory   InventoryItem[]
+
+  @@schema("public")
+}
+
+model InventoryItem {
+  id            String      @id @default(uuid())
+  userProfileId String
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  itemId        String
+  item          Item        @relation(fields: [itemId], references: [id])
+  quantity      Int         @default(1)
+
+  @@unique([userProfileId, itemId])
+  @@schema("public")
+}
+
+enum ItemType {
+  SEED
+  TOOL
+  CONSUMABLE
+  SPECIAL
+
+  @@schema("public")
+}

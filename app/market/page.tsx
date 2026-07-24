@@ -1,105 +1,164 @@
-"use client";
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function MarketPage() {
-  const [selectedServer, setSelectedServer] = useState('Server 19 (Daisy Hill Main)');
+    const commodities = [
+        { crop: 'Wheat', price: '$420.50', change: '+4.2%', trend: 'Up', bestSellPoint: 'Judith Plains Grain Elevator' },
+        { crop: 'Barley', price: '$385.00', change: '-1.5%', trend: 'Down', bestSellPoint: 'Central Feed Mill' },
+        { crop: 'Corn', price: '$460.25', change: '+6.8%', trend: 'Up', bestSellPoint: 'North River Ethanol Plant' },
+        { crop: 'Soybeans', price: '$650.10', change: '+2.1%', trend: 'Up', bestSellPoint: 'Montana Export Port' },
+        { crop: 'Canola', price: '$590.80', change: '-0.8%', trend: 'Down', bestSellPoint: 'Central Feed Mill' },
+        { crop: 'Sunflower', price: '$610.00', change: '+3.4%', trend: 'Up', bestSellPoint: 'Judith Plains Grain Elevator' },
+    ];
 
-  const commodities = [
-    { id: 1, name: 'Wheat', price: '$420', change: '+5.4%', trend: 'up', bestSellPoint: 'Central Grain Mill', demand: 'High Demand' },
-    { id: 2, name: 'Barley', price: '$380', change: '-1.2%', trend: 'down', bestSellPoint: 'North Port Elevator', demand: 'Normal' },
-    { id: 3, name: 'Canola', price: '$710', change: '+8.1%', trend: 'up', bestSellPoint: 'BioDiesel Plant', demand: 'Surging' },
-    { id: 4, name: 'Corn', price: '$450', change: '+2.0%', trend: 'up', bestSellPoint: 'Animal Feed Co.', demand: 'Stable' },
-    { id: 5, name: 'Soybeans', price: '$940', change: '-0.5%', trend: 'down', bestSellPoint: 'Export Harbor', demand: 'Normal' },
-    { id: 6, name: 'Milk', price: '$1,200', change: '+3.5%', trend: 'up', bestSellPoint: 'Dairy Processing Plant', demand: 'High Demand' },
-    { id: 7, name: 'Eggs', price: '$1,550', change: '+12.4%', trend: 'up', bestSellPoint: 'Supermarket Central', demand: 'Peak' }
-  ];
+    const sellPoints = [
+        { name: 'Judith Plains Grain Elevator', distance: '2.4 km', activeDemands: 'Wheat, Sunflower', status: 'Open' },
+        { name: 'Central Feed Mill', distance: '5.1 km', activeDemands: 'Barley, Canola', status: 'Open' },
+        { name: 'North River Ethanol Plant', distance: '11.8 km', activeDemands: 'Corn', status: 'Open' },
+        { name: 'Montana Export Port', distance: '24.5 km', activeDemands: 'Soybeans', status: 'Open' },
+    ];
 
-  return (
-    <div style={{ background: '#111827', minHeight: 'calc(100vh - 90px)', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        
-        {/* Header & Server Selector */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff', margin: '0 0 5px 0' }}>
-              Live Commodity Market & Pricing
-            </h1>
-            <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0' }}>
-              Real-time global crop prices, demand indexes, and optimal sell points across servers.
-            </p>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '12px', color: '#9ca3af' }}>Active Server Market:</span>
-            <select 
-              value={selectedServer}
-              onChange={(e) => setSelectedServer(e.target.value)}
-              style={{ padding: '8px 12px', background: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: '4px', fontSize: '13px' }}
-            >
-              <option>Server 19 (Daisy Hill Main)</option>
-              <option>Server 8 (North Plains)</option>
-              <option>Server 4 (Alpine Agro)</option>
-            </select>
-          </div>
-        </div>
+    return (
+        <div style={{ 
+            minHeight: 'calc(100vh - 90px)', 
+            backgroundImage: 'linear-gradient(rgba(3, 7, 18, 0.75), rgba(3, 7, 18, 0.85)), url("https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=80")', 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center', 
+            backgroundAttachment: 'fixed',
+            color: '#f3f4f6', 
+            padding: '40px 20px', 
+            fontFamily: 'Arial, sans-serif' 
+        }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                
+                {/* Page Header Card */}
+                <div style={{ 
+                    background: 'rgba(17, 24, 39, 0.9)', 
+                    backdropFilter: 'blur(12px)', 
+                    border: '1px solid rgba(255, 255, 255, 0.1)', 
+                    borderRadius: '16px', 
+                    padding: '30px', 
+                    marginBottom: '30px',
+                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '20px'
+                }}>
+                    <div>
+                        <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>
+                            Global Commodity Market & Pricing
+                        </h1>
+                        <p style={{ fontSize: '13px', color: '#9ca3af', margin: 0 }}>
+                            Real-time commodity valuation, market trends, and regional sell points for <span style={{ color: '#34d399', fontWeight: 'bold' }}>Judith Plains Montana 4X</span>.
+                        </p>
+                    </div>
+                    <div>
+                        <button style={{ 
+                            background: '#10b981', 
+                            color: '#ffffff', 
+                            border: 'none', 
+                            padding: '12px 20px', 
+                            borderRadius: '8px', 
+                            fontSize: '13px', 
+                            fontWeight: 'bold', 
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                        }}>
+                            Refresh Market Rates
+                        </button>
+                    </div>
+                </div>
 
-        {/* Market Trend Overview Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Market Sentiment</div>
-            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#4ade80' }}>Bullish (+4.2%)</div>
-            <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>Driven by high canola & grain demand</div>
-          </div>
-          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Top Performing Crop</div>
-            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#fbbf24' }}>Eggs ($1,550 / 1kL)</div>
-            <div style={{ fontSize: '12px', color: '#4ade80', marginTop: '4px' }}>+12.4% price shift in 24h</div>
-          </div>
-          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Active Sell Points</div>
-            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#60a5fa' }}>14 Locations Online</div>
-            <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>All delivery nodes operational</div>
-          </div>
-        </div>
-
-        {/* Commodities Table */}
-        <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: '#374151', color: '#d1d5db', borderBottom: '1px solid #4b5563' }}>
-                <th style={{ padding: '12px 15px' }}>Commodity</th>
-                <th style={{ padding: '12px 15px' }}>Current Price (1,000L)</th>
-                <th style={{ padding: '12px 15px' }}>24h Change</th>
-                <th style={{ padding: '12px 15px' }}>Optimal Sell Point</th>
-                <th style={{ padding: '12px 15px' }}>Demand Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {commodities.map((item) => (
-                <tr key={item.id} style={{ borderBottom: '1px solid #374151' }}>
-                  <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#fff' }}>{item.name}</td>
-                  <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#4ade80' }}>{item.price}</td>
-                  <td style={{ padding: '12px 15px', color: item.trend === 'up' ? '#4ade80' : '#ef4444', fontWeight: 'bold' }}>{item.change}</td>
-                  <td style={{ padding: '12px 15px', color: '#93c5fd' }}>{item.bestSellPoint}</td>
-                  <td style={{ padding: '12px 15px' }}>
-                    <span style={{ 
-                      background: item.demand === 'Peak' || item.demand === 'Surging' ? '#065f46' : '#1e3a8a', 
-                      color: '#fff', 
-                      padding: '3px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '11px', 
-                      fontWeight: 'bold' 
+                {/* Two Column Layout: Commodity Prices & Sell Points */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px', alignItems: 'start' }}>
+                    
+                    {/* Left Column: Commodity Pricing Table */}
+                    <div style={{ 
+                        background: 'rgba(17, 24, 39, 0.9)', 
+                        backdropFilter: 'blur(12px)', 
+                        border: '1px solid rgba(255, 255, 255, 0.1)', 
+                        borderRadius: '16px', 
+                        padding: '32px',
+                        boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
                     }}>
-                      {item.demand}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 20px 0', letterSpacing: '-0.5px' }}>
+                            Current Crop Pricing (Per 1,000 L)
+                        </h2>
 
-      </div>
-    </div>
-  );
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid #374151', color: '#9ca3af' }}>
+                                        <th style={{ paddingBottom: '12px', fontWeight: 'bold' }}>Commodity</th>
+                                        <th style={{ paddingBottom: '12px', fontWeight: 'bold' }}>Price</th>
+                                        <th style={{ paddingBottom: '12px', fontWeight: 'bold' }}>24h Trend</th>
+                                        <th style={{ paddingBottom: '12px', fontWeight: 'bold' }}>Best Destination</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {commodities.map((item, idx) => (
+                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                            <td style={{ padding: '14px 0', fontWeight: 'bold', color: '#ffffff' }}>{item.crop}</td>
+                                            <td style={{ padding: '14px 0', fontFamily: 'monospace', color: '#34d399', fontWeight: 'bold' }}>{item.price}</td>
+                                            <td style={{ padding: '14px 0' }}>
+                                                <span style={{ 
+                                                    background: item.trend === 'Up' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', 
+                                                    color: item.trend === 'Up' ? '#34d399' : '#f87171', 
+                                                    border: `1px solid ${item.trend === 'Up' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3'}`, 
+                                                    padding: '3px 8px', 
+                                                    borderRadius: '4px', 
+                                                    fontSize: '11px', 
+                                                    fontWeight: 'bold', 
+                                                    fontFamily: 'monospace' 
+                                                }}>
+                                                    {item.change}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '14px 0', color: '#93c5fd', fontSize: '12px' }}>{item.bestSellPoint}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Sell Points & Demands */}
+                    <div style={{ 
+                        background: 'rgba(17, 24, 39, 0.9)', 
+                        backdropFilter: 'blur(12px)', 
+                        border: '1px solid rgba(255, 255, 255, 0.1)', 
+                        borderRadius: '16px', 
+                        padding: '32px',
+                        boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
+                    }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 20px 0', letterSpacing: '-0.5px' }}>
+                            Regional Sell Points
+                        </h2>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {sellPoints.map((point, idx) => (
+                                <div key={idx} style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '10px', padding: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>{point.name}</h3>
+                                        <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                            {point.status}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>
+                                        Distance from Farm: <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{point.distance}</span>
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                                        Active Demand: <span style={{ color: '#34d399', fontWeight: 'bold' }}>{point.activeDemands}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    );
 }

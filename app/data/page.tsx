@@ -29,20 +29,20 @@ export default function DataPage() {
           <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
             <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>North Node (Slots 1-8)</span>
             <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: '8px 0 16px 0' }}>Operational Telemetry</h3>
-            <div style={{ fontSize: '12px', color: '#a1a1aa', spaceY: '8px' }}>
-              <p style={{ margin: '6px 0' }}>Active Machinery: 14 units online</p>
-              <p style={{ margin: '6px 0' }}>Field Yield Efficiency: 94.2%</p>
-              <p style={{ margin: '6px 0' }}>Server Latency: 14 ms</p>
+            <div style={{ fontSize: '12px', color: '#a1a1aa', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <p style={{ margin: 0 }}>Active Machinery: 14 units online</p>
+              <p style={{ margin: 0 }}>Field Yield Efficiency: 94.2%</p>
+              <p style={{ margin: 0 }}>Server Latency: 14 ms</p>
             </div>
           </div>
 
           <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
             <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>South Node (Slots 9-16)</span>
             <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: '8px 0 16px 0' }}>Operational Telemetry</h3>
-            <div style={{ fontSize: '12px', color: '#a1a1aa', spaceY: '8px' }}>
-              <p style={{ margin: '6px 0' }}>Active Machinery: 11 units online</p>
-              <p style={{ margin: '6px 0' }}>Storage Silo Capacity: 68% full</p>
-              <p style={{ margin: '6px 0' }}>Server Latency: 16 ms</p>
+            <div style={{ fontSize: '12px', color: '#a1a1aa', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <p style={{ margin: 0 }}>Active Machinery: 11 units online</p>
+              <p style={{ margin: 0 }}>Storage Silo Capacity: 68% full</p>
+              <p style={{ margin: 0 }}>Server Latency: 16 ms</p>
             </div>
           </div>
         </div>

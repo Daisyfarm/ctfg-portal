@@ -57,10 +57,36 @@ export default function IronDaisyTerminal() {
   // Login Barrier
   if (!session) {
     return (
-      <div style={{ height: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <Activity size={32} color="#d4af37" style={{ marginBottom: '20px', opacity: 0.5 }} />
-          <p style={{ color: '#d4af37', fontFamily: 'monospace', letterSpacing: '4px', fontSize: '10px' }}>IRON_DAISY_AWAITING_UPLINK...</p>
+      <div style={{ height: '100vh', background: '#0b0f19', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', background: '#111827', padding: '40px', borderRadius: '12px', border: '1px solid #1f2937', width: '380px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+          <div style={{ marginBottom: '15px' }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto' }}>
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </div>
+          <h1 style={{ color: '#fff', fontFamily: 'monospace', fontSize: '22px', fontWeight: 'bold', letterSpacing: '1px', margin: '0 0 5px 0' }}>
+            IRON DAISY <span style={{ color: '#22c55e' }}>AGRI</span>
+          </h1>
+          <p style={{ color: '#9ca3af', fontSize: '12px', marginBottom: '25px', fontFamily: 'monospace' }}>Operator Login</p>
+          
+          <div style={{ textAlign: 'left', marginBottom: '15px' }}>
+            <label style={{ display: 'block', color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase', marginBottom: '5px', fontFamily: 'monospace' }}>Email Address</label>
+            <input type="email" placeholder="email@example.com" style={{ width: '100%', padding: '10px', background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+          </div>
+
+          <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+            <label style={{ display: 'block', color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase', marginBottom: '5px', fontFamily: 'monospace' }}>Password</label>
+            <input type="password" placeholder="••••••••" style={{ width: '100%', padding: '10px', background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }} />
+          </div>
+
+          <button onClick={() => alert("Please connect authentication handler")} style={{ width: '100%', padding: '12px', background: '#22c55e', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontFamily: 'monospace', marginBottom: '15px' }}>
+            Login to Network
+          </button>
+          
+          <p style={{ color: '#6b7280', fontSize: '11px', fontFamily: 'monospace', margin: 0 }}>
+            Need an account? Register here
+          </p>
         </div>
       </div>
     );

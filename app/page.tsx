@@ -1,182 +1,171 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { sb } from "./db/supabase"; 
-import { Shield, Truck, Globe, BarChart3, Trophy, Radio, Clock, HardDrive, Zap, Activity } from 'lucide-react';
+import { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { Tractor, ShieldCheck, Lock, User, ArrowRight } from 'lucide-react';
 
-export default function IronDaisyTerminal() {
-  const [view, setView] = useState('FLEET');
-  const [session, setSession] = useState<any>(null);
-  const [news, setNews] = useState<any[]>([]);
-  const [mounted, setMounted] = useState(false);
-  const balance = 9400000;
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-  // Fleet Assets / Equipment
-  const fleet = [
-    { 
-      id: 'UNIT-01', 
-      name: 'Euro-Cab Vanguard', 
-      armor: 85, 
-      img: 'https://images.unsplash.com/photo-1586191128574-32f6405c8936?q=80&w=800' 
-    },
-    { 
-      id: 'UNIT-02', 
-      name: 'US Heavy Hauler', 
-      armor: 40, 
-      img: 'https://images.unsplash.com/photo-1591768793355-74d7ef7e9c95?q=80&w=800' 
+export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (isLogin) {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("Authentication failed: " + error.message);
+        setLoading(false);
+      } else {
+        await fetch(HK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🔐 **OPERATOR LOGGED IN**\n**Email:** ${email}\n**Timestamp:** ${new Date().toISOString()}`
+          })
+        });
+        window.location.href = '/dashboard';
+      }
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) {
+        alert("Registration failed: " + error.message);
+        setLoading(false);
+      } else if (data.user) {
+        // Create profile row
+        await sb.from('profiles').insert([{
+          id: data.user.id,
+          username: username || email.split('@')[0],
+          balance: 500000, // Starting capital
+          role: 'Operator'
+        }]);
+
+        await fetch(HK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🌾 **NEW OPERATOR REGISTERED**\n**Username:** ${username || email.split('@')[0]}\n**Email:** ${email}`
+          })
+        });
+
+        alert("Registration successful! Accessing terminal dashboard...");
+        window.location.href = '/dashboard';
+      }
     }
-  ];
-
-  // Auth & Intelligence Sync
-  useEffect(() => {
-    setMounted(true);
-    sb.auth.getSession().then(({ data: { session } }) => setSession(session));
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => setSession(session));
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (session) {
-      const fetchIntel = async () => {
-        const { data, error } = await sb
-          .from('tactical_news')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!error) {
-          setNews(data || []);
-        } else {
-          console.error("UPLINK_ERROR:", error.message);
-        }
-      };
-      fetchIntel();
-    }
-  }, [session]);
-
-  if (!mounted) return null;
-
-  // Login Barrier
-  if (!session) {
-    return (
-      <div style={{ height: '100vh', background: '#0b0f19', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', background: '#111827', padding: '40px', borderRadius: '12px', border: '1px solid #1f2937', width: '380px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
-          <div style={{ marginBottom: '15px' }}>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto' }}>
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </div>
-          <h1 style={{ color: '#fff', fontFamily: 'monospace', fontSize: '22px', fontWeight: 'bold', letterSpacing: '1px', margin: '0 0 5px 0' }}>
-            IRON DAISY <span style={{ color: '#22c55e' }}>AGRI</span>
-          </h1>
-          <p style={{ color: '#9ca3af', fontSize: '12px', marginBottom: '25px', fontFamily: 'monospace' }}>Operator Login</p>
-          
-          <div style={{ textAlign: 'left', marginBottom: '15px' }}>
-            <label style={{ display: 'block', color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase', marginBottom: '5px', fontFamily: 'monospace' }}>Email Address</label>
-            <input type="email" placeholder="email@example.com" style={{ width: '100%', padding: '10px', background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }} />
-          </div>
-
-          <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase', marginBottom: '5px', fontFamily: 'monospace' }}>Password</label>
-            <input type="password" placeholder="••••••••" style={{ width: '100%', padding: '10px', background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }} />
-          </div>
-
-          <button onClick={() => alert("Please connect authentication handler")} style={{ width: '100%', padding: '12px', background: '#22c55e', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontFamily: 'monospace', marginBottom: '15px' }}>
-            Login to Network
-          </button>
-          
-          <p style={{ color: '#6b7280', fontSize: '11px', fontFamily: 'monospace', margin: 0 }}>
-            Need an account? Register here
-          </p>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: 'monospace', display: 'flex' }}>
-      
-      {/* GLOBAL NAVIGATION */}
-      <aside style={{ width: '70px', borderRight: '1px solid #111', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '25px 0', gap: '25px', background: '#050505' }}>
-        <Shield size={24} color="#d4af37" />
-        {[
-          { id: 'COMMAND', icon: <Globe size={22} /> },
-          { id: 'FLEET', icon: <Truck size={22} /> },
-          { id: 'MARKET', icon: <BarChart3 size={20} /> },
-          { id: 'RANK', icon: <Trophy size={20} /> }
-        ].map((item) => (
-          <button 
-            key={item.id}
-            onClick={() => setView(item.id)}
-            style={{ 
-              background: 'none', border: 'none', cursor: 'pointer', 
-              color: view === item.id ? '#d4af37' : '#222',
-              transition: '0.2s'
+    <div style={{
+      background: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'Arial, sans-serif',
+      position: 'relative'
+    }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)' }}></div>
+
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        background: 'rgba(20, 20, 20, 0.95)',
+        border: '1px solid #4a7ab5',
+        borderRadius: '6px',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '440px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <Tractor size={48} color="#22c55e" style={{ marginBottom: '10px' }} />
+          <h1 style={{ color: '#fff', fontSize: '24px', textTransform: 'uppercase', margin: 0, fontWeight: '900', fontStyle: 'italic' }}>
+            Iron Daisy Agri
+          </h1>
+          <p style={{ color: '#4a7ab5', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginTop: '5px' }}>
+            CORPORATE AGRICULTURAL & LOGISTICS TERMINAL
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {!isLogin && (
+            <div>
+              <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>OPERATOR CALLSIGN / USERNAME</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Miller_01"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
+              />
+            </div>
+          )}
+
+          <div>
+            <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>SECURE EMAIL</label>
+            <input
+              type="email"
+              required
+              placeholder="operator@irondaisy.agri"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', color: '#aaa', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>PASSWORD CLEARANCE</label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              marginTop: '10px',
+              padding: '14px',
+              background: '#22c55e',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              textTransform: 'uppercase'
             }}
           >
-            {item.icon}
+            {loading ? 'Processing...' : (isLogin ? 'Access Terminal' : 'Initialize Operative Account')}
+            <ArrowRight size={16} />
           </button>
-        ))}
-      </aside>
+        </form>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* HEADER */}
-        <header style={{ padding: '20px 40px', borderBottom: '1px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#020202' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <HardDrive size={14} color="#d4af37" />
-            <span style={{ fontSize: '10px', color: '#444', letterSpacing: '2px' }}>IRON_DAISY_AGRI // {view}</span>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>${balance.toLocaleString()}</div>
-            <div style={{ fontSize: '8px', color: '#444' }}>OPERATIVE: {session.user.email}</div>
-          </div>
-        </header>
-
-        <div style={{ flex: 1, display: 'flex' }}>
-          {/* MAIN DATA MODULE */}
-          <main style={{ flex: 1, padding: '40px' }}>
-            {view === 'FLEET' ? (
-              <div style={{ display: 'flex', gap: '25px' }}>
-                {fleet.map(u => (
-                  <div key={u.id} style={{ width: '320px', background: '#050505', border: '1px solid #111' }}>
-                    <img src={u.img} style={{ width: '100%', height: '160px', objectFit: 'cover', opacity: 0.6 }} />
-                    <div style={{ padding: '20px' }}>
-                      <div style={{ color: '#d4af37', fontSize: '11px', fontWeight: 'bold' }}>{u.id}</div>
-                      <div style={{ fontSize: '9px', margin: '5px 0 15px', color: '#666' }}>{u.name}</div>
-                      <div style={{ height: '2px', background: '#111' }}>
-                        <div style={{ width: `${u.armor}%`, height: '100%', background: '#d4af37' }} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ border: '1px solid #d4af3733', padding: '30px', color: '#d4af37' }}>
-                <Zap size={20} style={{ marginBottom: '15px' }} />
-                <br />
-                [IRON_DAISY_OK] // {view}_DATA_STREAM_ACTIVE
-              </div>
-            )}
-          </main>
-
-          {/* LIVE INTEL SIDEBAR */}
-          <div style={{ width: '320px', borderLeft: '1px solid #111', padding: '30px', background: '#020202' }}>
-            <div style={{ fontSize: '10px', color: '#d4af37', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px', letterSpacing: '2px' }}>
-              <Radio size={14} /> LIVE_INTELLIGENCE
-            </div>
-            {news.length === 0 ? (
-              <p style={{ color: '#222', fontSize: '9px' }}>AWAITING DATA...</p>
-            ) : (
-              news.map((item) => (
-                <div key={item.id} style={{ marginBottom: '25px', paddingLeft: '12px', borderLeft: '1px solid #d4af3733' }}>
-                  <div style={{ fontSize: '8px', color: '#444', marginBottom: '6px' }}>
-                    <Clock size={10} style={{ display: 'inline', marginRight: '5px' }} />
-                    {new Date(item.created_at).toLocaleTimeString()}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#ccc', lineHeight: '1.4' }}>{item.headline}</div>
-                </div>
-              ))
-            )}
-          </div>
+        <div style={{ textAlign: 'center', marginTop: '25px', borderTop: '1px solid #333', paddingTop: '15px' }}>
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            style={{ background: 'transparent', border: 'none', color: '#4a7ab5', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+          >
+            {isLogin ? "Need a new operator account? Register here" : "Already have clearance? Log in"}
+          </button>
         </div>
       </div>
     </div>

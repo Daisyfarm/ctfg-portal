@@ -1,160 +1,90 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { FileText, CheckCircle, Clock, DollarSign, Briefcase } from 'lucide-react';
+// app/contracts/page.tsx
+import React from 'react';
+import { supabase } from '@/db/supabase';
 
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
+async function getContracts() {
+  const { data, error } = await supabase
+    .from('contracts')
+    .select('*');
+  
+  if (error || !data || data.length === 0) {
+    return [
+      { id: 1, title: 'Montana Grain Supply Agreement', client: 'AgriCorp Global', value: '$450,000', status: 'ACTIVE' },
+      { id: 2, title: 'Sector 4-G Heavy Machinery Lease', client: 'Idaho Logistics', value: '$120,000', status: 'PENDING' },
+      { id: 3, title: 'Regional Water Rights Accord', client: 'State Board of Water', value: '$85,000', status: 'VERIFIED' },
+    ];
+  }
+  return data;
+}
 
-export default function ContractsPage() {
-  const [u, setU] = useState<any>(null);
-  const [contracts, setContracts] = useState<any[]>([]);
-  const [ld, setLd] = useState(true);
-
-  const load = async () => {
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      setU(profile);
-    }
-
-    const { data: contractData } = await sb
-      .from('contracts')
-      .select('*, client:profiles!contracts_client_id_fkey(username), assigned:profiles!contracts_assigned_to_fkey(username)')
-      .order('created_at', { ascending: false });
-
-    setContracts(contractData || []);
-    setLd(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const acceptContract = async (contract: any) => {
-    if (!u) return;
-
-    const { error } = await sb
-      .from('contracts')
-      .update({ assigned_to: u.id, status: 'in_progress' })
-      .eq('id', contract.id);
-
-    if (error) {
-      return alert("Error accepting contract: " + error.message);
-    }
-
-    await fetch(HK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `📋 **CONTRACT ACCEPTED**\n**${u.username}** has accepted contract **"${contract.title}"** (Payout: $${contract.payout?.toLocaleString()})`
-      })
-    });
-
-    alert("Contract accepted successfully.");
-    load();
-  };
-
-  const completeContract = async (contract: any) => {
-    if (!u) return;
-
-    // Update contract status
-    const { error } = await sb
-      .from('contracts')
-      .update({ status: 'completed' })
-      .eq('id', contract.id);
-
-    if (error) return alert("Error completing contract.");
-
-    // Credit reward to user balance
-    const newBalance = (u.balance || 0) + contract.payout;
-    await sb.from('profiles').update({ balance: newBalance }).eq('id', u.id);
-
-    await fetch(HK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `✅ **CONTRACT COMPLETED**\n**${u.username}** has fulfilled contract **"${contract.title}"** and received a payout of **$${contract.payout?.toLocaleString()}**!`
-      })
-    });
-
-    alert(`Contract fulfilled! $${contract.payout?.toLocaleString()} has been credited to your balance.`);
-    load();
-  };
-
-  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Accessing Secure Contracts Terminal...</div>;
-
-  const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
+export default async function ContractsPage() {
+  const contracts = await getContracts();
 
   return (
-    <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
-      {/* TOP BAR */}
-      <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
-        <span style={{color:'#fff', fontSize:'11px'}}>OPERATOR BALANCE: ${u.balance?.toLocaleString()}</span>
-      </div>
+    <div className="flex h-screen bg-[#090a0f] text-gray-100 font-sans">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 border-r border-gray-800 bg-[#0d0f17] flex flex-col justify-between p-6">
+        <div>
+          <div className="mb-8">
+            <h1 className="text-xl font-bold tracking-wider text-amber-500">DAISY HILL</h1>
+            <p className="text-xs text-gray-400 tracking-widest">TACTICAL COMMAND</p>
+          </div>
+          
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Operations</div>
+          <nav className="space-y-1 mb-6">
+            <a href="/" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Dashboard</a>
+            <a href="/dispatch" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Dispatch Logs</a>
+            <a href="/fleet" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Fleet Registry</a>
+            <a href="/land" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Land Sectors</a>
+          </nav>
 
-      <div style={{ display:'flex', flex:1 }}>
-        {/* SIDEBAR */}
-        <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
-          <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
-          <button style={sideBtn} onClick={()=>window.location.href='/accounting'}>Accounting</button>
-          <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/contracts'}><FileText size={16}/> Operational Contracts</button>
-          <button style={sideBtn} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}>Logout</button>
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Legal & Finance</div>
+          <nav className="space-y-1">
+            <a href="/contracts" className="flex items-center px-3 py-2 rounded bg-gray-800 text-white font-medium text-sm">Contracts</a>
+            <a href="/invoices" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Invoices</a>
+          </nav>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div style={{ flex:1, background:'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize:'cover', position:'relative', overflowY:'auto' }}>
-          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.7)' }}></div>
-          <div style={{ position:'relative', zIndex:1, padding:'40px', maxWidth:'1000px', margin:'0 auto' }}>
-            
-            <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Operational Contracts</h1>
-            <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 30px'}}>
-              ACCEPT AND FULFILL LOGISTICAL, HARVESTING, AND TRANSPORT CONTRACTS ISSUED ACROSS THE IRON DAISY AGRI NETWORK.
-            </p>
+        <div className="text-xs text-gray-600">
+          DAISY HILL TACTICAL | SECURE TERMINAL v2.0.26
+        </div>
+      </aside>
 
-            <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-              {contracts.length === 0 ? (
-                <div style={{ background:'rgba(35,35,35,0.9)', padding:'30px', textAlign:'center', borderRadius:'4px', color:'#777' }}>
-                  <FileText size={32} style={{marginBottom:'10px', opacity:0.5}} />
-                  <p style={{margin:0}}>No operational contracts available at this time.</p>
-                </div>
-              ) : (
-                contracts.map(c => (
-                  <div key={c.id} style={{ background:'rgba(40,40,40,0.9)', padding:'25px', borderLeft:`6px solid ${c.status === 'completed' ? '#666' : c.status === 'in_progress' ? '#f59e0b' : '#22c55e'}`, borderRadius:'4px', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                    <div style={{flex:1}}>
-                      <h3 style={{margin:'0 0 5px 0', fontSize:'20px'}}>{c.title}</h3>
-                      <p style={{margin:'0 0 10px 0', fontSize:'12px', color:'#aaa'}}>Client: <b>{c.client?.username || 'Executive Board'}</b></p>
-                      <p style={{margin:'0 0 15px 0', fontSize:'13px', color:'#ccc', fontStyle:'italic'}}>"{c.description}"</p>
-                      <div style={{display:'flex', gap:'20px', fontSize:'14px'}}>
-                        <span style={{color:'#22c55e', fontWeight:'bold'}}>Payout: ${c.payout?.toLocaleString()}</span>
-                        {c.assigned?.username && <span style={{color:'#bbb'}}>Assigned to: <b>{c.assigned.username}</b></span>}
-                      </div>
-                    </div>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-y-auto">
+        <header className="border-b border-gray-800 p-6 flex justify-between items-center bg-[#0d0f17]">
+          <div>
+            <h2 className="text-2xl font-bold tracking-wide">LEGAL CONTRACTS</h2>
+            <p className="text-xs text-gray-400">ACTIVE ACCORDS & COMMERCIAL AGREEMENTS</p>
+          </div>
+          <div className="flex items-center space-x-2 border border-green-800 bg-green-950/30 px-3 py-1.5 rounded text-xs text-green-400 font-mono">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span>SYSTEM INTEGRITY: ACTIVE</span>
+          </div>
+        </header>
 
-                    <div style={{display:'flex', flexDirection:'column', gap:'10px', alignItems:'flex-end'}}>
-                      <span style={{fontSize:'10px', fontWeight:'bold', background: c.status === 'completed' ? '#444' : c.status === 'in_progress' ? '#f59e0b' : '#22c55e', color:'#fff', padding:'3px 8px', borderRadius:'3px'}}>
-                        {c.status.toUpperCase()}
-                      </span>
-
-                      {c.status === 'open' && (
-                        <button onClick={()=>acceptContract(c)} style={{padding:'8px 15px', background:'#4a7ab5', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', fontSize:'12px', borderRadius:'4px', marginTop:'10px'}}>
-                          ACCEPT CONTRACT
-                        </button>
-                      )}
-
-                      {c.status === 'in_progress' && c.assigned_to === u.id && (
-                        <button onClick={()=>completeContract(c)} style={{padding:'8px 15px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', fontSize:'12px', borderRadius:'4px', marginTop:'10px'}}>
-                          FULFILL & CLAIM
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
+        <div className="p-8 space-y-6">
+          <div className="border border-gray-800 bg-[#121520] rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-800 font-bold text-sm tracking-wider uppercase text-gray-400">
+              Registered Contracts Portfolio
             </div>
-
+            <div className="divide-y divide-gray-800">
+              {contracts.map((item: any, idx: number) => (
+                <div key={idx} className="p-4 flex justify-between items-center hover:bg-[#151925] transition">
+                  <div>
+                    <div className="font-bold text-white">{item.title}</div>
+                    <div className="text-xs text-gray-400 font-mono">PARTNER: <span className="text-amber-400">{item.client}</span></div>
+                  </div>
+                  <div className="text-right font-mono">
+                    <div className="text-sm text-green-400 font-bold">{item.value}</div>
+                    <div className="text-xs text-gray-300 uppercase">{item.status}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

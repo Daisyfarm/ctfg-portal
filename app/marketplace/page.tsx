@@ -1,201 +1,203 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { ShoppingCart, Tag, DollarSign, Package, PlusCircle, CheckCircle } from 'lucide-react';
-
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
+import React, { useState } from 'react';
 
 export default function MarketplacePage() {
-  const [u, setU] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
-  const [ld, setLd] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', category: 'crop', price: '', description: '' });
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showListingModal, setShowListingModal] = useState(false);
+  const [itemTitle, setItemTitle] = useState('');
+  const [itemPrice, setItemPrice] = useState('');
+  const [itemCategory, setItemCategory] = useState('Machinery');
+  const [successMsg, setSuccessMsg] = useState(false);
 
-  const load = async () => {
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      setU(profile);
-    }
+  const [listings, setListings] = useState([
+    { id: 1, title: 'John Deere 8R 410 (Low Hours)', category: 'Machinery', price: '$285,000', seller: 'FarmerJoe99', location: 'Server 19 - Daisy Hill' },
+    { id: 2, title: 'Large Farmland Plot #14', category: 'Land', price: '$450,000', seller: 'DaisyAdmin', location: 'Server 19 - Daisy Hill' },
+    { id: 3, title: 'Krampe Big Body 900 S', category: 'Trailers', price: '$42,000', seller: 'AgriLogistics', location: 'Server 8 - North Plains' },
+    { id: 4, title: 'Horsch Maestro 12 RX Planter', category: 'Equipment', price: '$95,000', seller: 'CornKing', location: 'Server 19 - Daisy Hill' }
+  ]);
 
-    const { data: marketData } = await sb
-      .from('marketplace')
-      .select('*, seller:profiles!marketplace_seller_id_fkey(username)')
-      .order('created_at', { ascending: false });
-
-    if (!marketData) {
-      const { data: fallbackMarket } = await sb.from('marketplace').select('*').order('created_at', { ascending: false });
-      setItems(fallbackMarket || []);
-    } else {
-      setItems(marketData);
-    }
-
-    setLd(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const createListing = async (e: any) => {
+  const handleCreateListing = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!u) return;
+    if (!itemTitle || !itemPrice) return;
 
-    const priceVal = parseFloat(form.price || '0');
+    const newList = {
+      id: listings.length + 1,
+      title: itemTitle,
+      category: itemCategory,
+      price: itemPrice.startsWith('$') ? itemPrice : `$${itemPrice}`,
+      seller: 'You (DaisyFarm)',
+      location: 'Server 19 - Daisy Hill'
+    };
 
-    const { error } = await sb.from('marketplace').insert([{
-      seller_id: u.id,
-      title: form.title,
-      category: form.category,
-      price: priceVal,
-      description: form.description,
-      status: 'active'
-    }]);
-
-    if (!error) {
-      await fetch(HK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: `🏷️ **MARKETPLACE LISTING CREATED**\n**Seller:** ${u.username}\n**Item:** ${form.title} (${form.category.toUpperCase()})\n**Price:** $${priceVal.toLocaleString()}`
-        })
-      });
-
-      alert("Item successfully listed on the marketplace.");
-      setShowForm(false);
-      setForm({ title: '', category: 'crop', price: '', description: '' });
-      load();
-    } else {
-      alert("Error listing item: " + error.message);
-    }
+    setListings([newList, ...listings]);
+    setItemTitle('');
+    setItemPrice('');
+    setShowListingModal(false);
+    setSuccessMsg(true);
+    setTimeout(() => setSuccessMsg(false), 3000);
   };
 
-  const buyItem = async (item: any) => {
-    if (!u) return;
-
-    if (item.seller_id === u.id) {
-      return alert("You cannot purchase your own marketplace listing.");
-    }
-
-    if (u.balance < item.price) {
-      return alert(`Insufficient funds. This listing costs $${item.price?.toLocaleString()}.`);
-    }
-
-    // Deduct from buyer
-    const newBuyerBalance = u.balance - item.price;
-    await sb.from('profiles').update({ balance: newBuyerBalance }).eq('id', u.id);
-
-    // Credit seller (fetch seller profile first or update directly)
-    const { data: sellerProfile } = await sb.from('profiles').select('balance, username').eq('id', item.seller_id).single();
-    if (sellerProfile) {
-      await sb.from('profiles').update({ balance: (sellerProfile.balance || 0) + item.price }).eq('id', item.seller_id);
-    }
-
-    // Mark listing as sold
-    await sb.from('marketplace').update({ status: 'sold' }).eq('id', item.id);
-
-    await fetch(HK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `🛒 **MARKETPLACE TRANSACTION**\n**Buyer:** ${u.username}\n**Item:** ${item.title}\n**Cost:** $${item.price?.toLocaleString()} paid to seller.`
-      })
-    });
-
-    alert(`Successfully purchased ${item.title} for $${item.price?.toLocaleString()}!`);
-    load();
-  };
-
-  if (ld || !u) return <div style={{background:'#1a1a1a',color:'#fff',height:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>Accessing Marketplace Terminal...</div>;
-
-  const sideBtn = { width:'100%', padding:'12px 15px', background:'transparent', color:'#aaa', border:'none', marginBottom:'8px', textAlign:'left' as const, cursor:'pointer', fontWeight:'bold', fontSize:'12px', borderRadius:'4px', display:'flex', alignItems:'center', gap:'10px' };
+  const filteredListings = selectedCategory === 'All'
+    ? listings
+    : listings.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase());
 
   return (
-    <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
-      {/* TOP BAR */}
-      <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
-        <span style={{color:'#fff', fontSize:'11px'}}>OPERATOR BALANCE: ${u.balance?.toLocaleString()}</span>
+    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif' }}>
+      {/* Top Navigation Bar */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #cbd5e1', padding: '12px 30px' }}>
+        <div style={{ display: 'flex', gap: '25px', maxWidth: '1400px', margin: '0 auto', fontSize: '13px', fontWeight: 'bold', color: '#2563eb', flexWrap: 'wrap' }}>
+          <span style={{ cursor: 'pointer' }}>Myself ▾</span>
+          <span style={{ cursor: 'pointer' }}>Interactions ▾</span>
+          <span style={{ cursor: 'pointer' }}>Finances ▾</span>
+          <span style={{ cursor: 'pointer' }}>Data ▾</span>
+          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Market</span>
+          <span style={{ color: '#1e3a8a', borderBottom: '2px solid #2563eb', paddingBottom: '2px', cursor: 'pointer' }}>Marketplace</span>
+          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
+          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
+          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
+        </div>
       </div>
 
-      <div style={{ display:'flex', flex:1 }}>
-        {/* SIDEBAR */}
-        <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
-          <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
-          <button style={sideBtn} onClick={()=>window.location.href='/accounting'}>Accounting</button>
-          <button style={{...sideBtn, background:'#333', color:'#fff'}} onClick={()=>window.location.href='/marketplace'}><ShoppingCart size={16}/> Commodities Marketplace</button>
-          <button style={sideBtn} onClick={()=>sb.auth.signOut().then(()=>window.location.href='/')}>Logout</button>
-        </div>
-
-        {/* MAIN CONTENT */}
-        <div style={{ flex:1, background:'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize:'cover', position:'relative', overflowY:'auto' }}>
-          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.7)' }}></div>
-          <div style={{ position:'relative', zIndex:1, padding:'40px', maxWidth:'1100px', margin:'0 auto' }}>
-            
-            <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Commodities Marketplace</h1>
-            <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 30px'}}>
-              TRADE HARVESTED CROPS, SEEDS, FERTILIZER, AND MACHINERY DIRECTLY WITH OTHER NETWORK OPERATIVES.
+      <div style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 30px' }}>
+        
+        {/* Page Header & Action Button */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 'normal', color: '#332266', margin: '0 0 5px 0' }}>
+              Player Marketplace
+            </h1>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
+              Buy and sell used machinery, land plots, trailers, and equipment directly with other players.
             </p>
-
-            <button onClick={()=>setShowForm(!showForm)} style={{ background:'#4a7ab5', border:'none', color:'#fff', padding:'10px 25px', fontWeight:'bold', cursor:'pointer', marginBottom:'30px', borderRadius:'2px' }}>
-              {showForm ? 'CANCEL LISTING' : 'CREATE NEW MARKET LISTING'}
-            </button>
-
-            {showForm && (
-              <form onSubmit={createListing} style={{ background:'rgba(25,25,25,0.95)', padding:'30px', border:'1px solid #4a7ab5', borderRadius:'4px', marginBottom:'30px', display:'flex', flexDirection:'column', gap:'15px' }}>
-                <h3 style={{marginTop:0}}>Market Listing Form</h3>
-                <input placeholder="Item Title (e.g. 50 Tons Premium Winter Wheat)" required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
-                <select style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.category} onChange={e=>setForm({...form, category: e.target.value})}>
-                  <option value="crop">Harvested Crops & Grains</option>
-                  <option value="machinery">Machinery & Parts</option>
-                  <option value="supplies">Seeds & Fertilizer</option>
-                  <option value="livestock">Livestock & Feed</option>
-                </select>
-                <input type="number" placeholder="Asking Price ($)" required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333'}} value={form.price} onChange={e=>setForm({...form, price: e.target.value})} />
-                <textarea placeholder="Item description, quality specifications, pickup location..." required style={{padding:'12px', background:'#111', color:'#fff', border:'1px solid #333', minHeight:'80px'}} value={form.description} onChange={e=>setForm({...form, description: e.target.value})} />
-                <button type="submit" style={{padding:'15px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer'}}>PUBLISH LISTING</button>
-              </form>
-            )}
-
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(320px, 1fr))', gap:'20px' }}>
-              {items.length === 0 ? (
-                <div style={{ background:'rgba(35,35,35,0.9)', padding:'30px', textAlign:'center', borderRadius:'4px', color:'#777', gridColumn:'1 / -1' }}>
-                  <ShoppingCart size={32} style={{marginBottom:'10px', opacity:0.5}} />
-                  <p style={{margin:0}}>No active marketplace listings available in the network.</p>
-                </div>
-              ) : (
-                items.map(item => (
-                  <div key={item.id} style={{ background:'rgba(35,35,35,0.95)', padding:'25px', borderLeft:`6px solid ${item.status === 'sold' ? '#777' : '#22c55e'}`, borderRadius:'4px', display:'flex', flexDirection:'column', gap:'12px' }}>
-                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                      <h3 style={{margin:0, fontSize:'18px'}}>{item.title}</h3>
-                      <span style={{fontSize:'10px', background:'#222', padding:'3px 8px', borderRadius:'3px', color:'#22c55e', fontWeight:'bold'}}>{item.category?.toUpperCase()}</span>
-                    </div>
-
-                    <p style={{margin:0, fontSize:'13px', color:'#ccc'}}>{item.description}</p>
-
-                    <div style={{display:'flex', justifyContent:'space-between', fontSize:'14px'}}>
-                      <span style={{color:'#22c55e', fontWeight:'bold'}}>Price: ${item.price?.toLocaleString()}</span>
-                      <span style={{color:'#aaa', fontSize:'12px'}}>Seller: <b>{item.seller?.username || 'Authorized'}</b></span>
-                    </div>
-
-                    <div style={{borderTop:'1px solid #444', paddingTop:'10px', marginTop:'5px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                      <span style={{fontSize:'10px', fontWeight:'bold', color: item.status === 'sold' ? '#ef4444' : '#22c55e'}}>
-                        {item.status?.toUpperCase()}
-                      </span>
-
-                      {item.status !== 'sold' && item.seller_id !== u.id && (
-                        <button onClick={()=>buyItem(item)} style={{padding:'8px 18px', background:'#22c55e', color:'#fff', border:'none', fontWeight:'bold', cursor:'pointer', fontSize:'12px', borderRadius:'4px'}}>
-                          BUY NOW
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
           </div>
+          <button 
+            onClick={() => setShowListingModal(true)}
+            style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '10px 18px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+          >
+            + CREATE LISTING
+          </button>
         </div>
+
+        {successMsg && (
+          <div style={{ background: '#dcfce7', color: '#16a34a', padding: '15px', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold', marginBottom: '20px' }}>
+            Listing posted successfully to the marketplace!
+          </div>
+        )}
+
+        {/* Modal / Inline Form for Creating a Listing */}
+        {showListingModal && (
+          <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px', marginBottom: '25px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', maxWidth: '600px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 15px 0' }}>New Marketplace Listing</h3>
+            <form onSubmit={handleCreateListing} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#334155', marginBottom: '6px' }}>Item Title</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Case IH Magnum 340" 
+                  value={itemTitle}
+                  onChange={(e) => setItemTitle(e.target.value)}
+                  style={{ width: '100%', padding: '10px', background: '#fff', color: '#000', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }}
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#334155', marginBottom: '6px' }}>Category</label>
+                  <select 
+                    value={itemCategory}
+                    onChange={(e) => setItemCategory(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: '#fff', color: '#000', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }}
+                  >
+                    <option>Machinery</option>
+                    <option>Land</option>
+                    <option>Trailers</option>
+                    <option>Equipment</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#334155', marginBottom: '6px' }}>Price ($)</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 120,000" 
+                    value={itemPrice}
+                    onChange={(e) => setItemPrice(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: '#fff', color: '#000', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }}
+                    required
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                <button 
+                  type="submit"
+                  style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '10px 20px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  PUBLISH
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setShowListingModal(false)}
+                  style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '10px 20px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Category Filters */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', flexWrap: 'wrap' }}>
+          {['All', 'Machinery', 'Land', 'Trailers', 'Equipment'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              style={{
+                background: selectedCategory === cat ? '#0284c7' : '#fff',
+                color: selectedCategory === cat ? '#fff' : '#334155',
+                border: '1px solid #cbd5e1',
+                padding: '6px 14px',
+                fontWeight: 'bold',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Listings Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+          {filteredListings.map((item) => (
+            <div key={item.id} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '22px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  {item.category}
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 8px 0' }}>
+                  {item.title}
+                </h3>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#0f172a', marginBottom: '12px' }}>
+                  {item.price}
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                  Seller: <strong style={{ color: '#334155' }}>{item.seller}</strong>
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '15px' }}>
+                  Location: <strong style={{ color: '#334155' }}>{item.location}</strong>
+                </div>
+              </div>
+              <button 
+                onClick={() => alert(`Contacted ${item.seller} regarding ${item.title}!`)}
+                style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '10px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', width: '100%' }}
+              >
+                CONTACT SELLER
+              </button>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );

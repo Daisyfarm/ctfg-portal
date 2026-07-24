@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Mail, MessageSquare, Send, PhoneCall, Globe, Shield } from 'lucide-react';
+import { Mail, Send } from 'lucide-react';
 
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
+const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
 const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
 export default function ContactPage() {
@@ -31,12 +31,11 @@ export default function ContactPage() {
     try {
       const senderName = u ? u.username : 'Anonymous Operative';
 
-      // Send dispatch via Discord Webhook
       await fetch(HK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `📬 **INCOMING EXECUTIVE DISPATCH**\n**Sender:** ${senderName}\n**Subject:** ${form.subject}\n**Message:** ${form.message}\n*Transmitted via Iron Daisy Agri Contact Portal.*`
+          content: `📬 **INCOMING EXECUTIVE DISPATCH**\n**Sender:** ${senderName}\n**Subject:** ${form.subject}\n**Message:** ${form.message}\n*Transmitted via Daisy Hill Farming Network Contact Portal.*`
         })
       });
 
@@ -56,13 +55,13 @@ export default function ContactPage() {
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
       {/* TOP BAR */}
       <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        <span onClick={()=>window.location.href=u ? '/dashboard' : '/'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
+        <span onClick={()=>window.location.href=u ? '/dashboard' : '/'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>DAISY HILL FARMING NETWORK</span>
         <span style={{color:'#fff', fontSize:'11px'}}>SECURE DISPATCH LINE</span>
       </div>
 
       <div style={{ display:'flex', flex:1 }}>
         {u && (
-          {/* SIDEBAR FOR LOGGED-IN USERS */}
+          /* SIDEBAR FOR LOGGED-IN USERS */
           <div style={{ width:'240px', background:'#222', padding:'20px', borderRight:'1px solid #000' }}>
             <button style={sideBtn} onClick={()=>window.location.href='/dashboard'}>Dashboard</button>
             <button style={sideBtn} onClick={()=>window.location.href='/accounting'}>Accounting</button>
@@ -78,7 +77,7 @@ export default function ContactPage() {
             
             <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Executive Contact Portal</h1>
             <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 30px'}}>
-              TRANSMIT SECURE INQUIRIES, PARTNERSHIP PROPOSALS, OR DIRECT COMMUNICATIONS TO THE IRON DAISY AGRI BOARD OF DIRECTORS.
+              TRANSMIT SECURE INQUIRIES, PARTNERSHIP PROPOSALS, OR DIRECT COMMUNICATIONS TO THE DAISY HILL FARMING NETWORK BOARD OF DIRECTORS.
             </p>
 
             <div style={{ background:'rgba(25,25,25,0.95)', padding:'35px', border:'1px solid #4a7ab5', borderRadius:'6px', boxShadow:'0 10px 30px rgba(0,0,0,0.6)' }}>

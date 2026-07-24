@@ -1,111 +1,60 @@
-"use client";
-import React, { useState } from 'react';
+'use client';
 
-export default function MarketplacePage() {
-  const [listings, setListings] = useState([
-    { id: 1, title: 'John Deere 8R 410 (Low Hours)', category: 'Heavy Machinery', price: '$285,000', seller: 'DaisyFarmer', server: 'Server 19' },
-    { id: 2, title: 'Field 22 Plot (14.5 Hectares)', category: 'Land Parcels', price: '$450,000', seller: 'NorthPlainsCoop', server: 'Server 8' },
-    { id: 3, title: 'Seed Potato Pallets (Bulk x10)', category: 'Supplies', price: '$4,200', seller: 'AlpineAgro', server: 'Server 4' }
-  ]);
+import React from 'react';
+import Link from 'next/link';
 
-  const [showModal, setShowModal] = useState(false);
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Heavy Machinery');
-
-  const handleAddListing = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !price) return;
-    setListings([
-      { id: listings.length + 1, title, category, price: `$${price}`, seller: 'Samuel Founder', server: 'Server 19' },
-      ...listings
-    ]);
-    setTitle('');
-    setPrice('');
-    setShowModal(false);
-  };
-
+export default function MarketPage() {
   return (
-    <div style={{ background: '#111827', minHeight: 'calc(100vh - 90px)', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        
-        {/* Header & Create Listing Button */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff', margin: '0 0 5px 0' }}>
-              Player Marketplace & Classifieds
-            </h1>
-            <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0' }}>
-              Buy and sell used machinery, land plots, and farm supplies directly with other network players.
-            </p>
+    <div style={{ minHeight: '100vh', backgroundColor: '#05070a', color: '#ffffff', fontFamily: 'sans-serif' }}>
+      <header style={{ backgroundColor: '#0b0e14', borderBottom: '1px solid #27272a', padding: '16px 24px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+            <Link href="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 900 }}>FARM NETWORK</Link>
+            <span style={{ color: '#52525b' }}>|</span>
+            <span style={{ color: '#34d399' }}>Commodity Market & Contracts</span>
           </div>
-          
-          <button 
-            onClick={() => setShowModal(!showModal)}
-            style={{ background: '#16a34a', color: '#fff', border: 'none', padding: '10px 18px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
-          >
-            + New Listing
-          </button>
+          <Link href="/" style={{ backgroundColor: '#27272a', color: '#ffffff', border: '1px solid #3f3f46', padding: '6px 12px', borderRadius: '4px', textDecoration: 'none', fontSize: '10px', fontWeight: 'bold' }}>
+            Back to Command
+          </Link>
         </div>
 
-        {/* Modal for New Listing */}
-        {showModal && (
-          <form onSubmit={handleAddListing} style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px', marginBottom: '25px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', color: '#fff' }}>Create Marketplace Listing</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px', marginBottom: '15px' }}>
-              <input 
-                type="text" 
-                placeholder="Item Title / Description" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)}
-                style={{ padding: '8px', background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: '4px', fontSize: '13px' }}
-                required
-              />
-              <input 
-                type="text" 
-                placeholder="Price ($)" 
-                value={price} 
-                onChange={(e) => setPrice(e.target.value)}
-                style={{ padding: '8px', background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: '4px', fontSize: '13px' }}
-                required
-              />
-              <select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-                style={{ padding: '8px', background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: '4px', fontSize: '13px' }}
-              >
-                <option>Heavy Machinery</option>
-                <option>Land Parcels</option>
-                <option>Supplies</option>
-              </select>
-            </div>
-            <button type="submit" style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '8px 16px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}>
-              Publish Listing
-            </button>
-          </form>
-        )}
+        <div style={{ maxWidth: '1280px', margin: '24px auto 0 auto', display: 'flex', gap: '32px', borderTop: '1px solid rgba(39, 39, 42, 0.8)', paddingTop: '16px', overflowX: 'auto' }}>
+          <Link href="/myself" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Myself</Link>
+          <Link href="/interactions" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Interactions</Link>
+          <Link href="/finance" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Finance</Link>
+          <Link href="/data" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Data</Link>
+          <Link href="/market" style={{ color: '#34d399', textDecoration: 'none', fontWeight: 'bold' }}>Market</Link>
+          <Link href="/wiki" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Wiki</Link>
+          <Link href="/settings" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Settings</Link>
+        </div>
+      </header>
 
-        {/* Listings Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          {listings.map((item) => (
-            <div key={item.id} style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#60a5fa', textTransform: 'uppercase' }}>{item.category}</span>
-                  <span style={{ fontSize: '11px', color: '#9ca3af' }}>{item.server}</span>
-                </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', margin: '0 0 8px 0' }}>{item.title}</h3>
-                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#4ade80', marginBottom: '12px' }}>{item.price}</div>
-                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '15px' }}>Seller: <strong style={{ color: '#fff' }}>{item.seller}</strong></div>
-              </div>
-              <button onClick={() => alert(`Contacted seller for ${item.title}!`)} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', padding: '8px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', width: '100%' }}>
-                CONTACT SELLER
-              </button>
-            </div>
-          ))}
+      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ marginBottom: '32px', borderBottom: '1px solid #27272a', paddingBottom: '20px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', margin: 0 }}>Live Commodity Exchange</h1>
+          <p style={{ fontSize: '12px', color: '#71717a', margin: '4px 0 0 0', textTransform: 'uppercase' }}>Real-time crop pricing, export futures, and regional supply index.</p>
         </div>
 
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+          <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>Wheat (Grade A)</span>
+            <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: '8px 0 4px 0' }}>$248.50 <span style={{ fontSize: '12px', color: '#34d399' }}>+4.2%</span></h2>
+            <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>High demand across regional distribution hubs.</p>
+          </div>
+
+          <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>Corn (Yellow Field)</span>
+            <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: '8px 0 4px 0' }}>$192.10 <span style={{ fontSize: '12px', color: '#ef4444' }}>-1.1%</span></h2>
+            <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>Stable domestic reserve inventories.</p>
+          </div>
+
+          <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>Soybeans (Premium)</span>
+            <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', margin: '8px 0 4px 0' }}>$412.80 <span style={{ fontSize: '12px', color: '#34d399' }}>+6.8%</span></h2>
+            <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>Surging export contracts to international ports.</p>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

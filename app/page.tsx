@@ -1,129 +1,62 @@
-// app/page.tsx
 import React from 'react';
-import { supabase } from '@/db/supabase';
 
-async function getOperatorData() {
-  const { data, error } = await supabase
-    .from('operators')
-    .select('*')
-    .eq('username', 'Samuel_Founder')
-    .single();
-  
-  if (error || !data) {
-    return {
-      username: 'Samuel_Founder',
-      balance: 9459000,
-      eid_status: 'VERIFIED',
-      rank: 'EXECUTIVE'
-    };
-  }
-  return data;
-}
-
-async function getLatestDispatch() {
-  const { data } = await supabase
-    .from('dispatches')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-    
-  return data ? data.message : '"Standby" — Sector 4-G Plowing Ops Protected.';
-}
-
-export default async function DashboardPage() {
-  const operator = await getOperatorData();
-  const latestDispatch = await getLatestDispatch();
-
+export default function CommandDashboard() {
   return (
-    <div className="flex h-screen bg-[#090a0f] text-gray-100 font-sans">
-      {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-gray-800 bg-[#0d0f17] flex flex-col justify-between p-6">
+    <main className="min-h-screen bg-[#0d1117] text-white p-6 font-sans">
+      {/* Top Header */}
+      <header className="flex justify-between items-center border-b border-gray-800 pb-4 mb-6">
         <div>
-          <div className="mb-8">
-            <h1 className="text-xl font-bold tracking-wider text-amber-500">DAISY HILL</h1>
-            <p className="text-xs text-gray-400 tracking-widest">TACTICAL COMMAND</p>
-          </div>
+          <h1 className="text-2xl font-bold tracking-wider text-white">COMMAND DASHBOARD</h1>
+          <p className="text-sm text-gray-400">SATELLITE UPLINK: MONTANA / IDAHO DIVISION</p>
+        </div>
+        <div className="bg-emerald-950 border border-emerald-600 text-emerald-400 px-3 py-1 rounded text-xs font-semibold tracking-wider flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          SYSTEM INTEGRITY: ACTIVE
+        </div>
+      </header>
+
+      {/* Live Dispatch Alert */}
+      <div className="bg-zinc-900 border border-red-900/50 p-4 rounded-lg mb-6 flex items-center gap-3">
+        <span className="text-red-500 font-bold text-lg">📡</span>
+        <p className="text-sm text-gray-300">
+          <strong className="text-red-400 tracking-wide">LIVE DISPATCH:</strong> &ldquo;Standby&rdquo; — Sector 4-G Plowing Ops Protected.
+        </p>
+      </div>
+
+      {/* User Stats Card */}
+      <section className="bg-gradient-to-r from-zinc-900 to-zinc-950 border border-zinc-800 p-6 rounded-xl relative overflow-hidden mb-8 shadow-xl">
+        <div className="relative z-10">
+          <p className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-1">Chief Operator / Founder</p>
+          <h2 className="text-3xl font-extrabold text-white mb-3">Samuel_Founder</h2>
+          <div className="text-4xl font-black text-emerald-400 mb-4">$9,459,000</div>
           
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Operations</div>
-          <nav className="space-y-1 mb-6">
-            <a href="#" className="flex items-center px-3 py-2 rounded bg-gray-800 text-white font-medium text-sm">Dashboard</a>
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">War Theatre</a>
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Sectors</a>
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Fleet Registry</a>
-          </nav>
-
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Legal & Finance</div>
-          <nav className="space-y-1">
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Board Vault</a>
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Asset Auction</a>
-            <a href="#" className="flex items-center px-3 py-2 rounded text-gray-400 hover:bg-gray-900 hover:text-white text-sm">Maintenance</a>
-          </nav>
-        </div>
-
-        <div className="text-xs text-gray-600">
-          DAISY HILL TACTICAL | SECURE TERMINAL v2.0.26
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto">
-        {/* Top Header Bar */}
-        <header className="border-b border-gray-800 p-6 flex justify-between items-center bg-[#0d0f17]">
-          <div>
-            <h2 className="text-2xl font-bold tracking-wide">COMMAND DASHBOARD</h2>
-            <p className="text-xs text-gray-400">SATELLITE UPLINK: MONTANA / DAISY HILL DIVISION</p>
-          </div>
-          <div className="flex items-center space-x-2 border border-green-800 bg-green-950/30 px-3 py-1.5 rounded text-xs text-green-400 font-mono">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span>SYSTEM INTEGRITY: ACTIVE</span>
-          </div>
-        </header>
-
-        {/* Dashboard Body */}
-        <div className="p-8 space-y-6">
-          {/* Live Dispatch Alert Banner */}
-          <div className="border border-red-900/50 bg-red-950/20 p-4 rounded text-sm text-red-300 flex items-center space-x-3">
-            <span className="font-bold uppercase tracking-wider text-red-400">Live Dispatch:</span>
-            <span>{latestDispatch}</span>
-          </div>
-
-          {/* Operator Card */}
-          <div className="border border-gray-800 bg-[#121520] p-6 rounded-lg relative overflow-hidden">
-            <div className="text-xs text-gray-400 uppercase tracking-widest mb-1">Chief Operator / Founder</div>
-            <div className="text-3xl font-extrabold text-white mb-2">{operator.username}</div>
-            <div className="text-3xl font-mono font-bold text-green-400 mb-6">
-              ${Number(operator.balance).toLocaleString()}
-            </div>
-            <div className="flex space-x-6 text-xs font-mono">
-              <div>
-                <span className="text-gray-500 block">EID STATUS</span>
-                <span className="text-green-400 font-bold">{operator.eid_status}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 block">RANK</span>
-                <span className="text-amber-400 font-bold">{operator.rank}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
-              REQUEST DISPATCH
-            </button>
-            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
-              LOG FUEL
-            </button>
-            <button className="border border-gray-700 bg-[#151925] hover:bg-[#1c2233] p-4 rounded font-medium text-sm transition text-center">
-              VIEW SATELLITE
-            </button>
-            <button className="border border-amber-600/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 p-4 rounded font-medium text-sm transition text-center">
-              STAFF PANEL
-            </button>
+          <div className="flex gap-6 text-xs font-medium uppercase tracking-wider text-zinc-400">
+            <div>EID Status: <span className="text-emerald-400 font-bold">Verified</span></div>
+            <div>Rank: <span className="text-amber-400 font-bold">Executive</span></div>
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Action Buttons Grid */}
+      <nav className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
+          REQUEST DISPATCH
+        </button>
+        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
+          LOG FUEL
+        </button>
+        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
+          VIEW SATELLITE
+        </button>
+        <button className="bg-amber-500 hover:bg-amber-400 transition text-black font-bold py-4 px-6 rounded-lg shadow-lg text-sm tracking-wide">
+          STAFF PANEL
+        </button>
+      </nav>
+
+      {/* Footer Terminal ID */}
+      <footer className="mt-16 text-center text-xs text-zinc-600 tracking-widest">
+        DAISY HILL FARMING NETWORK | SECURE TERMINAL V2.0.26
+      </footer>
+    </main>
   );
 }

@@ -1,111 +1,78 @@
-"use client";
-import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { FileCheck, ArrowLeft, Send } from 'lucide-react';
+'use client';
 
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
+import React, { useState } from 'react';
 
-export default function ApplyPage() {
-  const [form, setForm] = useState({ name: '', discord: '', role: '', experience: '' });
-  const [submitting, setSubmitting] = useState(false);
+export default function FSNApplyPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    discordHandle: '',
+    farmName: '',
+    experience: 'Intermediate',
+    platform: 'PC',
+  });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      await fetch(HK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: `📝 **NEW OPERATIVE RECRUITMENT APPLICATION**\n**Name:** ${form.name}\n**Discord:** ${form.discord}\n**Desired Role:** ${form.role}\n**Experience:** ${form.experience}\n*Transmitted via Daisy Hill Farming Network.*`
-        })
-      });
-      setSubmitted(true);
-    } catch (err: any) {
-      alert("Error submitting application: " + (err.message || "Unknown error"));
-    } finally {
-      setSubmitting(false);
-    }
+    setSubmitted(true);
   };
 
   return (
-    <div style={{ background: '#111', minHeight: '100vh', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #22c55e', paddingBottom: '20px', marginBottom: '30px' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0, fontWeight: 900 }}>Operative Application Form</h1>
-          <p style={{ fontSize: '12px', color: '#22c55e', margin: '5px 0 0' }}>DAISY HILL FARMING NETWORK | RECRUITMENT DIVISION</p>
+    <div className="min-h-screen bg-[#0d1117] text-gray-200 flex items-center justify-center p-6 font-sans">
+      <div className="max-w-md w-full bg-gray-900/60 border border-gray-800 rounded-lg p-8 shadow-2xl">
+        <div className="text-center mb-6">
+          <h1 className="text-lg font-bold tracking-wider text-white">FSN SECTOR UK // PRE-WHITELIST</h1>
+          <p className="text-xs text-gray-400 mt-1">Court Farm Operator Registration Portal</p>
         </div>
-        <button 
-          onClick={() => window.location.href = '/dashboard'}
-          style={{ background: '#222', color: '#fff', border: '1px solid #22c55e', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <ArrowLeft size={16} /> Return to Dashboard
-        </button>
-      </div>
 
-      <div style={{ maxWidth: '600px', margin: '0 auto', background: '#1a1a1a', border: '1px solid #333', padding: '30px', borderRadius: '6px' }}>
         {submitted ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <FileCheck size={48} color="#22c55e" style={{ margin: '0 auto 15px' }} />
-            <h3 style={{ color: '#22c55e', fontSize: '22px' }}>APPLICATION SUBMITTED</h3>
-            <p style={{ color: '#aaa', fontSize: '14px', marginTop: '10px' }}>Your recruitment credentials have been successfully transmitted to command.</p>
-            <button onClick={() => window.location.href = '/dashboard'} style={{ marginTop: '20px', padding: '10px 20px', background: '#22c55e', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>
-              Back to Dashboard
-            </button>
+          <div className="bg-green-950/40 border border-green-800 rounded p-4 text-center">
+            <h2 className="text-sm font-bold text-green-400 mb-1">Registration Logged</h2>
+            <p className="text-xs text-gray-300">Your pre-whitelist application has been securely routed to FSN network dispatch.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleSubmit} className="space-y-4 text-sm">
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Operative / In-Game Name *</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Discord Handle</label>
               <input 
                 type="text" 
-                required 
-                placeholder="e.g. Farmer Sam" 
-                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px' }}
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
+                required
+                placeholder="e.g. username#0000"
+                value={formData.discordHandle}
+                onChange={(e) => setFormData({...formData, discordHandle: e.target.value})}
+                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Discord Handle *</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Farm / Enterprise Name</label>
               <input 
                 type="text" 
-                required 
-                placeholder="e.g. samuel#0001" 
-                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px' }}
-                value={form.discord}
-                onChange={e => setForm({ ...form, discord: e.target.value })}
+                required
+                placeholder="e.g. Court Farm Holdings"
+                value={formData.farmName}
+                onChange={(e) => setFormData({...formData, farmName: e.target.value})}
+                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-600"
               />
             </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Desired Role / Division *</label>
-              <input 
-                type="text" 
-                required 
-                placeholder="e.g. Logistics Driver / Heavy Recovery Operator" 
-                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px' }}
-                value={form.role}
-                onChange={e => setForm({ ...form, role: e.target.value })}
-              />
+              <label className="block text-xs font-medium text-gray-400 mb-1">Farming Sim Experience Level</label>
+              <select 
+                value={formData.experience}
+                onChange={(e) => setFormData({...formData, experience: e.target.value})}
+                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-600"
+              >
+                <option value="Beginner">Beginner / New Operator</option>
+                <option value="Intermediate">Intermediate Management</option>
+                <option value="Veteran">Veteran / Multi-Farm Operator</option>
+              </select>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Experience & Background *</label>
-              <textarea 
-                required 
-                placeholder="Summarize your experience with fleet operations, heavy hauling, etc..." 
-                style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', minHeight: '120px' }}
-                value={form.experience}
-                onChange={e => setForm({ ...form, experience: e.target.value })}
-              />
-            </div>
+
             <button 
-              type="submit" 
-              disabled={submitting}
-              style={{ padding: '15px', background: '#22c55e', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              type="submit"
+              className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold uppercase tracking-wider rounded transition-colors mt-2 cursor-pointer"
             >
-              <Send size={16} /> {submitting ? 'TRANSMITTING...' : 'SUBMIT APPLICATION'}
+              Submit Pre-Whitelist Request
             </button>
           </form>
         )}

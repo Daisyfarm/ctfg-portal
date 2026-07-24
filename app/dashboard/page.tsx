@@ -53,9 +53,8 @@ export default function DashboardPage() {
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
       {/* TOP BAR */}
       <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        {/* LOGO BRANDING SECTION: Replace text or insert <img src="/your-logo.png" style={{height:'30px'}} /> */}
         <div onClick={()=>window.location.href='/dashboard'} style={{cursor:'pointer', display:'flex', alignItems:'center', gap:'10px'}}>
-          <span style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic'}}>DAISY HILL TACTICAL</span>
+          <span style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic'}}>DAISY HILL</span>
         </div>
         <div style={{display:'flex', gap:'20px', alignItems:'center', fontSize:'11px'}}>
           <span>OPERATIVE: <b style={{color:'#22c55e'}}>{u.username}</b></span>
@@ -73,7 +72,7 @@ export default function DashboardPage() {
             <button style={sideBtn} onClick={()=>window.location.href='/company'}>Corporate Suite</button>
             <button style={sideBtn} onClick={()=>window.location.href='/contracts'}>Contracts</button>
             <button style={sideBtn} onClick={()=>window.location.href='/conquest'}>Conquest</button>
-            <button style={sideBtn} onClick={()=>window.location.href='/community'---}>Community Hub</button>
+            <button style={sideBtn} onClick={()=>window.location.href='/community'}>Community Hub</button>
             <button style={sideBtn} onClick={()=>window.location.href='/contact'}>Contact Board</button>
             <button style={sideBtn} onClick={()=>window.location.href='/invoices'}>Corporate Invoices</button>
           </div>

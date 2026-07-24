@@ -1,9 +1,3 @@
-Fixing the /land Supabase URL Error
-The current build error is coming from your /land page (app/land/page.tsx), which is failing during server pre-rendering due to an unconfigured Supabase client.
-
-Replace the contents of your app/land/page.tsx file on GitHub with this complete, corrected version:
-
-TypeScript
 "use client";
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';

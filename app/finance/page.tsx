@@ -1,72 +1,69 @@
-"use client";
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function FinancePage() {
   return (
-    <div className="min-h-screen bg-[#05070a] text-white p-6 md:p-12 font-sans relative overflow-hidden">
-      
-      {/* BACKGROUND SCANLINES */}
-      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] z-0 bg-[length:100%_4px]"></div>
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-12 border-b border-zinc-800 pb-8">
-          <div>
-            <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase">Financial_Ledger // Judith_Plains</h1>
-            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.4em]">Global Network Vault // Balance: $8,100,000.00</p>
+    <div style={{ minHeight: '100vh', backgroundColor: '#05070a', color: '#ffffff', fontFamily: 'sans-serif' }}>
+      <header style={{ backgroundColor: '#0b0e14', borderBottom: '1px solid #27272a', padding: '16px 24px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <Link href="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 900 }}>FARM NETWORK</Link>
+            <span style={{ color: '#52525b' }}>|</span>
+            <span style={{ color: '#34d399' }}>Treasury Vault Ledger</span>
           </div>
-          <Link href="/" className="text-[10px] font-black bg-zinc-900 border border-zinc-800 px-6 py-3 hover:bg-white hover:text-black transition-all rounded uppercase">
-            Return_to_Command
+          <Link href="/" style={{ backgroundColor: '#27272a', color: '#ffffff', border: '1px solid #3f3f46', padding: '6px 12px', borderRadius: '4px', textDecoration: 'none', fontSize: '10px', fontWeight: 'bold' }}>
+            Back to Command
           </Link>
         </div>
+      </header>
 
-        {/* FINANCIAL STATS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-[#0f1117] border border-zinc-800 p-6 rounded-xl">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Net Capital</span>
-            <div className="text-2xl font-black text-emerald-400 mt-2">$8,100,000.00</div>
+      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ marginBottom: '32px', borderBottom: '1px solid #27272a', paddingBottom: '20px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', margin: 0 }}>Treasury Vault & Financial Ledger</h1>
+          <p style={{ fontSize: '12px', color: '#71717a', margin: '4px 0 0 0', textTransform: 'uppercase' }}>Global network balance, maintenance overhead deduction, and automated tax revenue.</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+          <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '10px', color: '#71717a', fontWeight: 'bold', textTransform: 'uppercase' }}>Total Vault Balance</span>
+            <h3 style={{ fontSize: '24px', fontWeight: 900, color: '#34d399', margin: '8px 0 0 0' }}>$8,100,000.00</h3>
           </div>
-          <div className="bg-[#0f1117] border border-zinc-800 p-6 rounded-xl">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Active Fleet Maintenance</span>
-            <div className="text-2xl font-black text-red-400 mt-2">-$14,500.00 / mo</div>
-          </div>
-          <div className="bg-[#0f1117] border border-zinc-800 p-6 rounded-xl">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Sector Tax Revenue</span>
-            <div className="text-2xl font-black text-blue-400 mt-2">+$42,800.00 / mo</div>
+          <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', padding: '24px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '10px', color: '#71717a', fontWeight: 'bold', textTransform: 'uppercase' }}>Daily Overhead Cost</span>
+            <h3 style={{ fontSize: '24px', fontWeight: 900, color: '#f87171', margin: '8px 0 0 0' }}>-$14,500.00</h3>
           </div>
         </div>
 
-        {/* TRANSACTION LOG TABLE */}
-        <div className="bg-[#0f1117] border border-zinc-800 rounded-2xl p-6">
-          <h3 className="text-xs font-black uppercase text-zinc-400 tracking-widest mb-6">Recent Network Transactions</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center border-b border-zinc-800/60 pb-4">
-              <div>
-                <div className="text-xs font-black uppercase text-white">Sector 4X Tax Collection</div>
-                <div className="text-[10px] text-zinc-500">Source: Regional Governance // Automated</div>
-              </div>
-              <div className="text-sm font-mono font-black text-emerald-400">+$12,400.00</div>
-            </div>
-            <div className="flex justify-between items-center border-b border-zinc-800/60 pb-4">
-              <div>
-                <div className="text-xs font-black uppercase text-white">Dedicated Server Upkeep</div>
-                <div className="text-[10px] text-zinc-500">Destination: Node Hosting Provider</div>
-              </div>
-              <div className="text-sm font-mono font-black text-red-400">-$150.00</div>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-xs font-black uppercase text-white">External Investment Payout</div>
-                <div className="text-[10px] text-zinc-500">Source: Board Member Tier</div>
-              </div>
-              <div className="text-sm font-mono font-black text-emerald-400">+$50.00</div>
-            </div>
-          </div>
+        <div style={{ backgroundColor: '#0f1117', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', margin: '0 0 16px 0', color: '#a1a1aa' }}>Recent Ledger Transactions</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #27272a', color: '#71717a', fontSize: '11px', textTransform: 'uppercase' }}>
+                <th style={{ padding: '12px' }}>Timestamp</th>
+                <th style={{ padding: '12px' }}>Description</th>
+                <th style={{ padding: '12px' }}>Node</th>
+                <th style={{ padding: '12px' }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid #18181b' }}>
+                <td style={{ padding: '16px 12px', color: '#71717a', fontSize: '11px' }}>2026-07-24 17:10</td>
+                <td style={{ padding: '16px 12px', fontWeight: 'bold' }}>Automated Export Dividend (Wheat)</td>
+                <td style={{ padding: '16px 12px' }}>North Node</td>
+                <td style={{ padding: '16px 12px', color: '#34d399', fontWeight: 'bold' }}>+$42,500.00</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '16px 12px', color: '#71717a', fontSize: '11px' }}>2026-07-24 12:00</td>
+                <td style={{ padding: '16px 12px', fontWeight: 'bold' }}>Heavy Equipment Maintenance</td>
+                <td style={{ padding: '16px 12px' }}>South Node</td>
+                <td style={{ padding: '16px 12px', color: '#f87171', fontWeight: 'bold' }}>-$8,200.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-      </div>
+      </main>
     </div>
   );
 }

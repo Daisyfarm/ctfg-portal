@@ -1,25 +1,10 @@
 import React from 'react';
-import Link from 'next/link';
 
-export default function HomePortal() {
-    const modules = [
-        { name: 'Dashboard', path: '/dashboard', desc: 'Active properties, server sync, and core financials.', icon: '📊', color: '#10b981' },
-        { name: 'Field Work', path: '/field-work', desc: 'Manage plowing, planting, harvesting, and task tracking.', icon: '🚜', color: '#3b82f6' },
-        { name: 'Contracting Center', path: '/contract-center', desc: 'Accept multiplayer contracts and view job payouts.', icon: '📝', color: '#f59e0b' },
-        { name: 'Investment Center', path: '/investment-center', desc: 'Corporate shares, infrastructure bonds, and passive ROI.', icon: '📈', color: '#8b5cf6' },
-        { name: 'Auction House', path: '/auction-house', desc: 'Bid on heavy machinery and surplus fleet equipment.', icon: '🔨', color: '#ec4899' },
-        { name: 'Competition Center', path: '/competition-center', desc: 'Server-wide harvest speedruns and yield contests.', icon: '🏆', color: '#eab308' },
-        { name: 'Event Center', path: '/event-center', desc: 'Community tractor pulls, meetups, and server gatherings.', icon: '🎉', color: '#06b6d4' },
-        { name: 'Import-Export Center', path: '/import-export-center', desc: 'Global shipping manifests, cargo, and tariffs.', icon: '🚢', color: '#14b8a6' },
-        { name: 'Lotto Center', path: '/lotto-center', desc: 'Server-wide lotteries and high-stakes jackpot pools.', icon: '🎟️', color: '#f97316' },
-        { name: 'Permit Center', path: '/permit-center', desc: 'Transport clearance and construction zoning licenses.', icon: '📜', color: '#6366f1' },
-        { name: 'Register Farm', path: '/register', desc: 'Onboard new enterprises and sync user profiles.', icon: '✨', color: '#22c55e' },
-    ];
-
+export default function MyselfPage() {
     return (
         <div style={{ 
             minHeight: 'calc(100vh - 90px)', 
-            backgroundImage: 'linear-gradient(rgba(3, 7, 18, 0.82), rgba(3, 7, 18, 0.90)), url("https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=80")', 
+            backgroundImage: 'linear-gradient(rgba(3, 7, 18, 0.75), rgba(3, 7, 18, 0.85)), url("https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=80")', 
             backgroundSize: 'cover', 
             backgroundPosition: 'center', 
             backgroundAttachment: 'fixed',
@@ -29,52 +14,71 @@ export default function HomePortal() {
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 
-                {/* Hero Section */}
-                <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-                    <h1 style={{ fontSize: '38px', fontWeight: '900', color: '#ffffff', margin: '0 0 12px 0', letterSpacing: '-0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
-                        Farm Sim <span style={{ color: '#10b981' }}>Network Hub</span>
+                {/* Welcome Card */}
+                <div style={{ 
+                    background: 'rgba(17, 24, 39, 0.9)', 
+                    backdropFilter: 'blur(12px)', 
+                    border: '1px solid rgba(255, 255, 255, 0.1)', 
+                    borderRadius: '16px', 
+                    padding: '36px', 
+                    marginBottom: '30px',
+                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
+                }}>
+                    <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 10px 0', letterSpacing: '-0.5px' }}>
+                        Welcome back, Samuel Founder
                     </h1>
-                    <p style={{ fontSize: '15px', color: '#cbd5e1', margin: 0, maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto', textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>
-                        Select a module below to manage your agricultural empire, coordinate multiplayer operations, and track live telemetry.
+                    <p style={{ fontSize: '14px', color: '#9ca3af', lineHeight: '1.6', margin: 0 }}>
+                        You are currently managing the <span style={{ color: '#34d399', fontWeight: 'bold' }}>Judith Plains Montana 4X</span> dual-server network (North Slots 1–8 & South Slots 9–16). Use the navigation tabs above to manage your funds, monitor field telemetry, or check live market pricing.
                     </p>
                 </div>
 
-                {/* Module Cards Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
-                    {modules.map((mod) => (
-                        <Link 
-                            key={mod.path} 
-                            href={mod.path} 
-                            style={{ 
-                                background: 'rgba(17, 24, 39, 0.85)', 
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)', 
-                                borderLeft: `4px solid ${mod.color}`,
-                                borderRadius: '12px', 
-                                padding: '24px', 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                justifyContent: 'space-between', 
-                                textDecoration: 'none', 
-                                color: 'inherit',
-                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
-                                transition: 'all 0.2s ease-in-out',
-                            }}
-                        >
-                            <div>
-                                <div style={{ fontSize: '32px', background: 'rgba(255,255,255,0.05)', width: 'fit-content', padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '14px' }}>
-                                    {mod.icon}
-                                </div>
-                                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0', letterSpacing: '-0.3px' }}>{mod.name}</h3>
-                                <p style={{ fontSize: '13px', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>{mod.desc}</p>
+                {/* Grid Overview */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px' }}>
+                    
+                    {/* Active Farm Node Summary */}
+                    <div style={{ 
+                        background: 'rgba(17, 24, 39, 0.9)', 
+                        backdropFilter: 'blur(12px)', 
+                        border: '1px solid rgba(255, 255, 255, 0.1)', 
+                        borderRadius: '16px', 
+                        padding: '28px',
+                        boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
+                    }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 16px 0' }}>Server Cluster Overview</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px', color: '#cbd5e1' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#1f2937', padding: '10px 14px', borderRadius: '8px' }}>
+                                <span>Judith Plains North</span>
+                                <span style={{ color: '#34d399', fontWeight: 'bold', fontFamily: 'monospace' }}>6 / 8 Active</span>
                             </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#1f2937', padding: '10px 14px', borderRadius: '8px' }}>
+                                <span>Judith Plains South</span>
+                                <span style={{ color: '#34d399', fontWeight: 'bold', fontFamily: 'monospace' }}>4 / 8 Active</span>
+                            </div>
+                        </div>
+                    </div>
 
-                            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: mod.color, fontWeight: 'bold' }}>
-                                <span>Launch Module</span>
-                                <span style={{ fontSize: '16px' }}>→</span>
+                    {/* Quick Financial Snapshot */}
+                    <div style={{ 
+                        background: 'rgba(17, 24, 39, 0.9)', 
+                        backdropFilter: 'blur(12px)', 
+                        border: '1px solid rgba(255, 255, 255, 0.1)', 
+                        borderRadius: '16px', 
+                        padding: '28px',
+                        boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
+                    }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 16px 0' }}>Financial Standing</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px', color: '#cbd5e1' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#1f2937', padding: '10px 14px', borderRadius: '8px' }}>
+                                <span>Net Worth</span>
+                                <span style={{ color: '#34d399', fontWeight: 'bold', fontFamily: 'monospace' }}>$8,100,000.00</span>
                             </div>
-                        </Link>
-                    ))}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', background: '#1f2937', padding: '10px 14px', borderRadius: '8px' }}>
+                                <span>Transferrable Web Funds</span>
+                                <span style={{ color: '#60a5fa', fontWeight: 'bold', fontFamily: 'monospace' }}>$154,611.70</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>

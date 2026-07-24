@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Shield, Radio, DollarSign, User, Send, FileText } from 'lucide-react';
+import { Radio, DollarSign, User, Send, FileText, Shield } from 'lucide-react';
 
 export default function CommandDashboard() {
   return (
@@ -12,13 +12,31 @@ export default function CommandDashboard() {
       fontFamily: 'Arial, sans-serif', 
       padding: '40px' 
     }}>
-      {/* Top Header */}
+      {/* Top Header with FSN Logo Area */}
       <div style={{ background: 'rgba(26, 26, 26, 0.85)', backdropFilter: 'blur(5px)', border: '1px solid #333', padding: '20px', borderRadius: '8px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '26px', textTransform: 'uppercase', margin: 0, fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b' }}>
-            <Shield color="#f59e0b" /> FSN FARM SIMULATOR NETWORK
-          </h1>
-          <p style={{ fontSize: '12px', color: '#aaa', margin: '5px 0 0' }}>COMMUNITY MULTIPLAYER PORTAL | SYSTEM INTEGRITY: ACTIVE</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          {/* Logo Badge Container (Replace src with your actual logo asset path when ready) */}
+          <div style={{ 
+            width: '64px', 
+            height: '64px', 
+            background: 'linear-gradient(135deg, #111 0%, #222 100%)', 
+            border: '2px solid #f59e0b', 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
+            overflow: 'hidden'
+          }}>
+            {/* You can swap this span out with: <img src="/your-logo.png" alt="FSN Logo" style={{width: '100%', height: '100%', objectFit: 'cover'}} /> */}
+            <span style={{ color: '#f59e0b', fontWeight: 900, fontSize: '14px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>FSN</span>
+          </div>
+          <div>
+            <h1 style={{ fontSize: '24px', textTransform: 'uppercase', margin: 0, fontWeight: 900, color: '#f59e0b', letterSpacing: '0.5px' }}>
+              FSN Farm Simulator Network
+            </h1>
+            <p style={{ fontSize: '11px', color: '#aaa', margin: '4px 0 0', letterSpacing: '1px' }}>COMMUNITY MULTIPLAYER PORTAL | SYSTEM INTEGRITY: ACTIVE</p>
+          </div>
         </div>
         <button 
           onClick={() => window.location.href = '/contact'}

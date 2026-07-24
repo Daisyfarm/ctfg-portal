@@ -1,95 +1,80 @@
-
-"use client";
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function AuctionHousePage() {
-  const [bids, setBids] = useState([
-    { id: 1, item: 'John Deere 7R 330', currentBid: '$145,000', timeRemaining: '2 hours', highestBidder: 'DaisyFarmer' },
-    { id: 2, item: 'Case IH 340 Magnum', currentBid: '$92,000', timeRemaining: '5 hours', highestBidder: 'NorthPlainsCoop' },
-    { id: 3, item: 'Large Fuel Tank Trailer', currentBid: '$18,500', timeRemaining: '1 day', highestBidder: 'AgriLogistics' }
-  ]);
+    const auctions = [
+        { id: 'AUC-104', item: 'John Deere 8R 410 Tractor', currentBid: '$185,000.00', bids: 14, timeRemaining: '2h 15m', status: 'Live' },
+        { id: 'AUC-105', item: 'Case IH Axial-Flow 9250 Combine', currentBid: '$310,000.00', bids: 22, timeRemaining: '5h 40m', status: 'Live' },
+        { id: 'AUC-106', item: 'Kinze 4905 Blue Drive Planter', currentBid: '$95,000.00', bids: 8, timeRemaining: '1d 3h', status: 'Upcoming' },
+    ];
 
-  const [bidAmount, setBidAmount] = useState('');
-  const [successMsg, setSuccessMsg] = useState(false);
-
-  const handlePlaceBid = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bidAmount) return;
-    setSuccessMsg(true);
-    setBidAmount('');
-    setTimeout(() => setSuccessMsg(false), 3000);
-  };
-
-  return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #cbd5e1', padding: '12px 30px' }}>
-        <div style={{ display: 'flex', gap: '25px', maxWidth: '1400px', margin: '0 auto', fontSize: '13px', fontWeight: 'bold', color: '#2563eb', flexWrap: 'wrap' }}>
-          <span style={{ cursor: 'pointer' }}>Myself ▾</span>
-          <span style={{ color: '#1e3a8a', borderBottom: '2px solid #2563eb', paddingBottom: '2px', cursor: 'pointer' }}>Interactions</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Finances</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Data ▾</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Market</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Marketplace</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 30px' }}>
-        
-        {/* Page Header */}
-        <div style={{ marginBottom: '25px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'normal', color: '#332266', margin: '0 0 5px 0' }}>
-            Live Machinery Auction House
-          </h1>
-          <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
-            Bid on seized, surplus, or player-consigned agricultural equipment and land plots.
-          </p>
-        </div>
-
-        {successMsg && (
-          <div style={{ background: '#dcfce7', color: '#16a34a', padding: '15px', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold', marginBottom: '20px' }}>
-            Bid placed successfully! You are currently the highest bidder.
-          </div>
-        )}
-
-        {/* Auction Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          {bids.map((auction) => (
-            <div key={auction.id} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '22px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase' }}>Active Auction</span>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#d97706', background: '#fef3c7', padding: '2px 8px', borderRadius: '4px' }}>Ends in {auction.timeRemaining}</span>
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+            {/* Navigation Header */}
+            <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                        <span className="text-xl font-bold tracking-wider text-emerald-400">FSN</span>
+                        <nav className="hidden md:flex space-x-6 text-sm text-slate-400">
+                            <span className="hover:text-white cursor-pointer">Dashboard</span>
+                            <span className="hover:text-white cursor-pointer">Investment Center</span>
+                            <span className="text-white font-medium cursor-pointer">Auction House</span>
+                        </nav>
+                    </div>
+                    <div className="text-sm text-slate-400">Cool Brook Farms</div>
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 8px 0' }}>{auction.item}</h3>
-                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#0f172a', marginBottom: '8px' }}>{auction.currentBid}</div>
-                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '15px' }}>Highest Bidder: <strong style={{ color: '#334155' }}>{auction.highestBidder}</strong></div>
-              </div>
-              
-              <form onSubmit={handlePlaceBid} style={{ display: 'flex', gap: '10px' }}>
-                <input 
-                  type="text" 
-                  placeholder="Enter bid ($)" 
-                  value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value)}
-                  style={{ flex: 1, padding: '8px', background: '#fff', color: '#000', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '12px' }}
-                  required
-                />
-                <button 
-                  type="submit"
-                  style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '8px 14px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
-                >
-                  BID
-                </button>
-              </form>
-            </div>
-          ))}
-        </div>
+            </header>
 
-      </div>
-    </div>
-  );
+            {/* Main Content */}
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+                
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-white tracking-tight">Equipment Auction House</h1>
+                        <p className="text-xs text-slate-400 mt-1">Bid on premium used machinery, surplus fleet vehicles, and agricultural hardware.</p>
+                    </div>
+                    <button className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg shadow-lg shadow-emerald-900/25 transition text-sm">
+                        List Equipment for Auction
+                    </button>
+                </div>
+
+                {/* Auction Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {auctions.map((auc) => (
+                        <div key={auc.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-xl space-y-4">
+                            <div>
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-xs font-mono text-emerald-400">{auc.id}</span>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold ${auc.status === 'Live' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
+                                        {auc.status}
+                                    </span>
+                                </div>
+                                <h3 className="text-md font-bold text-white">{auc.item}</h3>
+                            </div>
+
+                            <div className="space-y-2 border-t border-slate-800 pt-4">
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Current Bid:</span>
+                                    <span className="font-mono text-emerald-400 font-semibold">{auc.currentBid}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Total Bids:</span>
+                                    <span className="text-white font-semibold">{auc.bids} bids</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Time Left:</span>
+                                    <span className="text-slate-300 font-mono">{auc.timeRemaining}</span>
+                                </div>
+                            </div>
+
+                            <button className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-sm transition-all shadow-lg shadow-emerald-900/20">
+                                Place Bid
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+            </main>
+        </div>
+    );
 }

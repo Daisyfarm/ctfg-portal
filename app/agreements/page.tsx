@@ -36,7 +36,7 @@ export default function Agreements() {
   const submitDraft = async (e: any) => {
     e.preventDefault();
     const { data: target } = await sb.from('profiles').select('id').eq('username', form.partner).single();
-    if (!target) return alert("Partner Username not found in CTFG Registry.");
+    if (!target) return alert("Partner Username not found in Iron Daisy Agri Registry.");
 
     const { error } = await sb.from('agreements').insert([{
         creator_id: u.id,
@@ -56,7 +56,7 @@ export default function Agreements() {
   const signAgreement = async (id: string, title: string) => {
     await sb.from('agreements').update({ status: 'ACTIVE' }).eq('id', id);
     await fetch(HK, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ 
-        content: `🖋️ **CONTRACT SIGNED**\nThe agreement *"${title}"* is now **OFFICIALLY ACTIVE** within the CTFG Network.` 
+        content: `🖋️ **CONTRACT SIGNED**\nThe agreement *"${title}"* is now **OFFICIALLY ACTIVE** within Iron Daisy Agri.` 
     })});
     alert("Agreement Signed."); load();
   };
@@ -69,7 +69,7 @@ export default function Agreements() {
     <div style={{ background:'#111', minHeight:'100vh', color:'#fff', fontFamily:'Arial, sans-serif', display:'flex', flexDirection:'column' }}>
       {/* TOP BAR */}
       <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
-        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>CTFG NETWORK</span>
+        <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
         <span style={{color:'#fff', fontSize:'11px'}}>WEATHER: {w}</span>
       </div>
 
@@ -87,7 +87,7 @@ export default function Agreements() {
             
             <h1 style={{fontSize:'36px', textTransform:'uppercase', margin:0}}>Agreements</h1>
             <p style={{fontSize:'12px', color:'#4a7ab5', fontWeight:'bold', margin:'10px 0 30px'}}>
-                CREATE AND MANAGE FORMAL PARTNERSHIPS, LEASES, AND SERVICE CONTRACTS WITH OTHER OPERATORS. ONCE SIGNED, THESE AGREEMENTS ARE CONSIDERED BINDING BY CTFG STAFF.
+                CREATE AND MANAGE FORMAL PARTNERSHIPS, LEASES, AND SERVICE CONTRACTS WITH OTHER OPERATORS. ONCE SIGNED, THESE AGREEMENTS ARE CONSIDERED BINDING BY IRON DAISY AGRI STAFF.
             </p>
 
             <button onClick={()=>setShowDraft(!showDraft)} style={{ background:'#4a7ab5', border:'none', color:'#fff', padding:'10px 25px', fontWeight:'bold', cursor:'pointer', marginBottom:'30px', borderRadius:'2px' }}>

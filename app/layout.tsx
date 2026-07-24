@@ -1,9 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Iron Daisy Agri | Corporate Terminal',
-  description: 'Agricultural management, logistics, and financial governance terminal for Iron Daisy Agri operations.',
+  title: 'Daisy Hill Tactical | Corporate Terminal',
+  description: 'Agricultural management, logistics, and financial governance terminal for Daisy Hill operations.',
 };
 
 export default function RootLayout({

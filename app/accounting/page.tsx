@@ -51,7 +51,7 @@ export default function Accounting() {
       {/* TOP BAR */}
       <div style={{ background:'#222', padding:'12px 25px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'2px solid #4a7ab5' }}>
         <div style={{ display:'flex', gap:'30px', alignItems:'center' }}>
-          <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>CTFG NETWORK</span>
+          <span onClick={()=>window.location.href='/dashboard'} style={{color:'#22c55e', fontWeight:'900', fontSize:'20px', fontStyle:'italic', cursor:'pointer'}}>IRON DAISY AGRI</span>
           <span style={{color:'#fff', fontSize:'11px', textTransform:'uppercase'}}>Montana Weather: {w}</span>
         </div>
         <button onClick={()=>window.location.href='/admin'} style={{background:'#dc2626', border:'none', color:'#fff', padding:'6px 15px', fontSize:'11px', fontWeight:'bold', cursor:'pointer', borderRadius:'3px'}}>STAFF PANEL</button>
@@ -129,7 +129,7 @@ export default function Accounting() {
 
       {/* FOOTER */}
       <div style={{ background:'#1a1a1a', padding:'20px', textAlign:'center', fontSize:'11px', color:'#888', borderTop:'1px solid #333' }}>
-        CTFG FARM NETWORK © 2026 • BUILT BY SAMUEL FOUNDER
+        IRON DAISY AGRI © 2026 • EXECUTIVE OPERATIONS SUITE
       </div>
     </div>
   );

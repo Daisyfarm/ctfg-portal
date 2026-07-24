@@ -3,23 +3,23 @@ import React, { useEffect, useState } from 'react';
 import { sb } from "./db/supabase"; 
 import { Shield, Truck, Globe, BarChart3, Trophy, Radio, Clock, HardDrive, Zap, Activity } from 'lucide-react';
 
-export default function AegisTerminal() {
+export default function IronDaisyTerminal() {
   const [view, setView] = useState('FLEET');
   const [session, setSession] = useState<any>(null);
   const [news, setNews] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const balance = 9400000;
 
-  // Fleet Assets
+  // Fleet Assets / Equipment
   const fleet = [
     { 
-      id: 'EU-UNIT-01', 
+      id: 'UNIT-01', 
       name: 'Euro-Cab Vanguard', 
       armor: 85, 
       img: 'https://images.unsplash.com/photo-1586191128574-32f6405c8936?q=80&w=800' 
     },
     { 
-      id: 'US-UNIT-01', 
+      id: 'UNIT-02', 
       name: 'US Heavy Hauler', 
       armor: 40, 
       img: 'https://images.unsplash.com/photo-1591768793355-74d7ef7e9c95?q=80&w=800' 
@@ -60,7 +60,7 @@ export default function AegisTerminal() {
       <div style={{ height: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <Activity size={32} color="#d4af37" style={{ marginBottom: '20px', opacity: 0.5 }} />
-          <p style={{ color: '#d4af37', fontFamily: 'monospace', letterSpacing: '4px', fontSize: '10px' }}>AWAITING_ENCRYPTED_UPLINK...</p>
+          <p style={{ color: '#d4af37', fontFamily: 'monospace', letterSpacing: '4px', fontSize: '10px' }}>IRON_DAISY_AWAITING_UPLINK...</p>
         </div>
       </div>
     );
@@ -83,7 +83,7 @@ export default function AegisTerminal() {
             onClick={() => setView(item.id)}
             style={{ 
               background: 'none', border: 'none', cursor: 'pointer', 
-              color: view === 'item.id' ? '#d4af37' : '#222',
+              color: view === item.id ? '#d4af37' : '#222',
               transition: '0.2s'
             }}
           >
@@ -97,7 +97,7 @@ export default function AegisTerminal() {
         <header style={{ padding: '20px 40px', borderBottom: '1px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#020202' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <HardDrive size={14} color="#d4af37" />
-            <span style={{ fontSize: '10px', color: '#444', letterSpacing: '2px' }}>AEGIS_MASTER // {view}</span>
+            <span style={{ fontSize: '10px', color: '#444', letterSpacing: '2px' }}>IRON_DAISY_AGRI // {view}</span>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>${balance.toLocaleString()}</div>
@@ -127,7 +127,7 @@ export default function AegisTerminal() {
               <div style={{ border: '1px solid #d4af3733', padding: '30px', color: '#d4af37' }}>
                 <Zap size={20} style={{ marginBottom: '15px' }} />
                 <br />
-                [SYSTEM_OK] // {view}_DATA_STREAM_ACTIVE
+                [IRON_DAISY_OK] // {view}_DATA_STREAM_ACTIVE
               </div>
             )}
           </main>

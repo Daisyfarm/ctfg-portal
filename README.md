@@ -1,4 +1,4 @@
-# 🌾 Daisy Hill Tactical: Montana Conquest Dashboard
+# 🌾  Daisy Hill Tactical: Montana Conquest Dashboard
 **Location:** Glasgow ⇄ Montana 4x | **Status:** Active Operation
 
 ![Daisy Hill Hybrid Emblem](./public/edited-emblem.png)

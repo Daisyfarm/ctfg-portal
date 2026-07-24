@@ -23,8 +23,8 @@ export default function FinancesPage() {
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 
-                {/* Two-Column FSN Layout Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '30px' }}>
+                {/* Side-by-Side FSN Grid Layout */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'start' }}>
                     
                     {/* Left Column: Funds Transfer Form */}
                     <div style={{ 
@@ -48,7 +48,7 @@ export default function FinancesPage() {
                                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#cbd5e1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Transfer Type
                                 </label>
-                                <select style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', color: '#ffffff', padding: '12px', borderRadius: '8px', fontSize: '14px' }}>
+                                <select style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', color: '#ffffff', padding: '12px', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}>
                                     <option>Transfer To Web Account</option>
                                     <option>Transfer To In-Game Account</option>
                                 </select>
@@ -69,7 +69,7 @@ export default function FinancesPage() {
                                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#cbd5e1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Transfer Server (From Server)
                                 </label>
-                                <select style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', color: '#ffffff', padding: '12px', borderRadius: '8px', fontSize: '14px' }}>
+                                <select style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', color: '#ffffff', padding: '12px', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}>
                                     <option>19 - FSN Command Farm</option>
                                 </select>
                             </div>

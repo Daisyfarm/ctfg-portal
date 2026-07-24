@@ -2,100 +2,101 @@
 import React, { useState } from 'react';
 
 export default function MarketPage() {
-  const [selectedCrop, setSelectedCrop] = useState('All');
+  const [selectedServer, setSelectedServer] = useState('Server 19 (Daisy Hill Main)');
 
-  const marketPrices = [
-    { crop: 'Wheat', sellPoint: 'Daisy Hill Grain Elevator', price: '$1,450 / 1,000L', trend: '+4.2%', status: 'High Demand' },
-    { crop: 'Barley', sellPoint: 'North Plains Silo', price: '$1,320 / 1,000L', trend: '-1.1%', status: 'Stable' },
-    { crop: 'Canola', sellPoint: 'Alpine Oil Mill', price: '$2,180 / 1,000L', trend: '+6.8%', status: 'Peak Demand' },
-    { crop: 'Corn', sellPoint: 'Daisy Hill Grain Elevator', price: '$1,290 / 1,000L', trend: '+0.5%', status: 'Stable' },
-    { crop: 'Sugarbeet', sellPoint: 'Sugar Factory', price: '$410 / 1,000L', trend: '-2.3%', status: 'Low Demand' },
-    { crop: 'Soybeans', sellPoint: 'North Plains Port', price: '$2,450 / 1,000L', trend: '+3.9%', status: 'High Demand' }
+  const commodities = [
+    { id: 1, name: 'Wheat', price: '$420', change: '+5.4%', trend: 'up', bestSellPoint: 'Central Grain Mill', demand: 'High Demand' },
+    { id: 2, name: 'Barley', price: '$380', change: '-1.2%', trend: 'down', bestSellPoint: 'North Port Elevator', demand: 'Normal' },
+    { id: 3, name: 'Canola', price: '$710', change: '+8.1%', trend: 'up', bestSellPoint: 'BioDiesel Plant', demand: 'Surging' },
+    { id: 4, name: 'Corn', price: '$450', change: '+2.0%', trend: 'up', bestSellPoint: 'Animal Feed Co.', demand: 'Stable' },
+    { id: 5, name: 'Soybeans', price: '$940', change: '-0.5%', trend: 'down', bestSellPoint: 'Export Harbor', demand: 'Normal' },
+    { id: 6, name: 'Milk', price: '$1,200', change: '+3.5%', trend: 'up', bestSellPoint: 'Dairy Processing Plant', demand: 'High Demand' },
+    { id: 7, name: 'Eggs', price: '$1,550', change: '+12.4%', trend: 'up', bestSellPoint: 'Supermarket Central', demand: 'Peak' }
   ];
 
-  const filteredMarket = selectedCrop === 'All' 
-    ? marketPrices 
-    : marketPrices.filter(item => item.crop.toLowerCase() === selectedCrop.toLowerCase());
-
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-      {/* Top Navigation Bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #cbd5e1', padding: '12px 30px' }}>
-        <div style={{ display: 'flex', gap: '25px', maxWidth: '1400px', margin: '0 auto', fontSize: '13px', fontWeight: 'bold', color: '#2563eb', flexWrap: 'wrap' }}>
-          <span style={{ cursor: 'pointer' }}>Myself ▾</span>
-          <span style={{ cursor: 'pointer' }}>Interactions ▾</span>
-          <span style={{ cursor: 'pointer' }}>Finances ▾</span>
-          <span style={{ cursor: 'pointer' }}>Data ▾</span>
-          <span style={{ color: '#1e3a8a', borderBottom: '2px solid #2563eb', paddingBottom: '2px', cursor: 'pointer' }}>Market</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Wiki</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Support</span>
-          <span style={{ color: '#64748b', fontWeight: 'normal', cursor: 'pointer' }}>Settings</span>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1400px', margin: '30px auto', padding: '0 30px' }}>
+    <div style={{ background: '#111827', minHeight: 'calc(100vh - 90px)', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '30px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         
-        {/* Page Title */}
-        <div style={{ marginBottom: '25px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'normal', color: '#332266', margin: '0 0 5px 0' }}>
-            Commodity Market & Brokerages
-          </h1>
-          <p style={{ fontSize: '13px', color: '#64748b', margin: '0' }}>
-            Track live crop prices, sellpoint demands, and regional trading boards across server maps.
-          </p>
-        </div>
-
-        {/* Filter Buttons */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', flexWrap: 'wrap' }}>
-          {['All', 'Wheat', 'Barley', 'Canola', 'Corn', 'Soybeans'].map((crop) => (
-            <button
-              key={crop}
-              onClick={() => setSelectedCrop(crop)}
-              style={{
-                background: selectedCrop === crop ? '#0284c7' : '#fff',
-                color: selectedCrop === crop ? '#fff' : '#334155',
-                border: '1px solid #cbd5e1',
-                padding: '6px 14px',
-                fontWeight: 'bold',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-              }}
+        {/* Header & Server Selector */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff', margin: '0 0 5px 0' }}>
+              Live Commodity Market & Pricing
+            </h1>
+            <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0' }}>
+              Real-time global crop prices, demand indexes, and optimal sell points across servers.
+            </p>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '12px', color: '#9ca3af' }}>Active Server Market:</span>
+            <select 
+              value={selectedServer}
+              onChange={(e) => setSelectedServer(e.target.value)}
+              style={{ padding: '8px 12px', background: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: '4px', fontSize: '13px' }}
             >
-              {crop}
-            </button>
-          ))}
+              <option>Server 19 (Daisy Hill Main)</option>
+              <option>Server 8 (North Plains)</option>
+              <option>Server 4 (Alpine Agro)</option>
+            </select>
+          </div>
         </div>
 
-        {/* Market Data Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          {filteredMarket.map((item, index) => (
-            <div key={index} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '22px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#0284c7', textTransform: 'uppercase' }}>
-                    {item.crop}
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: item.trend.startsWith('+') ? '#16a34a' : '#dc2626', background: item.trend.startsWith('+') ? '#dcfce7' : '#fee2e2', padding: '2px 8px', borderRadius: '4px' }}>
-                    {item.trend}
-                  </span>
-                </div>
-                <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 6px 0' }}>
-                  {item.price}
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 15px 0' }}>
-                  Sellpoint: <strong style={{ color: '#334155' }}>{item.sellPoint}</strong>
-                </p>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>Status: <strong style={{ color: '#0f172a' }}>{item.status}</strong></span>
-                <button style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '6px 12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
-                  VIEW ROUTES
-                </button>
-              </div>
-            </div>
-          ))}
+        {/* Market Trend Overview Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Market Sentiment</div>
+            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#4ade80' }}>Bullish (+4.2%)</div>
+            <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>Driven by high canola & grain demand</div>
+          </div>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Top Performing Crop</div>
+            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#fbbf24' }}>Eggs ($1,550 / 1kL)</div>
+            <div style={{ fontSize: '12px', color: '#4ade80', marginTop: '4px' }}>+12.4% price shift in 24h</div>
+          </div>
+          <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', padding: '20px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '6px' }}>Active Sell Points</div>
+            <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#60a5fa' }}>14 Locations Online</div>
+            <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>All delivery nodes operational</div>
+          </div>
+        </div>
+
+        {/* Commodities Table */}
+        <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ background: '#374151', color: '#d1d5db', borderBottom: '1px solid #4b5563' }}>
+                <th style={{ padding: '12px 15px' }}>Commodity</th>
+                <th style={{ padding: '12px 15px' }}>Current Price (1,000L)</th>
+                <th style={{ padding: '12px 15px' }}>24h Change</th>
+                <th style={{ padding: '12px 15px' }}>Optimal Sell Point</th>
+                <th style={{ padding: '12px 15px' }}>Demand Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {commodities.map((item) => (
+                <tr key={item.id} style={{ borderBottom: '1px solid #374151' }}>
+                  <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#fff' }}>{item.name}</td>
+                  <td style={{ padding: '12px 15px', fontWeight: 'bold', color: '#4ade80' }}>{item.price}</td>
+                  <td style={{ padding: '12px 15px', color: item.trend === 'up' ? '#4ade80' : '#ef4444', fontWeight: 'bold' }}>{item.change}</td>
+                  <td style={{ padding: '12px 15px', color: '#93c5fd' }}>{item.bestSellPoint}</td>
+                  <td style={{ padding: '12px 15px' }}>
+                    <span style={{ 
+                      background: item.demand === 'Peak' || item.demand === 'Surging' ? '#065f46' : '#1e3a8a', 
+                      color: '#fff', 
+                      padding: '3px 8px', 
+                      borderRadius: '4px', 
+                      fontSize: '11px', 
+                      fontWeight: 'bold' 
+                    }}>
+                      {item.demand}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
       </div>

@@ -1,73 +1,117 @@
 "use client";
-import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { FileText, Send, ArrowLeft, User, Clock, Tractor } from 'lucide-react';
+import { useState } from 'react';
+import { supabase } from '../../db/supabase';
 
-const sb = createClient('https://dlwhztcqntalrhfrefsk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsd2h6dGNxbnRhbHJoZnJlZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NzM2ODgsImV4cCI6MjA4OTQ0OTY4OH0.z_TOBv8Ky9Ksx3hTu19ScXHGcO86-GmwjdYFbdOt8ZY');
-const HOOK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
+const HK = "https://discord.com/api/webhooks/1484184649847804016/o_bj5hINtTTZEux2RBegwBEqLUlNYIMS7Azomm4xadN7S6g353sEJhaaIiExvh0Ct4Za";
 
-export default function Apply() {
-  const [form, setForm] = useState({ age: '', exp: '', style: '', about: '' });
-  const [sent, setSent] = useState(false);
+export default function ApplyPage() {
+  const [form, setForm] = useState({ discordName: '', experience: '', reason: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const submit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { user } } = await sb.auth.getUser();
-    
-    // 1. Save to Database
-    await sb.from('applications').insert([{
-      user_id: user?.id,
-      discord_tag: user?.email, // Using email as a backup for the tag
-      age: parseInt(form.age),
-      experience: form.exp,
-      specialty: form.style,
-      about_me: form.about
-    }]);
+    setSubmitting(true);
 
-    // 2. Alert Discord
-    await fetch(HOOK, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        content: `📑 **NEW MEMBERSHIP APPLICATION**\n**User:** ${user?.email}\n**Age:** ${form.age}\n**Exp:** ${form.exp}\n**Role:** ${form.style}\n**Bio:** ${form.about}\n*Review this in the Staff Portal!*`
-      })
-    });
+    try {
+      // Insert application into Supabase database
+      const { error } = await supabase.from('applications').insert([
+        {
+          discord_name: form.discordName,
+          experience: form.experience,
+          reason: form.reason,
+          status: 'pending'
+        }
+      ]);
 
-    setSent(true);
+      if (error) throw error;
+
+      // Send alert via Discord Webhook
+      await fetch(HK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🚨 **NEW RECRUITMENT APPLICATION**\n**Discord Name:** ${form.discordName}\n**Experience:** ${form.experience}\n*Check the Iron Daisy Agri executive suite portal to review.*`
+        })
+      });
+
+      setSubmitted(true);
+    } catch (err: any) {
+      alert("Error submitting application: " + (err.message || "Unknown error"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (sent) return <div style={{background:'#0b0f1a',color:'white',height:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>
-    <h2 style={{color:'#22c55e'}}>Application Sent!</h2>
-    <p>Samuel will review your request. Check Discord for a DM soon.</p>
-    <button onClick={()=>window.location.href='/dashboard'} style={{background:'#1e293b',color:'white',border:'none',padding:'10px 20px',borderRadius:'10px',marginTop:'20px',cursor:'pointer'}}>Back to Dashboard</button>
-  </div>;
-
   return (
-    <div style={{ background:'#0b0f1a', minHeight:'100vh', color:'white', fontFamily:'sans-serif', padding:'30px' }}>
-      <div style={{ maxWidth:'500px', margin:'0 auto' }}>
-        <button onClick={()=>window.location.href='/dashboard'} style={{background:'none',border:'none',color:'#94a3b8',display:'flex',alignItems:'center',gap:'5px',cursor:'pointer',marginBottom:'20px'}}><ArrowLeft size={16}/> Dashboard</button>
-        <h1 style={{fontSize:'28px',fontWeight:'bold',marginBottom:'10px'}}>Apply to <span style={{color:'#22c55e'}}>CTFG Fleet</span></h1>
-        <p style={{color:'#94a3b8',marginBottom:'30px'}}>Tell us why you want to farm on the Montana 4x map.</p>
+    <div style={{ background: '#111', minHeight: '100vh', color: '#fff', fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
+      {/* TOP BAR */}
+      <div style={{ background: '#222', padding: '12px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #4a7ab5' }}>
+        <span onClick={() => window.location.href='/'} style={{ color: '#22c55e', fontWeight: '900', fontSize: '20px', fontStyle: 'italic', cursor: 'pointer' }}>IRON DAISY AGRI</span>
+        <span style={{ color: '#fff', fontSize: '11px', textTransform: 'uppercase' }}>Recruitment Portal</span>
+      </div>
 
-        <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:'15px', background:'#131926', padding:'25px', borderRadius:'24px', border:'1px solid #1e293b' }}>
-          <input placeholder="Your Age" type="number" required style={{padding:'12px',borderRadius:'10px',background:'#0b0f1a',border:'1px solid #334155',color:'white'}} onChange={e=>setForm({...form, age: e.target.value})}/>
-          <select required style={{padding:'12px',borderRadius:'10px',background:'#0b0f1a',border:'1px solid #334155',color:'white'}} onChange={e=>setForm({...form, exp: e.target.value})}>
-            <option value="">Farming Experience?</option>
-            <option>New to FS25</option>
-            <option>100+ Hours</option>
-            <option>Veteran (FS13-FS22)</option>
-          </select>
-          <select required style={{padding:'12px',borderRadius:'10px',background:'#0b0f1a',border:'1px solid #334155',color:'white'}} onChange={e=>setForm({...form, style: e.target.value})}>
-            <option value="">Preferred Role?</option>
-            <option>Grain Cart/Logistics</option>
-            <option>Combine Operator</option>
-            <option>Plowing/Tillage</option>
-            <option>Livestock Manager</option>
-          </select>
-          <textarea placeholder="Tell us about your playstyle..." required style={{padding:'12px',borderRadius:'10px',background:'#0b0f1a',border:'1px solid #334155',color:'white',minHeight:'100px'}} onChange={e=>setForm({...form, about: e.target.value})}></textarea>
-          
-          <button type="submit" style={{background:'#22c55e',color:'white',border:'none',padding:'15px',borderRadius:'12px',fontWeight:'bold',cursor:'pointer',fontSize:'16px'}}>Submit Application</button>
-        </form>
+      <div style={{ flex: 1, background: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600")', backgroundSize: 'cover', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)' }}></div>
+
+        <div style={{ position: 'relative', zIndex: 1, background: 'rgba(25,25,25,0.95)', padding: '40px', border: '1px solid #4a7ab5', borderRadius: '6px', maxWidth: '600px', width: '100%', boxShadow: '0 10px 30px rgba(0,0,0,0.6)' }}>
+          <h1 style={{ fontSize: '28px', textTransform: 'uppercase', margin: '0 0 10px 0', color: '#fff' }}>IDA Recruitment Form</h1>
+          <p style={{ fontSize: '13px', color: '#aaa', margin: '0 0 25px 0' }}>
+            You are now applying to join the Iron Daisy Agri network. Fill out the fields below to submit your evaluation to the Board of Directors.
+          </p>
+
+          {submitted ? (
+            <div style={{ textAlign: 'center', padding: '30px 0' }}>
+              <h3 style={{ color: '#22c55e', fontSize: '22px' }}>APPLICATION SUBMITTED</h3>
+              <p style={{ color: '#ccc', fontSize: '14px', marginTop: '10px' }}>Your records have been transmitted to the board. Stand by for review.</p>
+              <button onClick={() => window.location.href='/'} style={{ marginTop: '20px', padding: '10px 25px', background: '#4a7ab5', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>Return Home</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Discord Name / Handle *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="e.g. Total" 
+                  style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px' }}
+                  value={form.discordName}
+                  onChange={e => setForm({ ...form, discordName: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Farming / Simulation Experience *</label>
+                <textarea 
+                  required 
+                  placeholder="Briefly describe your background with Farm Sim / multiplayer operations..." 
+                  style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', minHeight: '90px' }}
+                  value={form.experience}
+                  onChange={e => setForm({ ...form, experience: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#ddd' }}>Why Iron Daisy Agri? *</label>
+                <textarea 
+                  required 
+                  placeholder="What brings you to our corporation?" 
+                  style={{ width: '100%', padding: '12px', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', minHeight: '90px' }}
+                  value={form.reason}
+                  onChange={e => setForm({ ...form, reason: e.target.value })}
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submitting}
+                style={{ padding: '15px', background: '#22c55e', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px', fontSize: '14px', transition: 'background 0.2s' }}
+              >
+                {submitting ? 'TRANSMITTING...' : 'SUBMIT APPLICATION'}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

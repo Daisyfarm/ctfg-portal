@@ -8,21 +8,18 @@ export default function FSNPlayerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-gray-200 p-6 font-sans">
-      {/* FSN Header Bar */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
         <div>
           <h1 className="text-xl font-bold tracking-wider text-white">COURT FARM // FSN COMMAND</h1>
           <p className="text-xs text-gray-400">Connected to the FSN network. Managing UK sector operations and cross-server trade pipelines.</p>
         </div>
         <div className="flex items-center space-x-3 flex-wrap gap-y-2">
-          {/* Currency Toggle */}
           <button 
             onClick={() => setCurrency(currency === 'USD' ? 'GBP' : 'USD')}
             className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded border border-gray-700 font-medium transition-colors"
           >
             Currency: <span className="text-white font-bold">{currency === 'USD' ? 'USD ($)' : 'GBP (£)'}</span>
           </button>
-
           <span className="px-3 py-1 bg-green-950 border border-green-800 text-green-400 text-xs rounded font-semibold flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
             FSN NODE ONLINE
@@ -31,7 +28,6 @@ export default function FSNPlayerDashboard() {
         </div>
       </header>
 
-      {/* FSN Navigation Tabs */}
       <div className="flex space-x-2 mb-6 border-b border-gray-800 pb-3">
         <button 
           onClick={() => setActiveTab('market')}
@@ -53,10 +49,7 @@ export default function FSNPlayerDashboard() {
         </button>
       </div>
 
-      {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Dynamic Panel Content */}
         <div className="lg:col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-5">
           {activeTab === 'market' && (
             <div>
@@ -143,7 +136,6 @@ export default function FSNPlayerDashboard() {
           )}
         </div>
 
-        {/* Network & Node Status Panel */}
         <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-5 flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">Node Telemetry</h2>
@@ -176,7 +168,6 @@ export default function FSNPlayerDashboard() {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

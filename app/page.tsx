@@ -1,62 +1,75 @@
+"use client";
 import React from 'react';
+import { Shield, Radio, DollarSign, User, Send, FileText, MapPin, Contact } from 'lucide-react';
 
 export default function CommandDashboard() {
   return (
-    <main className="min-h-screen bg-[#0d1117] text-white p-6 font-sans">
+    <div style={{ background: '#111', minHeight: '100vh', color: '#fff', fontFamily: 'Arial, sans-serif', padding: '40px' }}>
       {/* Top Header */}
-      <header className="flex justify-between items-center border-b border-gray-800 pb-4 mb-6">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #4a7ab5', paddingBottom: '20px', marginBottom: '30px' }}>
         <div>
-          <h1 className="text-2xl font-bold tracking-wider text-white">COMMAND DASHBOARD</h1>
-          <p className="text-sm text-gray-400">SATELLITE UPLINK: MONTANA / IDAHO DIVISION</p>
+          <h1 style={{ fontSize: '28px', textTransform: 'uppercase', margin: 0, fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Shield color="#4a7ab5" /> COMMAND DASHBOARD
+          </h1>
+          <p style={{ fontSize: '12px', color: '#4a7ab5', margin: '5px 0 0' }}>SATELLITE UPLINK: MONTANA / IDAHO DIVISION | SYSTEM INTEGRITY: ACTIVE</p>
         </div>
-        <div className="bg-emerald-950 border border-emerald-600 text-emerald-400 px-3 py-1 rounded text-xs font-semibold tracking-wider flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          SYSTEM INTEGRITY: ACTIVE
-        </div>
-      </header>
+        <button 
+          onClick={() => window.location.href = '/contact'}
+          style={{ background: '#222', color: '#fff', border: '1px solid #4a7ab5', padding: '10px 20px', cursor: 'pointer', fontWeight: 'bold', borderRadius: '4px' }}
+        >
+          Secure Contact
+        </button>
+      </div>
 
       {/* Live Dispatch Alert */}
-      <div className="bg-zinc-900 border border-red-900/50 p-4 rounded-lg mb-6 flex items-center gap-3">
-        <span className="text-red-500 font-bold text-lg">📡</span>
-        <p className="text-sm text-gray-300">
-          <strong className="text-red-400 tracking-wide">LIVE DISPATCH:</strong> &ldquo;Standby&rdquo; — Sector 4-G Plowing Ops Protected.
-        </p>
+      <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px', marginBottom: '30px', borderLeft: '4px solid #f59e0b' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b', fontSize: '14px', fontWeight: 'bold' }}>
+          <Radio size={18} /> LIVE DISPATCH BROADCAST
+        </div>
+        <p style={{ margin: '8px 0 0', fontSize: '15px', color: '#ddd' }}>&ldquo;Standby&rdquo; — Sector 4-G Plowing Ops Protected.</p>
       </div>
 
       {/* User Stats Card */}
-      <section className="bg-gradient-to-r from-zinc-900 to-zinc-950 border border-zinc-800 p-6 rounded-xl relative overflow-hidden mb-8 shadow-xl">
-        <div className="relative z-10">
-          <p className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-1">Chief Operator / Founder</p>
-          <h2 className="text-3xl font-extrabold text-white mb-3">Samuel_Founder</h2>
-          <div className="text-4xl font-black text-emerald-400 mb-4">$9,459,000</div>
-          
-          <div className="flex gap-6 text-xs font-medium uppercase tracking-wider text-zinc-400">
-            <div>EID Status: <span className="text-emerald-400 font-bold">Verified</span></div>
-            <div>Rank: <span className="text-amber-400 font-bold">Executive</span></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+        <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px' }}>
+          <div style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Chief Operator / Founder</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', marginTop: '5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <User size={20} color="#4a7ab5" /> Samuel_Founder
           </div>
+          <div style={{ fontSize: '13px', color: '#aaa', marginTop: '5px' }}>Rank: <strong style={{ color: '#fff' }}>Executive</strong></div>
+          <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '8px' }}>EID Status: Verified</div>
         </div>
-      </section>
+
+        <div style={{ background: '#1a1a1a', border: '1px solid #333', padding: '20px', borderRadius: '6px' }}>
+          <div style={{ color: '#888', fontSize: '12px', textTransform: 'uppercase' }}>Treasury Reserves</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', marginTop: '5px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <DollarSign size={24} /> 9,459,000
+          </div>
+          <div style={{ fontSize: '12px', color: '#aaa', marginTop: '8px' }}>Daisy Hill Farming Network Fund</div>
+        </div>
+      </div>
 
       {/* Action Buttons Grid */}
-      <nav className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
-          REQUEST DISPATCH
+      <h2 style={{ fontSize: '18px', textTransform: 'uppercase', marginBottom: '15px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>Terminal Access</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
+        <button onClick={() => window.location.href = '/dispatch'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+          <Send size={18} color="#4a7ab5" /> Request Dispatch
         </button>
-        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
-          LOG FUEL
+        <button onClick={() => window.location.href = '/contracts'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+          <FileText size={18} color="#f59e0b" /> View Contracts
         </button>
-        <button className="bg-zinc-800 hover:bg-zinc-700 transition text-zinc-200 font-semibold py-4 px-6 rounded-lg border border-zinc-700 text-sm tracking-wide">
-          VIEW SATELLITE
+        <button onClick={() => window.location.href = '/directory'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #4a7ab5', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+          <Shield size={18} color="#22c55e" /> Personnel Directory
         </button>
-        <button className="bg-amber-500 hover:bg-amber-400 transition text-black font-bold py-4 px-6 rounded-lg shadow-lg text-sm tracking-wide">
-          STAFF PANEL
+        <button onClick={() => window.location.href = '/contact'} style={{ background: '#1a1a1a', color: '#fff', border: '1px solid #f59e0b', padding: '15px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+          Contact Board
         </button>
-      </nav>
+      </div>
 
       {/* Footer Terminal ID */}
-      <footer className="mt-16 text-center text-xs text-zinc-600 tracking-widest">
+      <div style={{ marginTop: '50px', borderTop: '1px solid #333', paddingTop: '20px', textAlign: 'center', fontSize: '11px', color: '#666' }}>
         DAISY HILL FARMING NETWORK | SECURE TERMINAL V2.0.26
-      </footer>
-    </main>
+      </div>
+    </div>
   );
 }

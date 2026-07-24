@@ -1,20 +1,17 @@
 import React from 'react';
 import Link from 'next/link';
 
-export default function HubPage() {
+export default function Home() {
     const modules = [
-        { title: 'Dashboard', desc: 'Active properties, server sync, and core financials.', link: '/', icon: '📊' },
-        { title: 'Field Work', desc: 'Manage plowing, planting, harvesting, and task tracking.', link: '/field-work', icon: '🚜' },
-        { title: 'Contracting Center', desc: 'Accept multiplayer contracts and view job payouts.', link: '/contracting-centre', icon: '📝' },
-        { title: 'Investment Center', desc: 'Corporate shares, infrastructure bonds, and passive ROI.', link: '/investment', icon: '📈' },
-        { title: 'Auction House', desc: 'Bid on heavy machinery and surplus fleet equipment.', link: '/auction-house', icon: '🔨' },
-        { title: 'Competition Center', desc: 'Server-wide harvest speedruns and yield contests.', link: '/competition', icon: '🏆' },
-        { title: 'Import-Export', desc: 'Global shipping containers, tariffs, and bulk trade routes.', link: '/import-export', icon: '🚢' },
-        { title: 'Permit Centre', desc: 'Acquire heavy transport permits, land zoning, and building licenses.', link: '/permit-centre', icon: '🪪' },
-        { title: 'Event Center', desc: 'Community tractor pulls, livestock shows, and server celebrations.', link: '/event-center', icon: '🎪' },
-        { title: 'Lotto Center', desc: 'Weekly server jackpot draws and community lottery tickets.', link: '/lotto-center', icon: '🎟️' },
-        { title: 'Registration Form', desc: 'Register new farm enterprises and join the FSN network.', link: '/registration', icon: '✍️' },
-        { title: 'Interactions & Wiki', desc: 'Co-op permissions, server rules, and network guides.', link: '/interactions', icon: '🤝' },
+        { title: 'Auction House', description: 'Bid on heavy machinery and land lots.', href: '/auction-house', icon: '🔨' },
+        { title: 'Competition Center', description: 'Track seasonal challenges and leaderboards.', href: '/competition', icon: '🏆' },
+        { title: 'Contracting Centre', description: 'Accept fieldwork and transport sub-contracts.', href: '/contracting-centre', icon: '📋' },
+        { title: 'Event Center', description: 'Stay updated on community meetups and convoys.', href: '/event-center', icon: '📅' },
+        { title: 'Import & Export', description: 'Manage bulk commodity shipments and logistics.', href: '/import-export', icon: '🚢' },
+        { title: 'Investment Center', description: 'Manage shared farm investments and loans.', href: '/investment-center', icon: '📈' },
+        { title: 'Lotto Center', description: 'Participate in server raffles and jackpot draws.', href: '/lotto-center', icon: '🎰' },
+        { title: 'Permit Centre', description: 'Apply for land development and transport licenses.', href: '/permit-centre', icon: '🪪' },
+        { title: 'Registration Portal', description: 'Register your farm enterprise and profile.', href: '/registration', icon: '📝' },
     ];
 
     return (
@@ -25,42 +22,90 @@ export default function HubPage() {
             backgroundPosition: 'center', 
             backgroundAttachment: 'fixed',
             color: '#f3f4f6', 
-            padding: '50px 20px', 
+            padding: '40px 20px', 
             fontFamily: 'Arial, sans-serif' 
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 
-                {/* Header Banner */}
-                <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-                    <h1 style={{ fontSize: '38px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>
-                        Farm Sim <span style={{ color: '#34d399' }}>Network Hub</span>
+                {/* Hero Header */}
+                <div style={{ 
+                    background: 'rgba(17, 24, 39, 0.9)', 
+                    backdropFilter: 'blur(12px)', 
+                    border: '1px solid rgba(255, 255, 255, 0.1)', 
+                    borderRadius: '16px', 
+                    padding: '40px',
+                    marginBottom: '30px',
+                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)'
+                }}>
+                    <span style={{ 
+                        background: 'rgba(52, 211, 153, 0.1)', 
+                        color: '#34d399', 
+                        border: '1px solid rgba(52, 211, 153, 0.2)', 
+                        padding: '4px 12px', 
+                        borderRadius: '20px', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold', 
+                        display: 'inline-block',
+                        marginBottom: '15px'
+                    }}>
+                        ACTIVE SERVER HUB
+                    </span>
+                    <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 10px 0' }}>
+                        Judith Plains Montana 4X
                     </h1>
-                    <p style={{ fontSize: '15px', color: '#9ca3af', maxWidth: '650px', margin: '0 auto', lineHeight: '1.5' }}>
-                        Select a module below to manage your agricultural empire, coordinate multiplayer operations on <span style={{ color: '#34d399', fontWeight: 'bold' }}>Judith Plains Montana 4X</span>, and track live telemetry.
+                    <p style={{ fontSize: '15px', color: '#9ca3af', lineHeight: '1.6', maxWidth: '800px', margin: 0 }}>
+                        Welcome to the central network portal. Access all operational sectors, coordinate logistics, and manage your agricultural enterprise across the region.
                     </p>
                 </div>
 
                 {/* Module Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
-                    {modules.map((mod, idx) => (
-                        <Link key={idx} href={mod.link} style={{ textDecoration: 'none' }}>
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                    gap: '20px' 
+                }}>
+                    {modules.map((mod, index) => (
+                        <Link 
+                            key={index} 
+                            href={mod.href} 
+                            style={{ 
+                                textDecoration: 'none', 
+                                color: 'inherit' 
+                            }}
+                        >
                             <div style={{ 
-                                background: 'rgba(17, 24, 39, 0.9)', 
-                                backdropFilter: 'blur(12px)', 
-                                border: '1px solid rgba(255, 255, 255, 0.1)', 
-                                borderRadius: '16px', 
-                                padding: '28px',
-                                boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.6)',
-                                transition: 'transform 0.2s, border-color 0.2s',
-                                cursor: 'pointer',
+                                background: 'rgba(17, 24, 39, 0.85)', 
+                                backdropFilter: 'blur(10px)', 
+                                border: '1px solid rgba(255, 255, 255, 0.08)', 
+                                borderRadius: '14px', 
+                                padding: '25px',
                                 height: '100%',
-                                boxSizing: 'border-box'
-                            }}>
-                                <div style={{ fontSize: '28px', marginBottom: '14px' }}>{mod.icon}</div>
-                                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>{mod.title}</h3>
-                                <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 20px 0', lineHeight: '1.5' }}>{mod.desc}</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', fontSize: '13px', fontWeight: 'bold' }}>
-                                    Launch Module <span>→</span>
+                                transition: 'all 0.2s ease-in-out',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+                                e.currentTarget.style.transform = 'translateY(-3px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                            >
+                                <div>
+                                    <div style={{ fontSize: '28px', marginBottom: '12px' }}>{mod.icon}</div>
+                                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffffff', margin: '0 0 8px 0' }}>
+                                        {mod.title}
+                                    </h2>
+                                    <p style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5', margin: 0 }}>
+                                        {mod.description}
+                                    </p>
+                                </div>
+                                <div style={{ marginTop: '20px', fontSize: '12px', fontWeight: 'bold', color: '#34d399' }}>
+                                    Open Portal →
                                 </div>
                             </div>
                         </Link>

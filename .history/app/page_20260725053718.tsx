@@ -10,27 +10,27 @@ export default function Home() {
       backgroundColor: '#05070a', 
       color: '#ffffff', 
       fontFamily: 'sans-serif',
-      backgroundImage: 'linear-gradient(rgba(5, 7, 10, 0.55), rgba(5, 7, 10, 0.65)), url("/hero-farm.jpg")',
+      backgroundImage: 'linear-gradient(rgba(5, 7, 10, 0.92), rgba(5, 7, 10, 0.95)), url("/hero-farm.jpg")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
     }}>
       {/* Top Header Nav */}
-      <header style={{ backgroundColor: 'rgba(11, 14, 20, 0.65)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', padding: '16px 24px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <header style={{ backgroundColor: 'rgba(11, 14, 20, 0.85)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #27272a', padding: '16px 24px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <span style={{ color: '#ffffff', fontWeight: 900 }}>FARM NETWORK</span>
-            <span style={{ color: '#71717a' }}>|</span>
+            <span style={{ color: '#52525b' }}>|</span>
             <span style={{ color: '#34d399' }}>Enterprise Command System v2.4</span>
           </div>
           <div style={{ display: 'flex', gap: '20px', fontSize: '11px' }}>
-            <Link href="/market" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Market Index</Link>
-            <Link href="/contracts" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Contracts</Link>
-            <Link href="/fleet" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Fleet</Link>
-            <Link href="/dispatch" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Dispatch</Link>
-            <Link href="/event-center" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Events</Link>
-            <Link href="/field-work" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Fields</Link>
-            <Link href="/import-export" style={{ color: '#d4d4d8', textDecoration: 'none' }}>Imports</Link>
+            <Link href="/market" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Market Index</Link>
+            <Link href="/contracts" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Contracts</Link>
+            <Link href="/fleet" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Fleet</Link>
+            <Link href="/dispatch" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Dispatch</Link>
+            <Link href="/event-center" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Events</Link>
+            <Link href="/field-work" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Fields</Link>
+            <Link href="/import-export" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Imports</Link>
           </div>
         </div>
       </header>
@@ -39,21 +39,21 @@ export default function Home() {
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
           <div>
-            <div style={{ color: '#34d399', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.1em', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+            <div style={{ color: '#34d399', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.1em' }}>
               Operational Sector Alpha • Status: Secure
             </div>
-            <h1 style={{ fontSize: '36px', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', textShadow: '0 2px 6px rgba(0,0,0,0.8)' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em' }}>
               Regional Command Center
             </h1>
           </div>
-          <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', padding: '12px 20px', borderRadius: '8px', fontSize: '12px', display: 'flex', gap: '16px' }}>
+          <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', padding: '12px 20px', borderRadius: '8px', fontSize: '12px', display: 'flex', gap: '16px' }}>
             <div>
-              <span style={{ color: '#a1a1aa' }}>Server Time: </span>
+              <span style={{ color: '#71717a' }}>Server Time: </span>
               <span style={{ color: '#ffffff', fontWeight: 900 }}>LIVE</span>
             </div>
-            <span style={{ color: '#3f3f46' }}>|</span>
+            <span style={{ color: '#27272a' }}>|</span>
             <div>
-              <span style={{ color: '#a1a1aa' }}>FSN Status: </span>
+              <span style={{ color: '#71717a' }}>FSN Status: </span>
               <span style={{ color: '#ef4444', fontWeight: 900 }}>OBSOLETE</span>
             </div>
           </div>
@@ -61,23 +61,23 @@ export default function Home() {
 
         {/* Quick Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '24px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 900, color: '#a1a1aa', textTransform: 'uppercase', marginBottom: '8px' }}>Active Fleet Units</div>
+          <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
+            <div style={{ fontSize: '10px', fontWeight: 900, color: '#71717a', textTransform: 'uppercase', marginBottom: '8px' }}>Active Fleet Units</div>
             <div style={{ fontSize: '28px', fontWeight: 900, color: '#34d399' }}>3 / 5</div>
-            <div style={{ fontSize: '11px', color: '#d4d4d8', marginTop: '4px' }}>2 Units on Standby / Maint</div>
+            <div style={{ fontSize: '11px', color: '#a1a1aa', marginTop: '4px' }}>2 Units on Standby / Maint</div>
           </div>
-          <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '24px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 900, color: '#a1a1aa', textTransform: 'uppercase', marginBottom: '8px' }}>Active Logistics Tasks</div>
+          <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
+            <div style={{ fontSize: '10px', fontWeight: 900, color: '#71717a', textTransform: 'uppercase', marginBottom: '8px' }}>Active Logistics Tasks</div>
             <div style={{ fontSize: '28px', fontWeight: 900, color: '#60a5fa' }}>4 Pending</div>
-            <div style={{ fontSize: '11px', color: '#d4d4d8', marginTop: '4px' }}>Next Grain Haul at 1,200T</div>
+            <div style={{ fontSize: '11px', color: '#a1a1aa', marginTop: '4px' }}>Next Grain Haul at 1,200T</div>
           </div>
-          <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '24px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 900, color: '#a1a1aa', textTransform: 'uppercase', marginBottom: '8px' }}>Regional Grain Index</div>
+          <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
+            <div style={{ fontSize: '10px', fontWeight: 900, color: '#71717a', textTransform: 'uppercase', marginBottom: '8px' }}>Regional Grain Index</div>
             <div style={{ fontSize: '28px', fontWeight: 900, color: '#eab308' }}>$1,842 / T</div>
             <div style={{ fontSize: '11px', color: '#34d399', marginTop: '4px' }}>+4.2% up from yesterday</div>
           </div>
-          <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '24px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 900, color: '#a1a1aa', textTransform: 'uppercase', marginBottom: '8px' }}>Customs & Tariffs</div>
+          <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
+            <div style={{ fontSize: '10px', fontWeight: 900, color: '#71717a', textTransform: 'uppercase', marginBottom: '8px' }}>Customs & Tariffs</div>
             <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff' }}>Optimal</div>
             <div style={{ fontSize: '11px', color: '#34d399', marginTop: '4px' }}>Rotterdam & Hamburg Ports Clear</div>
           </div>
@@ -86,10 +86,10 @@ export default function Home() {
         {/* Live Farm Surveillance Feeds Section */}
         <div style={{ marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', color: '#ffffff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 900, textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em', color: '#a1a1aa' }}>
               Live Field & Fleet Visual Feeds
             </h3>
-            <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 900, textTransform: 'uppercase', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>● FEED ACTIVE</span>
+            <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 900, textTransform: 'uppercase' }}>● FEED ACTIVE</span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -99,10 +99,10 @@ export default function Home() {
               { title: 'Sector 3 - Equipment Yard', img: '/farm3.jpg', status: 'Unit Maintenance - Ready' },
               { title: 'Sector 4 - Operations Center', img: '/farm4.jpg', status: 'Main Hub - Active Yield' }
             ].map((feed, idx) => (
-              <div key={idx} style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', overflow: 'hidden' }}>
+              <div key={idx} style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
                 <div style={{ height: '180px', overflow: 'hidden', position: 'relative' }}>
-                  <img src={feed.img} alt={feed.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'contrast(1.05) brightness(0.95)' }} />
-                  <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'rgba(5, 7, 10, 0.85)', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 900, color: '#34d399', textTransform: 'uppercase' }}>
+                  <img src={feed.img} alt={feed.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'contrast(1.1) brightness(0.9)' }} />
+                  <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'rgba(5, 7, 10, 0.8)', border: '1px solid #27272a', padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: 900, color: '#34d399', textTransform: 'uppercase' }}>
                     {feed.status}
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export default function Home() {
         </div>
 
         {/* Navigation Grid / Shortcuts */}
-        <h3 style={{ fontSize: '16px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '0.05em', color: '#ffffff', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '0.05em', color: '#a1a1aa' }}>
           Portal Modules & Systems
         </h3>
         
@@ -130,10 +130,10 @@ export default function Home() {
             { title: 'Import / Export', desc: 'Manage international port shipments, volumes, and tariffs.', link: '/import-export' },
           ].map((mod, i) => (
             <Link key={i} href={mod.link} style={{ textDecoration: 'none' }}>
-              <div style={{ backgroundColor: 'rgba(11, 14, 20, 0.75)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '24px', transition: 'border-color 0.2s', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ backgroundColor: 'rgba(15, 17, 23, 0.85)', backdropFilter: 'blur(8px)', border: '1px solid #27272a', borderRadius: '12px', padding: '24px', transition: 'border-color 0.2s', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                   <h4 style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff', margin: '0 0 8px 0', textTransform: 'uppercase' }}>{mod.title}</h4>
-                  <p style={{ fontSize: '12px', color: '#d4d4d8', margin: 0, lineHeight: '1.5' }}>{mod.desc}</p>
+                  <p style={{ fontSize: '12px', color: '#a1a1aa', margin: 0, lineHeight: '1.5' }}>{mod.desc}</p>
                 </div>
                 <div style={{ marginTop: '20px', fontSize: '11px', fontWeight: 900, color: '#34d399', textTransform: 'uppercase' }}>
                   Access Terminal ➔

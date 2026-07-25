@@ -6,20 +6,15 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/market/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/market/page.js"
     ],
-    "/contracts/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/contracts/page.js"
+      "static/chunks/app/page.js"
     ],
     "/fleet/page": [
       "static/chunks/webpack.js",
@@ -31,20 +26,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dispatch/page.js"
     ],
-    "/event-center/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/event-center/page.js"
-    ],
-    "/field-work/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/field-work/page.js"
-    ],
-    "/import-export/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/import-export/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }
